@@ -83,7 +83,9 @@ describe('#598 volet A — l\'aperçu reflète le traitement réel', () => {
         );
         // `skipBalance` (case de « Modifier ») ne peut qu'ENLEVER le traitement.
         expect(corps).toContain('skipBalance');
-        expect(corps).toContain('BALANCE_GLOBALE_ACTIVE');
+        // Volet B (27 nov. 2026) : la constante `BALANCE_GLOBALE_ACTIVE` est devenue la case du lot,
+        // `balanceDuLotActive` ; c'est toujours elle, et elle seule, que le SSOT lit pour le global.
+        expect(corps).toContain('balanceDuLotActive');
     });
 
     it('cas 4 — l\'import passe par le SSOT, pas par une constante locale', () => {

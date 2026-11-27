@@ -90,6 +90,10 @@ async function monter(page, { avecCopie = false, archive = false, criteres = 'co
         window._pdf912 = [];
         window._html912 = [];
         window.jspdf.jsPDF.API.save = function (nom) { window._pdf912.push({ nom, pages: this.getNumberOfPages() }); return this; };
+        // Fiche 7 du lot « Évaluation » (27 nov. 2026) : le PDF d'une rétroaction s'ouvre dans un nouvel onglet. Ce banc
+        // juge le CONTENU du PDF : l'onglet est refusé ici, le PDF passe par le téléchargement observé ci-dessus. L'onglet
+        // est jugé par evaluation-lot-2026-11-27.spec.js.
+        window.open = () => null;
         const rendu = window.syntheseRetroactionRendu.rendreSyntheseHTML;
         window.syntheseRetroactionRendu.rendreSyntheseHTML = function () { const h = rendu.apply(this, arguments); window._html912.push(h); return h; };
     }, { png: PNG, T, DA, avecCopie, archive, criteres, NOTE_PRIVEE });

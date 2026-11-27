@@ -219,6 +219,10 @@
        =============================== */
 
     let fichiersEnAttente = [];
+    // La production choisie pour le lot (« S'applique à tout le lot ») ; elle tombe avec le lot (#1271,
+    // `oublierProductionDuLot`). Lu au code le 27 nov. 2026, sans symptôme vécu : après un rechargement en
+    // plein lot, cette variable repart vide alors que l'Inspecteur peut encore afficher la production gardée
+    // en session (`genererEtape2Colonnes`, troisième repli) ; les fichiers déposés ensuite ne la reçoivent pas.
     let productionSelectionnee = '';
     let importEnCours = false;
 
@@ -982,6 +986,7 @@
         if (typeof window.majBoutonRetirerCopiesDemo === 'function') window.majBoutonRetirerCopiesDemo();   // T3
 
         // Nettoyer les fichiers importes avec succes
+        const avantMenage = fichiersEnAttente.length;
         fichiersEnAttente = fichiersEnAttente.filter(f => f.statut !== 'importe');
 
         // #558 B1 — PERSISTER le retrait, sinon sessionStorage garde les fichiers
@@ -990,6 +995,7 @@
         // qu'il risque de ré-importer en doublon. La file en mémoire et la file
         // persistée doivent bouger ENSEMBLE.
         persisterFileDAttente();
+        oublierProductionSiLotImporte(avantMenage - fichiersEnAttente.length);   // #1271
 
         return { importes, erreurs, doublons: doublonsDetectes, total };
     }
@@ -1010,7 +1016,41 @@
         fichiersEnAttente = fichiersEnAttente.filter(f => f.statut !== 'importe');
         const retires = avant - fichiersEnAttente.length;
         if (retires > 0) persisterFileDAttente();
+        oublierProductionSiLotImporte(retires);   // #1271
         return retires;
+    }
+
+    /**
+     * #1271 (décision de Grégoire, 27 nov. 2026) — LA PRODUCTION CHOISIE POUR LE LOT VIT LE
+     * TEMPS DU LOT. Le choix « S'applique à tout le lot » de l'Inspecteur survivait à une
+     * importation et à « Annuler tout » : le dépôt suivant le recevait, et il passait avant le
+     * nom de production porté par les fichiers de Léa (`ajouterFichiersEnAttente`).
+     *
+     * Il vit à deux endroits, qui tombent ensemble : `productionSelectionnee` ici, et la clé de
+     * session que l'Inspecteur relit au rendu (`travaux-ui.js`, `genererEtape2Colonnes`), avec
+     * la production visée par un jeton de reprise. Appelée par « Annuler tout »
+     * (`travauxUI.annulerImport`) et quand une importation a vidé la file.
+     */
+    function oublierProductionDuLot() {
+        productionSelectionnee = '';
+        if (typeof sessionStorage === 'undefined') return;
+        const cleSession = (nom) => (typeof cle === 'function' ? cle(nom) : nom);
+        try {
+            sessionStorage.removeItem(cleSession('travaux-pipeline-production'));
+            sessionStorage.removeItem(cleSession('travaux-jeton-production'));
+        } catch (e) {
+            console.warn('[Travaux-Import] #1271 : choix du lot non effacé de la session :', e);
+        }
+    }
+
+    /**
+     * #1271 — une importation est « réussie » quand elle a écrit des fichiers et vidé la file :
+     * le lot est fini. Si des fichiers restent (une erreur, un doublon laissé de côté), c'est
+     * encore le même lot, et le choix reste.
+     * @param {number} retires - fichiers que ce ménage vient de retirer de la file
+     */
+    function oublierProductionSiLotImporte(retires) {
+        if (retires > 0 && fichiersEnAttente.length === 0) oublierProductionDuLot();
     }
 
     /**
@@ -2881,6 +2921,7 @@
         // Production globale
         setProductionGlobale: setProductionGlobale,
         getProductionGlobale: getProductionGlobale,
+        oublierProductionDuLot: oublierProductionDuLot,   // #1271
         // Editeur de pages
         decomposerPDF: decomposerPDF,
         reassemblerPages: reassemblerPages,
