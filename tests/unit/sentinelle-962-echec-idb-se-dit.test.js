@@ -202,6 +202,15 @@ describe('#962 · modes.js : « Enregistré » après le commit d\'une grosse cl
         expect(b.appels).toEqual([['enregistre', 'a2026_presences']]);
     });
 
+    it('#1278 · la clé et le nom de l\'erreur vont aux dernières actions du rapport de bug, un DA masqué, jamais le message', () => {
+        const b = monter();
+        const actions = [];
+        b.win.enregistrerAction = (type, details) => actions.push([type, details]);
+        const e = new Error('contenu à ne pas garder'); e.name = 'InvalidStateError';
+        b.abonneEchec()('a2026_eval_2000001_prod', e);
+        expect(actions).toEqual([['ÉCRITURE REFUSÉE', 'a2026_eval_…_prod · InvalidStateError']]);
+    });
+
     it('l\'abonné de db.surEchecEcriture fait dire l\'échec au témoin, même pour une écriture directe', () => {
         const b = monter();
         expect(typeof b.abonneEchec()).toBe('function');

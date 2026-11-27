@@ -1085,6 +1085,17 @@ function _refuserSiTrimestreClos(cleEffective, geste, discret) {
     return true;
 }
 
+/**
+ * #1278 — le témoin dit « Non enregistré » sans nommer ce qui a été refusé : la clé et le NOM de l'erreur vont aux
+ * « dernières actions » du rapport de bug, pour qu'on puisse le dire après coup. Jamais le message de l'erreur ni une
+ * valeur ; une suite de cinq chiffres ou plus dans la clé (un DA) est masquée.
+ */
+function _garderEcritureRefusee(cleEcrite, error) {
+    if (typeof window.enregistrerAction !== 'function') return;
+    const cle = String(cleEcrite || '?').replace(/\d{5,}/g, '…');
+    window.enregistrerAction('ÉCRITURE REFUSÉE', cle + ' · ' + ((error && error.name) || 'erreur sans nom'));
+}
+
 function _raisonNonEnregistre(error) {
     if (error && error.name === 'ConnexionPerdue') return RAISONS_NON_ENREGISTRE.connexion;
     const quota = error && (error.name === 'QuotaExceededError' ||
@@ -1715,6 +1726,7 @@ if (typeof db !== 'undefined' && typeof db.surEchecEcriture === 'function') {
     db.surEchecEcriture((cleEcrite, error) => {
         const temoin = window.temoinEnregistrement;
         if (temoin) temoin.nonEnregistre(_raisonNonEnregistre(error), undefined, cleEcrite);
+        _garderEcritureRefusee(cleEcrite, error);
     });
 } else {
     console.error('[#962] db.surEchecEcriture indisponible — un échec d\'écriture IndexedDB serait muet.');
