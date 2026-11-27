@@ -923,6 +923,14 @@ function poserCaseAssignationSimple(inputSimple, production, groupeCoursId) {
     const entree = production && production.echeancesParGroupe
         ? production.echeancesParGroupe[groupeCoursId]
         : null;
+    // #1056 : le champ montre la date que l'application emploie pour ce groupe (`obtenirEcheanceEffective` lit
+    // l'entrée du groupe avant `dateEcheance`). Rempli depuis `dateEcheance` seule, il s'ouvrait vide quand la
+    // date ne vivait que dans l'entrée, et la retouche d'un autre champ l'effaçait à l'enregistrement.
+    // Lecture seule ici : rien n'est écrit sans « Enregistrer ». Le stock déjà effacé reste effacé.
+    if (entree && entree.date && inputSimple && inputSimple.value !== entree.date) {
+        inputSimple.value = entree.date;
+        majIndicationEcheance(inputSimple);
+    }
     // Entrée muette ⇒ assignée, comme partout ailleurs (`obtenirEcheanceEffective`).
     // Pas d'entrée ⇒ on lit le legacy : une date saisie valait transmission.
     const assignee = entree

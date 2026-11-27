@@ -246,6 +246,29 @@ describe('#494 · U3 — une production d\'avant ce jour n\'est pas déclassée'
 
 /* ------------------------- U4 — LA PORTE QUE #493 AVAIT OUVERTE, REFERMÉE */
 
+describe('#1056 · le champ date montre la date du groupe, pour qu\'une retouche ne l\'efface pas', () => {
+    it('la date ne vit que dans l\'entrée du groupe : le champ la reçoit à l\'ouverture', () => {
+        const win = charger();
+        const ecran = ecranModeSimple();
+        poser(win, ecran, { echeancesParGroupe: { GC_A: { assignee: true, date: '2026-12-09' } } }, 'GC_A');
+        expect(ecran.input.value).toBe('2026-12-09');
+    });
+    it('l\'entrée du groupe et la date d\'origine diffèrent : celle du groupe, que le calendrier emploie', () => {
+        const win = charger();
+        const ecran = ecranModeSimple();
+        ecran.input.value = '2026-11-02';
+        poser(win, ecran, { dateEcheance: '2026-11-02', echeancesParGroupe: { GC_A: { assignee: true, date: '2026-12-09' } } }, 'GC_A');
+        expect(ecran.input.value).toBe('2026-12-09');
+    });
+    it('témoin : une entrée sans date laisse le champ tel quel', () => {
+        const win = charger();
+        const ecran = ecranModeSimple();
+        ecran.input.value = '2026-11-02';
+        poser(win, ecran, { dateEcheance: '2026-11-02', echeancesParGroupe: { GC_A: { assignee: false, date: null } } }, 'GC_A');
+        expect(ecran.input.value).toBe('2026-11-02');
+    });
+});
+
 describe('#494 · U4 — une date préparée n\'est pas une échéance due', () => {
     const PREPAREE = {
         id: 'PROD_A1', titre: 'Artefact 1',
