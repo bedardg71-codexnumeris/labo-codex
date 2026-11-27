@@ -118,7 +118,7 @@ Trouvaille sans suite (niveau 3) : supprimer une grille de « Partagés » n'emp
   - `entre` ignoré → M.b, M.c ;
   - tableaux imbriqués comptés → M.e ;
   - un seul tableau par le nouveau chemin → U.a, M.e.
-- Suite Vitest complète, premier passage : 966 fichiers, 1 rouge, `bareme-1-editeur.test.js` I.b. Cette sentinelle liste les modules qui lisent `descripteurs`. `partage-format.js` y entre désormais : il lit `descripteurs.echelleId` pour emporter l'échelle, comme `import-export.js` pour la rebrancher, et ne calcule ni note ni bilan. Ajouté à sa liste avec ce motif, replié dans le commit de #1090. Second passage : en cours au moment de ce commit ; son verdict est inscrit au commit suivant.
+- Suite Vitest complète, premier passage : 966 fichiers, 1 rouge, `bareme-1-editeur.test.js` I.b. Cette sentinelle liste les modules qui lisent `descripteurs`. `partage-format.js` y entre désormais : il lit `descripteurs.echelleId` pour emporter l'échelle, comme `import-export.js` pour la rebrancher, et ne calcule ni note ni bilan. Ajouté à sa liste avec ce motif, replié dans le commit de #1090. Second passage (27 nov., conteneur) : 966 fichiers, 12 500 essais, tous verts.
 - Jetons anti-cache des quatre fichiers touchés : `20261126d`, le jour du build en ligne (`version.json` : `1126-0653`).
 
 **Pas vérifié : aucun navigateur dans le conteneur**
