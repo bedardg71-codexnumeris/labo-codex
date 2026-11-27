@@ -508,7 +508,10 @@ test('pratiques : les deux titres, les boutons du milieu et l’encadré partis,
 
 test('pratiques : chaque rangée du trimestre porte « Garder dans ma bibliothèque → » ou son état calme (#1164) ; la famille en mots ; « ← Utiliser » ramène un gabarit, la fenêtre reste ouverte', async ({ page }) => {
     test.setTimeout(120000);
-    await ouvrirDemo(page, 'pratiques', 1440, 560);
+    // ↻ 27 nov. 2026 (verdict de l'assemblage) : 500 de haut, plus 560. « Hybride » et « Cumulative » sont plus courts que
+    // « Par sélection de productions » et « Sommative » : les rangées ne passent plus à la ligne, la fenêtre perd 42 px de
+    // contenu (782 → 740, mesuré sous WebKit) et « Modèle sommatif » tenait à l'écran sans défiler. La fenêtre défile encore.
+    await ouvrirDemo(page, 'pratiques', 1440, 500);
     await ouvrirBibliotheque(page, 'pratiques');
 
     const trimestre = colonne(page, 'pratiques', 'trimestre').locator('.biblio2-liste').first();
