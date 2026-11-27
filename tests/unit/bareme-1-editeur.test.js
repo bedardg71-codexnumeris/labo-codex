@@ -533,7 +533,10 @@ describe('barème 1 · I — aucun calcul ne lit le barème', () => {
         // Conception › Grilles n'a pas de descripteurs) : il n'y est plus.
         // ↻ 19 nov. 2026 (lot autoevaluation-consignes) : `export-pdf.js` lit les descripteurs pour IMPRIMER la grille
         // d'autoévaluation des consignes (`pageAutoevaluation`) ; il ne calcule ni note ni bilan.
-        expect(lecteurs.sort()).toEqual(['bareme.js', 'export-pdf.js', 'grilles.js', 'import-export.js', 'materiel-assistant.js', 'materiel-creation.js']);
+        // ↻ 27 nov. 2026 (#1090, lot conception) : `partage-format.js` lit `descripteurs.echelleId` pour EMPORTER au partage
+        // l'échelle d'une grille (`echellesDesDescripteurs`), comme `import-export.js` le lit pour la rebrancher ; il ne
+        // calcule ni note ni bilan.
+        expect(lecteurs.sort()).toEqual(['bareme.js', 'export-pdf.js', 'grilles.js', 'import-export.js', 'materiel-assistant.js', 'materiel-creation.js', 'partage-format.js']);
     });
 
     it('I.c mêmes points, même note : la portée d’une évaluation enregistrée, avec et sans barème', () => {

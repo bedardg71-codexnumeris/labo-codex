@@ -22,7 +22,8 @@
  *
  * DUPLICATION AVEC DÉPENDANCES (cohérent avec le modèle d'export) :
  *  - grille      → copie + SES cartouches partagées (grilleId remappé,
- *                  écrites dans `cartouches_{nouvelId}`)
+ *                  écrites dans `cartouches_{nouvelId}`) + l'échelle de ses
+ *                  descripteurs, sauf si le trimestre l'a déjà (#1090)
  *  - cartouche   → duplique SA grille parente entière (une cartouche sans
  *                  sa grille est inutilisable — ancrage cartouches_{grilleId})
  *  - production  → copie + sa grille partagée (et les cartouches de
@@ -187,6 +188,49 @@
     }
 
     /**
+     * #1090 (27 nov. 2026) — L'ÉCHELLE DES DESCRIPTEURS D'UNE GRILLE PARTAGÉE ENTRE DANS LE TRIMESTRE.
+     *
+     * Un paquet de grille emporte désormais l'échelle que nomment ses descripteurs
+     * (`partage-format.js`) ; l'import la range dans `partage_echelles` et y rebranche la grille. Pour
+     * la copie dans les documents, chaque échelle nommée est cherchée dans le trimestre actif — là où
+     * `rendreDescripteursNiveaux` (grilles.js) la lit :
+     *   1. l'id y est déjà → rien ;
+     *   2. l'échelle source est introuvable (fichier d'avant ce lot) → rien : la copie garde l'id, comme avant ;
+     *   3. une échelle locale de même identité (`memeIdentite`, identite-item.js : id, `idOriginal`,
+     *      `inspireDe.idOriginal`, `inspireDe.sourceId`) → la copie la désigne, aucune échelle n'est écrite ;
+     *   4. sinon → l'échelle est copiée comme par « Dupliquer » sur une échelle partagée (`copiePropre`).
+     * Le nom ne suffit pas (#450 : deux échelles homonymes peuvent être toutes deux en usage) : une échelle
+     * de même nom et d'une autre lignée reste distincte, et la copie s'ajoute à côté.
+     * Écrit seulement dans `cle('echellesTemplates')`, par ajout (aucun remplacement) ; `partage_*` n'est
+     * jamais touché.
+     *
+     * @param {Object} grilleSource
+     * @param {Function} lireEchelleSource - (id) => échelle dans la source, ou null
+     * @returns {Object<string, string>} id source → id posé, pour les seules échelles qui changent d'id
+     */
+    function rapporterEchellesDeGrille(grilleSource, lireEchelleSource) {
+        var table = {};
+        var ids = (window.partageFormat && typeof window.partageFormat.echellesDesDescripteurs === 'function')
+            ? window.partageFormat.echellesDesDescripteurs(grilleSource) : [];
+        ids.forEach(function (id) {
+            var locales = lire(window.cle('echellesTemplates'));
+            if (locales.some(function (e) { return e && e.id === id; })) return;
+            var source = lireEchelleSource(id);
+            if (!source) return;
+            var enPlace = (typeof window.memeIdentite === 'function')
+                ? locales.find(function (e) { return e && e.id && window.memeIdentite(e, source); }) : null;
+            if (enPlace) {
+                table[id] = enPlace.id;
+                return;
+            }
+            var copie = copiePropre(source, 'echelle');
+            ajouterACollection(window.cle('echellesTemplates'), copie);
+            table[id] = copie.id;
+        });
+        return table;
+    }
+
+    /**
      * Duplique une grille (d'une SOURCE quelconque) + ses cartouches liées vers
      * les documents de l'utilisateur. Retourne { grille, nbCartouches }.
      *
@@ -204,14 +248,27 @@
      * (D-C4, jamais statué, l'est ici). Celui de la grille ne bouge pas : l'import ne le
      * rebranche pas non plus.
      *
+     * #1090 (27 nov. 2026, décision de Grégoire) : avec `options.emporterEchelles`, l'échelle que
+     * nomment les descripteurs de la grille la suit (`rapporterEchellesDeGrille`), et la copie la
+     * désigne. Seuls les trois appels du partage, plus bas, le demandent : la copie d'une grille
+     * depuis un autre trimestre (`copierGrilleDepuisTrimestre`, `copierCartoucheDepuisTrimestre`)
+     * passe aussi par ici, et elle reste telle qu'avant ce lot.
+     *
      * @param {Object} grilleSource - grille à copier (objet déjà résolu par le caller)
      * @param {Function} [lireCartouchesDe] - (grille) => Array des cartouches liées ;
      *                   défaut = lecteur Voûte (collection plate)
      * @param {Function} [lireEchelleSource] - (id) => échelle dans la source ;
      *                   défaut = lecteur Voûte (partage_echelles)
+     * @param {{emporterEchelles?: boolean}} [options]
      */
-    function dupliquerGrillePartagee(grilleSource, lireCartouchesDe, lireEchelleSource) {
+    function dupliquerGrillePartagee(grilleSource, lireCartouchesDe, lireEchelleSource, options) {
+        var lireEchelle = (typeof lireEchelleSource === 'function') ? lireEchelleSource : lireEchellePartageeParId;
         var copie = copiePropre(grilleSource, 'grille');
+        var tableEchelles = (options && options.emporterEchelles) ? rapporterEchellesDeGrille(grilleSource, lireEchelle) : {};
+        // La règle commune des imports (#627, import-export.js) : les descripteurs suivent la table.
+        if (typeof window.rebrancherReferences === 'function') {
+            window.rebrancherReferences(copie, 'grille', { echelles: tableEchelles });
+        }
         ajouterACollection(window.cle('grillesTemplates'), copie);
 
         var lecteur = (typeof lireCartouchesDe === 'function') ? lireCartouchesDe : lireCartouchesPartageDe;
@@ -220,10 +277,9 @@
             var copies = cartouchesLiees.map(function (c) {
                 var cc = copiePropre(c, 'cartouche');
                 cc.grilleId = copie.id;
-                if (cc.echelleId) {
-                    cc.echelleId = rattacherEchelle(cc.echelleId,
-                        (typeof lireEchelleSource === 'function') ? lireEchelleSource : lireEchellePartageeParId);
-                }
+                // #1090 : rien à suivre ici — une cartouche partagée arrive sans `echelleId` (le schéma de
+                // partage ne le déclare pas) ; celle d'un autre trimestre ne reçoit pas de table d'échelles.
+                if (cc.echelleId) cc.echelleId = rattacherEchelle(cc.echelleId, lireEchelle);
                 return cc;
             });
             // Clé neuve (ancrage de la grille copiée) — rien d'existant à préserver.
@@ -237,6 +293,9 @@
      * ses dépendances. Retourne { libelle, idNouveau } ou null si impossible
      * (item introuvable, cartouche orpheline).
      */
+    // #1090 : la copie d'un partagé emporte l'échelle des descripteurs (voir `rapporterEchellesDeGrille`).
+    var AVEC_ECHELLES = { emporterEchelles: true };
+
     partageSection.dupliquerVersMesDocuments = function (type, id) {
         var item = null;
         lire(CLES_STOCKAGE[type] || '').forEach(function (i) {
@@ -248,7 +307,7 @@
         }
 
         if (type === 'grille') {
-            var resG = dupliquerGrillePartagee(item, lireCartouchesPartageDe);
+            var resG = dupliquerGrillePartagee(item, lireCartouchesPartageDe, null, AVEC_ECHELLES);
             return {
                 idNouveau: resG.grille.id,
                 libelle: 'Grille « ' + nomDe(item) + ' » copiée dans tes documents'
@@ -267,7 +326,7 @@
                 alert('Cette cartouche est liée à une grille qui n\'est plus dans tes partagés — impossible de la dupliquer seule.');
                 return null;
             }
-            var resC = dupliquerGrillePartagee(parent, lireCartouchesPartageDe);
+            var resC = dupliquerGrillePartagee(parent, lireCartouchesPartageDe, null, AVEC_ECHELLES);
             return {
                 idNouveau: resC.grille.id,
                 libelle: 'Grille « ' + nomDe(parent) + ' » copiée avec ses ' + resC.nbCartouches
@@ -284,7 +343,7 @@
                     if (g.id === copieP.grilleId) grilleLiee = g;
                 });
                 if (grilleLiee) {
-                    var resPG = dupliquerGrillePartagee(grilleLiee, lireCartouchesPartageDe);
+                    var resPG = dupliquerGrillePartagee(grilleLiee, lireCartouchesPartageDe, null, AVEC_ECHELLES);
                     copieP.grilleId = resPG.grille.id;
                     complement = ' (avec sa grille' + (resPG.nbCartouches ? ' et ' + resPG.nbCartouches + ' cartouche' + (resPG.nbCartouches > 1 ? 's' : '') : '') + ')';
                 } else if (copieP.grilleId.indexOf('PARTAGE_') === 0) {
