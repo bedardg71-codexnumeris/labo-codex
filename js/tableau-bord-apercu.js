@@ -1771,6 +1771,30 @@ function determinerModeAffichageTableauBord(config) {
 // #830 — phrase validée par Grégoire le 23 sept. 2026, mot pour mot.
 const TEXTE_A_SANS_PERIODES = 'Assiduité non calculée : aucune séance de l\'horaire ne porte son nombre de périodes. Tu peux le saisir dans Cadre › Trimestre › Horaire.';
 
+// #1250 — textes de Grégoire (27 nov. 2026, 11 h 56). Un groupe sans AUCUNE production lisait « 1 évaluation en attente »
+// et « 3 évaluations en attente », alors que rien n'attend : rien n'existe encore. Ils s'adressent à l'enseignant·e ; la
+// complétion se nourrit de ce que les étudiant·es remettent (« leurs productions », règle du 8 nov.).
+const TEXTE_C_SANS_PRODUCTION = 'Paraîtra quand tes étudiant·es auront remis une première production';
+const NOMBRES_EN_LETTRES = ['', 'une', 'deux', 'trois', 'quatre', 'cinq', 'six'];
+/** « Paraîtra après trois productions évaluées » ; le nombre suit le seuil de la pratique (3 par défaut). */
+function texteSansProductionP(seuilP) {
+    if (seuilP <= 1) return 'Paraîtra après une première production évaluée';
+    return 'Paraîtra après ' + (NOMBRES_EN_LETTRES[seuilP] || seuilP) + ' productions évaluées';
+}
+/**
+ * Ce que disent les bandes C et P quand elles sont vides.
+ * @returns {{texteAttenteC: string, texteAttenteP: string}} '' quand le seuil est atteint
+ */
+function textesAttenteCEtP(evalsManquantesC, evalsManquantesP, seuilP, nbProductions) {
+    const enAttente = (n) => `${n} évaluation${n > 1 ? 's' : ''} en attente`;
+    const aucune = nbProductions === 0;
+    return {
+        texteAttenteC: evalsManquantesC > 0 ? (aucune ? TEXTE_C_SANS_PRODUCTION : enAttente(evalsManquantesC)) : '',
+        texteAttenteP: evalsManquantesP > 0 ? (aucune ? texteSansProductionP(seuilP) : enAttente(evalsManquantesP)) : ''
+    };
+}
+window.textesAttenteCEtP = textesAttenteCEtP;   // lu par son banc
+
 // PROPOSÉ (lot « Vue simple », 9 nov. 2026 ; à valider par Grégoire), sur le patron de la phrase de #830 : un groupe sans
 // horaire — né en vue simple, par exemple — lisait « 1 séance en attente », alors qu'aucune séance ne peut venir.
 const TEXTE_A_SANS_HORAIRE = 'Assiduité non calculée : ce groupe n\'a pas d\'horaire. Tu peux le donner dans Cadre › Trimestre › Horaire.';
@@ -1883,10 +1907,9 @@ function afficherMetriquesGlobales(etudiants) {
     // Générer les textes explicites "en attente"
     const texteAttenteA = seancesManquantesA > 0
         ? `${seancesManquantesA} séance${seancesManquantesA > 1 ? 's' : ''} en attente` : '';
-    const texteAttenteC = evalsManquantesC > 0
-        ? `${evalsManquantesC} évaluation${evalsManquantesC > 1 ? 's' : ''} en attente` : '';
-    const texteAttenteP = evalsManquantesP > 0
-        ? `${evalsManquantesP} évaluation${evalsManquantesP > 1 ? 's' : ''} en attente` : '';
+    const productionsDuGroupe = obtenirDonneesSelonMode('productions');
+    const { texteAttenteC, texteAttenteP } = textesAttenteCEtP(evalsManquantesC, evalsManquantesP, seuilP,
+        Array.isArray(productionsDuGroupe) ? productionsDuGroupe.length : 0);
 
 
     // Debug: Vérifier les indices A des étudiants

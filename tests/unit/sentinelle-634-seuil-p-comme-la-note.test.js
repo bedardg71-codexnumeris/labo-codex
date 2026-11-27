@@ -70,3 +70,21 @@ describe('#634 · seuilEvaluationsPourP lit la pratique active comme la note', (
         expect(win.seuilEvaluationsPourP({})).toBe(3);
     });
 });
+
+describe('#1250 · un groupe sans aucune production ne dit plus « N évaluations en attente »', () => {
+    const textes = (...args) => monter({ pratiques: [], pointeur: null }).textesAttenteCEtP(...args);
+    it('aucune production : les deux phrases de Grégoire (27 nov. 2026)', () => {
+        expect(textes(1, 3, 3, 0)).toEqual({
+            texteAttenteC: 'Paraîtra quand tes étudiant·es auront remis une première production',
+            texteAttenteP: 'Paraîtra après trois productions évaluées'
+        });
+    });
+    it('le nombre suit le seuil de la pratique', () => {
+        expect(textes(1, 5, 5, 0).texteAttenteP).toBe('Paraîtra après cinq productions évaluées');
+        expect(textes(1, 1, 1, 0).texteAttenteP).toBe('Paraîtra après une première production évaluée');
+    });
+    it('témoin : dès qu\'une production existe, les messages d\'avant reviennent', () => {
+        expect(textes(1, 3, 3, 1)).toEqual({ texteAttenteC: '1 évaluation en attente', texteAttenteP: '3 évaluations en attente' });
+        expect(textes(0, 2, 3, 4)).toEqual({ texteAttenteC: '', texteAttenteP: '2 évaluations en attente' });
+    });
+});
