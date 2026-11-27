@@ -45,7 +45,7 @@ Depuis la réécriture du 20 nov., la grille est la cinquième étape de « Nous
 
 **« Poser tes codes »** (« Automatiser tes commentaires ») désignait de la même façon : aligné, sur les lignes de la production du parcours (sa consigne dit « une production reçue »). Pas à « Ta rétroaction s'écrit seule », qui désigne aussi « Actions › Annoter » à la reprise : la copie à rouvrir y est celle des codes, devenue « Annoté » ; viser une ligne « Importé » y enverrait sur une autre copie. Les deux « Je regarde » ont leurs propres lignes (Loutre Enjouée, Antilope Vaillante) : pas touchés.
 
-**Preuve** : `tests/unit/parcours-ligne-importee-2026-11-27.test.js`, 7 essais, **3 rouges sur `951de3f8`** (le halo allait à la première ligne, « Évalué »). La Liste y est rendue comme `js/liste-evaluations.js` l'écrit, et deux essais confrontent ce rendu au fichier : un changement de la pastille ou du menu fait rougir le banc. Break-test : 7 casses, toutes prises. Sous Chromium : `nous-faisons-recevoir-2026-11-19.spec.js`, `parcours-8-commentaires-2026-11-09.spec.js` et `je-regarde-commentaires-2026-11-22.spec.js` **en cours au moment de ce dépôt** (les trois premiers essais de « Je regarde » verts) ; le résultat est ajouté ici.
+**Preuve** : `tests/unit/parcours-ligne-importee-2026-11-27.test.js`, 7 essais, **3 rouges sur `951de3f8`** (le halo allait à la première ligne, « Évalué »). La Liste y est rendue comme `js/liste-evaluations.js` l'écrit, et deux essais confrontent ce rendu au fichier : un changement de la pastille ou du menu fait rougir le banc. Break-test : 7 casses, toutes prises. Sous Chromium : `nous-faisons-recevoir-2026-11-19.spec.js` (4), `parcours-8-commentaires-2026-11-09.spec.js` (11) et `je-regarde-commentaires-2026-11-22.spec.js` (3) verts ; 5 essais de captures sautés par construction (ils ne tournent que sur demande, `CAPTURES_PARCOURS`).
 
 ## Trouvaille, hors du lot
 
@@ -53,7 +53,7 @@ Depuis la réécriture du 20 nov., la grille est la cinquième étape de « Nous
 
 ## Vérifié, et pas vérifié
 
-- Vitest complet depuis `tests/` : **en cours au moment de ce dépôt** (les fichiers touchés et leurs sentinelles : verts). Le résultat est ajouté ici à la fin du lot.
+- Vitest complet depuis `tests/` : 967 fichiers, 12 515 essais verts (27 nov., conteneur, sur `8b4966bb3`). Le hook pre-push l'a aussi passé au vert.
 - Sous Chromium (le conteneur a un Chromium) : les bancs des trois parcours touchés, cités fiche par fiche. **Rien sous WebKit** : ni Safari ni l'iPad ne sont ici. Avant toute fusion, le verdict du Mac, comme d'habitude.
 - Les jetons anti-cache des trois fichiers portent le jour du build en ligne : `js/parcours-evaluer.js?v=20261126d`, `js/parcours-recevoir.js?v=20261126e` (`d` à la fiche 2), `js/parcours-commentaires.js?v=20261126e`. La release les avancera.
 - Rien n'est en ligne : la branche n'est fusionnée nulle part. Les gestes ci-dessous attendent qu'elle le soit.
