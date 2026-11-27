@@ -246,6 +246,26 @@
         return evaluationsVerrouillees().some(function (e) { return avant.indexOf(e.id) === -1; });
     }
 
+    /**
+     * L'évaluation ouverte est verrouillée (Grégoire, 22 nov. 2026, aperçu n° 53 ; tranché par Cowork le 27 nov.) : elle
+     * fait l'étape « Ta rétroaction » comme un verrou neuf. Déjà verrouillée à « Commencer », elle ne pouvait jamais
+     * satisfaire `verrouNeuf`, même déverrouillée puis reverrouillée (son identifiant est dans `verrousAvant`), et la bulle
+     * disait « Verrouiller » sous un bouton « Déverrouiller ». L'évaluation ouverte : celle que le formulaire montre
+     * (l'étudiant·e et la production, et l'identifiant qu'il modifie s'il en retient un) ; avec un fichier, celle du
+     * fichier ouvert (`evaluationDuFichierOuvert`).
+     */
+    function evaluationOuverteVerrouillee() {
+        var ec = evaluationVivante();
+        if (!ec || !ec.etudiantDA || !ec.productionId || !evaluationDuFichierOuvert(ec)) return false;
+        return evaluationsVerrouillees().some(function (e) {
+            return (!ec.idModification || e.id === ec.idModification)
+                && String(e.etudiantDA) === String(ec.etudiantDA) && e.productionId === ec.productionId;
+        });
+    }
+
+    /** « Ta rétroaction » est faite : un verrou neuf, ou l'évaluation ouverte verrouillée. */
+    function verrouPose() { return verrouNeuf() || evaluationOuverteVerrouillee(); }
+
     function boutonVerrou() { return el('btnVerrouillerEvaluation'); }
 
     /** Le menu « Actions… » d'une ligne de la Liste qui offre ce geste (`evaluer`, `annoter`). */
@@ -716,7 +736,7 @@
         zones: function () { return [boutonVerrou()]; },
         contour: boutonVerrou,
         nommeLeContour: false,
-        atteint: verrouNeuf
+        atteint: verrouPose
     };
 
     var ETAPE_7_SANS_FICHIER = {
@@ -727,7 +747,7 @@
         zones: function () { return [boutonVerrou()]; },
         contour: boutonVerrou,
         nommeLeContour: false,
-        atteint: verrouNeuf
+        atteint: verrouPose
     };
 
     var ETAPE_8 = {
