@@ -15,9 +15,10 @@
    tests/unit/sentinelle-parcours-evaluer-2026-11-09.test.js (« Nous faisons ») et
    tests/unit/sentinelle-je-regarde-evaluer-2026-11-18.test.js (« Je regarde ») les confrontent à leurs consignes.
 
-   · « Nous faisons » : une bulle avance quand la donnée est RÉELLEMENT enregistrée. Ce qui existait au départ ne fait
-     pas avancer : le parcours retient, à « Commencer », ce qui était déjà là, et ensuite ce qu'il a vu naître
-     (`parcoursEvaluer`, une préférence : des identifiants, rien des données de la personne). « Reprendre » relit ce repère.
+   · « Nous faisons » : une bulle avance quand la donnée est RÉELLEMENT enregistrée. Depuis #1273 (27 nov. 2026, décision
+     de Grégoire), ce qui EXISTE déjà fait l'étape, peu importe quand ce fut créé : une pratique, une grille, une
+     cartouche, une production à la personne. Le parcours retient ce qu'il prend pour la suite (`parcoursEvaluer`, une
+     préférence : des identifiants, rien des données de la personne). « Reprendre » relit ce repère.
    · Il se joue sur les vraies données : si la démo est ouverte, il la referme d'abord ; si elle s'ouvre en route, il
      se ferme et attend.
    · La condition d'entrée : une classe en place (un groupe-cours réel avec ses étudiant·es).
@@ -114,6 +115,88 @@
         return liste.find(function (x) { return x && x.id && deja.indexOf(x.id) === -1; }) || null;
     }
 
+    // ---------- « Nous faisons » : ce qui EXISTE fait l'étape (#1273) ----------
+    // Vécu par Grégoire sur l'iPad le 11 nov. 2026 : sa grille, créée juste avant « Commencer », ne faisait pas avancer
+    // l'étape, qui ne comptait que ce qui naissait ensuite. Décision de Grégoire (27 nov. 2026, 14 h 41) : une étape qui
+    // demande une pratique, une grille, une cartouche ou une production est faite dès qu'il en EXISTE une à la personne
+    // dans le trimestre, peu importe quand elle a été créée ; le parcours passe alors à l'étape suivante.
+    // « À la personne » : dans le trimestre réel (la démo est refermée au lancement), hors du matériel que l'application
+    // sème (la grille, la cartouche et l'échelle de départ, les gabarits : `IDS_GABARITS_HARDCODES`, main.js) et hors de ce
+    // que la démo marque (`BibliothequeUI.estItemDemo`). Une pratique n'est jamais de démo hors de la démo
+    // (`estPratiqueDeDemo`, bibliotheque-ui.js), mais un gabarit (`estGabarit`) n'est pas la sienne. Une production : celles
+    // du cours actif (`obtenirDonneesSelonMode`), hors du portfolio, un contenant qu'on n'évalue pas.
+    // CE QUI EST RETENU pour la suite quand il y en a plusieurs : ce que le parcours retenait déjà, si cela existe encore ;
+    // sinon la plus récente (`laPlusRecente`). La pratique : celle qui s'applique au cours actif, si c'est l'une des siennes.
+    // L'ÉCHELLE GARDE SA RÈGLE (`monEchelleEstChoisie`) : l'étape se fait par un choix (« Je garde celle-ci »), et une
+    // échelle existe toujours, celle de départ.
+    // « JE REGARDE » GARDE SON REPÈRE (`grilleCreee`, `productionCreee`, `pratiqueCreee`, `cartoucheCreee`) : il se joue
+    // dans la démo, où tout existe déjà.
+
+    function fournie(x) {
+        var semes = window.IDS_GABARITS_HARDCODES;
+        return Array.isArray(semes) && semes.indexOf(x.id) !== -1;
+    }
+
+    function deLaDemo(x) {
+        var B = window.BibliothequeUI;
+        return !!(B && typeof B.estItemDemo === 'function' && B.estItemDemo(x));
+    }
+
+    /** Une grille, une cartouche ou une production de la personne. */
+    function aLaPersonne(x) { return !!(x && x.id) && !fournie(x) && !deLaDemo(x); }
+
+    /** La plus récente : par sa date de création ; à date égale ou absente, la dernière de la liste (l'application ajoute à la fin). */
+    function laPlusRecente(liste) {
+        return liste.reduce(function (r, x) {
+            return !r || String(x.dateCreation || '') >= String(r.dateCreation || '') ? x : r;
+        }, null);
+    }
+
+    /**
+     * Ce que l'étape retient parmi `liste` : `prefere` s'il y est, sinon ce qu'elle retenait déjà sous `champ` s'il y est
+     * encore, sinon la plus récente. Le repère (`parcoursEvaluer`) ne s'écrit que si ce qu'elle retient change.
+     */
+    function retenir(liste, champ, prefere) {
+        var ctx = lireCtx();
+        var x = (prefere && parId(liste, prefere)) || parId(liste, ctx[champ]) || laPlusRecente(liste);
+        if (x && ctx[champ] !== x.id) {
+            var maj = {};
+            maj[champ] = x.id;
+            majCtx(maj);
+        }
+        return x;
+    }
+
+    function mesPratiques() { return pratiques().filter(function (p) { return p && p.id && p.estGabarit !== true; }); }
+    function mesGrilles() { return grilles().filter(aLaPersonne); }
+    function mesCartouches() {
+        return grilles().reduce(function (acc, g) { return acc.concat(cartouchesDe(g && g.id).filter(aLaPersonne)); }, []);
+    }
+    function mesProductions() {
+        var duCours = typeof obtenirDonneesSelonMode === 'function' ? (obtenirDonneesSelonMode('productions') || []) : productions();
+        return duCours.filter(function (p) { return aLaPersonne(p) && p.type !== 'portfolio'; });
+    }
+
+    /** L'une de ses pratiques existe ; retenue : celle qui s'applique au cours actif, sinon la plus récente. */
+    function maPratique() { return retenir(mesPratiques(), 'pratiqueId', pratiqueAppliquee()); }
+    function pratiqueExiste() { return !!maPratique(); }
+    /** L'une de ses pratiques s'applique au cours actif. */
+    function maPratiqueEstAppliquee() { var p = maPratique(); return !!p && pratiqueAppliquee() === p.id; }
+    /** Le menu en haut de la page montre l'une de ses pratiques, sa fiche ouverte. */
+    function maPratiqueEstChoisie() {
+        var s = el('menuPratiques');
+        return fichePratiqueOuverte() && !!s && !!s.value && !!parId(mesPratiques(), s.value);
+    }
+    function grilleExiste() { return !!retenir(mesGrilles(), 'grilleId'); }
+    function cartoucheExiste() { return !!retenir(mesCartouches(), 'cartoucheId'); }
+    function productionExiste() {
+        var avant = lireCtx().productionId, p = retenir(mesProductions(), 'productionId');
+        // Retenue en cours de passage : elle vient de naître à la bulle 7 (au lancement, `lancer` efface la marque), et
+        // l'application rouvre alors sa fiche elle-même (`ouvrirLaProduction` l'attend).
+        if (p && p.id !== avant) vientDeCreer = true;
+        return !!p;
+    }
+
     /** Le groupe-cours actif (le pointeur que lisent le Cadre et le deuxième parcours ; les échéances s'y rangent). */
     function groupeCoursActifId() {
         var gc = typeof db !== 'undefined' ? db.getSync('groupeCoursActif', null) : null;
@@ -161,9 +244,11 @@
     function editeurGrilleVisible() { return sousSectionVisible('conception-grille-criteres'); }
     function dissection() { return window.materielDissection || null; }
 
+    /** « Je regarde » : la grille née depuis le repère du modèle (« Nous faisons » : `grilleExiste`, #1273). */
     function grilleCreee() {
         var g = nouveau(grilles(), lireCtx().grillesAvant);
-        // Une grille née avec ses rétroactions (Mon matériel peut créer sa cartouche) : elles ne font pas avancer la bulle 6.
+        // Une grille née avec ses rétroactions (Mon matériel peut créer sa cartouche) : elles ne font pas avancer l'étape
+        // de la cartouche du modèle.
         if (g && !lireCtx().grilleId) majCtx({ grilleId: g.id, cartouchesAvant: (lireCtx().cartouchesAvant || []).concat(ids(cartouchesDe(g.id))) });
         return !!g;
     }
@@ -175,11 +260,6 @@
      */
     function A() { return window.MaterielAide; }
 
-    /** Toutes les cartouches existantes, toutes grilles confondues (le repère de « Commencer »). */
-    function toutesLesCartouches() {
-        return grilles().reduce(function (acc, g) { return acc.concat(ids(cartouchesDe(g && g.id))); }, []);
-    }
-
     // ---------- La production, ses consignes ----------
 
     function ficheProductionOuverte() { return vis(el('formulaireProduction')); }
@@ -187,6 +267,7 @@
     // Vrai quand la bulle 7 vient de voir naître la production : l'application rouvre alors sa fiche elle-même.
     var vientDeCreer = false;
 
+    /** « Je regarde » : la production née depuis le repère du modèle (« Nous faisons » : `productionExiste`, #1273). */
     function productionCreee() {
         var p = nouveau(productions(), lireCtx().productionsAvant);
         if (p && !lireCtx().productionId) { majCtx({ productionId: p.id }); vientDeCreer = true; }
@@ -316,6 +397,7 @@
         document.body.classList.toggle('parcours-sur-modale', !!oui && window.innerWidth >= LARGEUR_MIN_SUR_MODALE);
     }
 
+    /** « Je regarde » : la pratique née depuis le repère du modèle (« Nous faisons » : `pratiqueExiste`, #1273). */
     function pratiqueCreee() {
         var p = nouveau(pratiques(), lireCtx().pratiquesAvant);
         if (p && !lireCtx().pratiqueId) majCtx({ pratiqueId: p.id });
@@ -329,13 +411,19 @@
 
     function boutonAppliquer() { return qs('#conteneurEditionPratique [data-action="appliquerPratiqueAuCoursActive"]'); }
 
-    /** La pratique née dans ce parcours est celle que montre le menu en haut de la page, sa fiche ouverte. */
+    /**
+     * « Je regarde » : la pratique née dans le modèle est celle que montre le menu en haut de la page, sa fiche ouverte
+     * (« Nous faisons » : `maPratiqueEstChoisie`, #1273).
+     */
     function laPratiqueEstChoisie() {
         var s = el('menuPratiques');
         return fichePratiqueOuverte() && !!s && !!lireCtx().pratiqueId && s.value === lireCtx().pratiqueId;
     }
 
-    /** C'est la pratique née dans ce parcours qui est appliquée au cours actif (pas une autre, ni celle d'avant). */
+    /**
+     * « Je regarde » : c'est la pratique née dans le modèle qui est appliquée au cours actif (pas une autre, ni celle
+     * d'avant). « Nous faisons » : `maPratiqueEstAppliquee` (#1273).
+     */
     function laPratiqueDuParcoursEstAppliquee() {
         pratiqueCreee();
         var id = lireCtx().pratiqueId;
@@ -394,10 +482,11 @@
     // sont posés par le moteur. Pas de « Remplir » : c'est le matériel de la personne.
     // L'ORDRE est celui de « Je regarde », sauf aux bulles 3 et 4, exprès : la pratique s'applique au cours (3) avant
     // l'échelle (4), qui est ici une étape pour tout le monde, même en notation sommative.
-    // CE QUI FAIT AVANCER : ce qui NAÎT pendant le parcours (une pratique, son application, une échelle choisie, une
-    // grille, une cartouche, une production, ses consignes transmises, une évaluation verrouillée). Le parcours
-    // retient, à « Commencer », ce qui était déjà là (`parcoursEvaluer`, une préférence : des identifiants, rien des
-    // données de la personne). « Reprendre » relit ce repère et repart de la première bulle qui reste à faire.
+    // CE QUI FAIT AVANCER : ce qui EXISTE (#1273, 27 nov. 2026 : une pratique à la personne, son application au cours,
+    // une grille, une cartouche, une production), l'échelle choisie (« Je garde celle-ci », ou une échelle née pendant le
+    // parcours), les consignes transmises et une évaluation verrouillée de la production retenue. Le parcours retient
+    // ce qu'il prend pour la suite (`parcoursEvaluer`, une préférence : des identifiants, rien des données de la
+    // personne). « Reprendre » relit ce repère et repart de la première bulle qui reste à faire.
     // RETIRÉ AVEC L'ANCIENNE PRATIQUE GUIDÉE (neuf étapes, la grille d'abord ; zéro dette) : les deux bulles
     // d'ouverture (« Pourquoi étiqueter », « Tu apprends aussi »), les bulles devant l'exemple étiqueté, la bulle du
     // choix des points ou des niveaux, « Prendre cette grille », le complément en pages de l'étiquetage, la règle des
@@ -550,23 +639,10 @@
     }
 
     // ----- Bulle 6 : la cartouche -----
-
-    /**
-     * La cartouche née pendant le parcours, sous QUELLE GRILLE QUE CE SOIT : la bulle dit « Choisis ta grille », elle
-     * ne retient pas la personne qui en choisit une autre. (La cartouche qu'une grille apporte en naissant ne compte
-     * pas : `grilleCreee` l'a rangée dans le repère.)
-     */
-    function cartoucheNee() {
-        var ctx = lireCtx();
-        if (ctx.cartoucheId) return true;
-        var nee = null;
-        grilles().some(function (g) {
-            nee = g && g.id ? nouveau(cartouchesDe(g.id), ctx.cartouchesAvant) : null;
-            return !!nee;
-        });
-        if (nee) majCtx({ cartoucheId: nee.id });
-        return !!nee;
-    }
+    // Faite dès qu'une cartouche de la personne existe, sous QUELLE GRILLE QUE CE SOIT (`cartoucheExiste`, #1273) : la
+    // bulle dit « Choisis ta grille », elle ne retient pas la personne qui en choisit une autre. Depuis le 27 nov. 2026,
+    // la cartouche qu'une grille apporte en naissant (Mon matériel, une grille avec ses rétroactions) compte aussi : elle
+    // existe, et elle est à la personne.
 
     function cartoucheEnCreation() { return vis(el('btnCreerCartouche')); }
 
@@ -643,8 +719,8 @@
     /** L'étape k est faite, lue comme `premiereNonFaite` la lit. */
     function etapeFaite(k) {
         return [
-            function () { return pratiqueCreee() || (wizardOuvert() && !aLEntreeDeLAssistant()); },
-            pratiqueCreee, laPratiqueDuParcoursEstAppliquee, monEchelleEstChoisie, grilleCreee, cartoucheNee, productionCreee,
+            function () { return pratiqueExiste() || (wizardOuvert() && !aLEntreeDeLAssistant()); },
+            pratiqueExiste, maPratiqueEstAppliquee, monEchelleEstChoisie, grilleExiste, cartoucheExiste, productionExiste,
             consignesTransmises, evaluationVerrouillee
         ][k]();
     }
@@ -746,7 +822,7 @@
                 return wizardOuvert() ? ouToucherPourMaPratique() : qs('#conception-pratiques-notation [data-action="creerNouvellePratique"]');
             },
             nommeLeContour: true,
-            atteint: function () { return voiePrise() || pratiqueCreee(); }
+            atteint: function () { return voiePrise() || pratiqueExiste(); }
         },
         {
             // 2. Deux voies, selon le choix de la bulle 1 : « Un modèle » (deux formes), ou « Tes réponses ». La bulle ne
@@ -766,7 +842,7 @@
             contour: ouToucherPourMaPratique,
             nommeLeContour: true,
             atteint: function () {
-                if (pratiqueCreee()) { surModale(false); return true; }
+                if (pratiqueExiste()) { surModale(false); return true; }
                 var dans = (wizardOuvert() && !aLEntreeDeLAssistant()) || questionDeLEchelle();
                 sansAssistant = dans ? 0 : sansAssistant + 1;
                 // Revenue au premier écran de l'assistant (« ← Précédent »), ou l'assistant refermé : la bulle 1.
@@ -784,7 +860,7 @@
                     note("Une pratique créée ne s'applique encore à aucun cours. Tu la prépares une fois ; elle peut resservir d'un cours à l'autre et se partager avec tes collègues."),
                     note("Sans pratique appliquée, l'application ne calcule aucune note."),
                     sansTemoin("Vérifie que le cours de l'en-tête est bien celui que tu veux évaluer", function () { return [el('selectGroupeCoursHeader')]; }),
-                    { texte: "Choisis ta pratique dans le menu en haut de la page, puis fais défiler jusqu'au bas de sa fiche", fait: laPratiqueEstChoisie },
+                    { texte: "Choisis ta pratique dans le menu en haut de la page, puis fais défiler jusqu'au bas de sa fiche", fait: maPratiqueEstChoisie },
                     consigne("Touche « Appliquer au cours actif »")
                 ];
             },
@@ -793,10 +869,10 @@
                 await allerAuxPratiques();
                 window.scrollTo(0, 0);
             },
-            zones: function () { return laPratiqueEstChoisie() ? [boutonAppliquer()] : []; },
-            contour: function () { return laPratiqueEstChoisie() ? boutonAppliquer() : el('menuPratiques'); },
+            zones: function () { return maPratiqueEstChoisie() ? [boutonAppliquer()] : []; },
+            contour: function () { return maPratiqueEstChoisie() ? boutonAppliquer() : el('menuPratiques'); },
             nommeLeContour: true,
-            atteint: laPratiqueDuParcoursEstAppliquee
+            atteint: maPratiqueEstAppliquee
         },
         {
             // 4. Ton échelle de performance : Conception › Échelles. Une étape pour tout le monde, même en notation sommative.
@@ -907,7 +983,7 @@
                 if (f === 'liste') return qs('#conception-grille-criteres [data-action="creerNouvelleGrille"]');
                 return el('btnCreerGrille');
             },
-            atteint: grilleCreee
+            atteint: grilleExiste
         },
         {
             // 6. Ta cartouche : Conception › Cartouches. La bulle reste sur la fiche jusqu'à « Créer la cartouche ».
@@ -937,7 +1013,6 @@
                 ];
             },
             avant: async function () {
-                grilleCreee();
                 aller('conception', 'retroactions');
                 await attendre(function () { return sousSectionVisible('conception-retroactions'); }, 2000);
             },
@@ -945,7 +1020,7 @@
                 if (!ficheCartoucheOuverte()) return qs('#conception-retroactions [data-action="creerNouvelleCartouche"]');
                 return cartoucheEnCreation() ? el('btnCreerCartouche') : null;
             },
-            atteint: cartoucheNee
+            atteint: cartoucheExiste
         },
         {
             // 7. Ta production : Conception › Productions.
@@ -976,7 +1051,6 @@
                 ];
             },
             avant: async function () {
-                cartoucheNee();
                 menusAmenes = false;
                 aller('conception', 'productions');
                 await attendre(function () { return sousSectionVisible('conception-productions'); }, 2000);
@@ -986,7 +1060,7 @@
                 if (!ficheProductionOuverte()) return qs('#conception-productions [data-action="creerNouvelleProduction"]');
                 return vis(el('btnCreerProduction')) ? el('btnCreerProduction') : null;
             },
-            atteint: productionCreee
+            atteint: productionExiste
         },
         {
             // 8. Tes consignes : la même fiche, plus bas.
@@ -1082,6 +1156,26 @@
         }
     ];
 
+    // #1273 : L'ÉTAPE FAITE, LE PARCOURS VA DROIT À LA PREMIÈRE QUI RESTE À FAIRE. Ce qui existe fait les étapes : celles
+    // d'après peuvent l'être déjà (une grille, une cartouche, une production d'avant « Commencer »). Le moteur avance d'une
+    // étape à la fois et ouvre chacune, sa page avec elle : mesuré sous Chromium le 27 nov. 2026, après « Je garde
+    // celle-ci », les cinq étapes déjà faites s'ouvraient l'une après l'autre avant la dernière bulle. Le saut ne part que
+    // d'une étape vue à faire pendant ce passage : une étape revue (le compteur, « en visite ») est déjà faite quand elle
+    // s'ouvre, elle ne saute pas. Banc : tests/integration/nous-faisons-evaluer-ce-qui-existe-1273.spec.js.
+    var vueAFaire = false;
+    ETAPES.slice(0, -1).forEach(function (e, k) {
+        var faite = e.atteint;
+        e.atteint = function () {
+            if (!faite()) { vueAFaire = true; return false; }
+            if (!vueAFaire || M().enVisite() || M().etapeCourante() !== k) return true;
+            var suite = premiereNonFaite();
+            if (suite <= k + 1) return true;
+            vueAFaire = false;
+            M().allerA(suite);
+            return false;
+        };
+    });
+
     var DEF = { id: ID, etapes: ETAPES, lienSortie: 'Plus tard',
                 // L'objectif, à la première forme de la première bulle seulement : la seconde (l'assistant ouvert) ne le redit pas.
                 objectif: function () { return wizardOuvert() ? '' : NOUS.objectif; },
@@ -1089,13 +1183,15 @@
 
     // ---------- Le lancement, « Plus tard », la fin ----------
 
-    /** Ce qui existait à « Commencer » : ce qui en naîtra ensuite fera avancer les étapes. */
+    /**
+     * Le repère de « Commencer » et de « Refaire » : les échelles qui existaient (une échelle NÉE pendant le parcours fait
+     * l'étape 4, `monEchelleEstChoisie`) et rien de retenu. Depuis #1273 (27 nov. 2026), plus d'instantané des pratiques,
+     * des grilles, des cartouches ni des productions : ce qui existe fait l'étape. Un repère posé avant garde ses
+     * instantanés (rien ne le réécrit) ; ils ne sont plus lus.
+     */
     function poserLeRepere() {
         majCtx({
-            grillesAvant: ids(grilles()), productionsAvant: ids(productions()), pratiquesAvant: ids(pratiques()),
             echellesAvant: ids(echelles()),
-            // Le repère des cartouches couvre TOUTES les grilles (relecture neuve du 9 nov.).
-            cartouchesAvant: toutesLesCartouches(),
             grilleId: null, productionId: null, evaluationId: null, evaluationDA: null,
             pratiqueId: null, cartoucheId: null, echelleId: null, voiePratique: null
         });
@@ -1129,15 +1225,18 @@
         var reprise = window.Assistance.etatDe(ID).etat === 'en-cours' && Array.isArray(lireCtx().echellesAvant);
         if (!reprise) poserLeRepere();
         surModale(false);
-        vientDeCreer = false;
         var depuis = premiereNonFaite();
         // Ce qui est déjà fait au départ de ce passage : la confirmation ne dira que ce qui s'y fait (`confirmation`).
         faitesAuLancement = ETAPES.slice(0, -1).map(function (e, k) { return etapeFaite(k); });
+        // Une production trouvée au lancement n'est pas née à la bulle 7 : sa fiche ne se rouvre pas d'elle-même.
+        vientDeCreer = false;
+        vueAFaire = false;
         window.Assistance.definirEtat(ID, 'en-cours', depuis);
         return M().lancer(DEF, {
             depuis: depuis,
             acquis: depuis,
             surEtape: function (i) {
+                vueAFaire = false;
                 if (i > 1) surModale(false);
                 window.Assistance.definirEtat(ID, 'en-cours', i);
             },
@@ -1690,7 +1789,7 @@
 
     // ---------- Étape 4 : la pratique appliquée au cours du deuxième groupe ----------
 
-    // `laPratiqueEstChoisie` et `laPratiqueDuParcoursEstAppliquee` : communes aux deux temps (plus haut).
+    // `laPratiqueEstChoisie` et `laPratiqueDuParcoursEstAppliquee` : plus haut ; « Nous faisons » a les siennes depuis #1273.
 
     // ---------- Étape 5 : la grille, étiquetée une rangée à la fois ----------
 

@@ -236,10 +236,10 @@ describe('« Nous faisons » : l’ordre et ce qui fait avancer', () => {
         expect(ETAPES.map((e) => e.titre).slice(2, 4)).toEqual(["L'appliquer à ton cours", 'Ton échelle de performance']);
     });
 
-    it('chaque bulle avance sur ce qui naît (une donnée), jamais sur un bouton « Continuer »', () => {
+    it('chaque bulle avance sur une donnée (ce qui existe, #1273), jamais sur un bouton « Continuer »', () => {
         ETAPES.slice(0, 9).forEach((e, i) => expect(typeof e.atteint, 'bulle ' + (i + 1)).toBe('function'));
         expect(tranche(EVALUER, 'var ETAPES = [', 'var DEF = ')).not.toContain("'Continuer'");
-        // Hors d'une page, rien n'est né : aucune bulle n'est atteinte.
+        // Hors d'une page, rien n'existe : aucune bulle n'est atteinte.
         ETAPES.slice(2, 9).forEach((e, i) => expect(e.atteint(), 'bulle ' + (i + 3)).toBe(false));
     });
 
@@ -258,10 +258,12 @@ describe('« Nous faisons » : l’ordre et ce qui fait avancer', () => {
         expect(P.texteDuChoix).toBeUndefined();
     });
 
-    it('le repère : ce qui existait à « Commencer », des identifiants seulement ; un repère d’avant le 20 nov. est refait', () => {
+    it('le repère : les échelles qui existaient à « Commencer », des identifiants seulement ; un repère d’avant le 20 nov. est refait', () => {
         const repere = tranche(EVALUER, 'function poserLeRepere() {', '\n    }\n');
-        ['grillesAvant', 'productionsAvant', 'pratiquesAvant', 'echellesAvant', 'cartouchesAvant'].forEach((c) => expect(repere).toContain(c + ': '));
-        // Chaque valeur est une liste d'identifiants (`ids(…)`, `toutesLesCartouches()`) ou rien : aucun nom, aucun DA.
+        expect(repere).toContain('echellesAvant: ');
+        // #1273 (27 nov. 2026) : ce qui existe fait l'étape ; plus d'instantané des grilles, productions, pratiques, cartouches.
+        ['grillesAvant', 'productionsAvant', 'pratiquesAvant', 'cartouchesAvant'].forEach((c) => expect(repere).not.toContain(c));
+        // Chaque valeur est une liste d'identifiants (`ids(…)`) ou rien : aucun nom, aucun DA.
         expect(repere).not.toMatch(/\.nom\b|etudiantDA|obtenirEtudiants/);
         expect(tranche(EVALUER, 'async function lancer() {', 'return M().lancer(DEF, {')).toContain("Array.isArray(lireCtx().echellesAvant)");
     });

@@ -246,16 +246,49 @@
         return evaluationsVerrouillees().some(function (e) { return avant.indexOf(e.id) === -1; });
     }
 
+    /**
+     * L'évaluation ouverte est verrouillée (Grégoire, 22 nov. 2026, aperçu n° 53 ; tranché par Cowork le 27 nov.) : elle
+     * fait l'étape « Ta rétroaction » comme un verrou neuf. Déjà verrouillée à « Commencer », elle ne pouvait jamais
+     * satisfaire `verrouNeuf`, même déverrouillée puis reverrouillée (son identifiant est dans `verrousAvant`), et la bulle
+     * disait « Verrouiller » sous un bouton « Déverrouiller ». L'évaluation ouverte : celle que le formulaire montre
+     * (l'étudiant·e et la production, et l'identifiant qu'il modifie s'il en retient un) ; avec un fichier, celle du
+     * fichier ouvert (`evaluationDuFichierOuvert`).
+     */
+    function evaluationOuverteVerrouillee() {
+        var ec = evaluationVivante();
+        if (!ec || !ec.etudiantDA || !ec.productionId || !evaluationDuFichierOuvert(ec)) return false;
+        return evaluationsVerrouillees().some(function (e) {
+            return (!ec.idModification || e.id === ec.idModification)
+                && String(e.etudiantDA) === String(ec.etudiantDA) && e.productionId === ec.productionId;
+        });
+    }
+
+    /** « Ta rétroaction » est faite : un verrou neuf, ou l'évaluation ouverte verrouillée. */
+    function verrouPose() { return verrouNeuf() || evaluationOuverteVerrouillee(); }
+
     function boutonVerrou() { return el('btnVerrouillerEvaluation'); }
 
-    /** Le menu « Actions… » d'une ligne de la Liste qui offre ce geste (`evaluer`, `annoter`). */
-    function menuActions(geste) {
-        var menus = document.querySelectorAll('#evaluations-liste select.eval-actions-select');
-        for (var k = 0; k < menus.length; k++) {
-            if (vis(menus[k]) && menus[k].querySelector('option[value^="' + geste + '|"]')) return menus[k];
-        }
-        return null;
+    /**
+     * Le menu « Actions… » d'une ligne de la Liste qui offre ce geste (`evaluer`, `annoter`). Avec un `statut`
+     * (l'identifiant que la Liste pose en classe sur la pastille de la ligne, `js/liste-evaluations.js`), celui d'une
+     * ligne à ce statut s'il y en a une ; sinon, le premier qui offre le geste.
+     */
+    function menuActions(geste, statut) {
+        var menus = [].filter.call(document.querySelectorAll('#evaluations-liste select.eval-actions-select'), function (s) {
+            return vis(s) && !!s.querySelector('option[value^="' + geste + '|"]');
+        });
+        var aCeStatut = statut ? menus.filter(function (s) {
+            var r = rangeeDe(s);
+            return !!(r && r.querySelector('.travaux-badge-pill.' + statut));
+        }) : [];
+        return aCeStatut[0] || menus[0] || null;
     }
+
+    /**
+     * « Sur la ligne d'une production importée » (l'étape « La liste ») : vu le 22 nov. 2026, le halo et la flèche allaient
+     * à la première ligne qui offre « Annoter », déjà « Évalué ». Une ligne « Importé » s'il y en a une ; sinon, comme avant.
+     */
+    function menuAAnnoter() { return menuActions('annoter', 'importe'); }
 
     function rangeeDe(s) { return s ? (s.closest('tr') || s.parentElement) : null; }
 
@@ -506,11 +539,11 @@
         avant: async function () {
             retirerExtras();
             aller('evaluations', 'liste');
-            await attendre(function () { return !!menuActions('annoter'); }, 3000);
-            amenerDeCote(menuActions('annoter'));
+            await attendre(function () { return !!menuAAnnoter(); }, 3000);
+            amenerDeCote(menuAAnnoter());
         },
-        zones: function () { return [rangeeDe(menuActions('annoter'))]; },
-        contour: function () { return menuActions('annoter'); },
+        zones: function () { return [rangeeDe(menuAAnnoter())]; },
+        contour: menuAAnnoter,
         nommeLeContour: true,   // « Actions › Annoter » (Grégoire, 11 nov. 2026, 9 h 47 : la flèche va à ce que la bulle nomme)
         atteint: annotationOuverteRetenue
     };
@@ -716,7 +749,7 @@
         zones: function () { return [boutonVerrou()]; },
         contour: boutonVerrou,
         nommeLeContour: false,
-        atteint: verrouNeuf
+        atteint: verrouPose
     };
 
     var ETAPE_7_SANS_FICHIER = {
@@ -727,7 +760,7 @@
         zones: function () { return [boutonVerrou()]; },
         contour: boutonVerrou,
         nommeLeContour: false,
-        atteint: verrouNeuf
+        atteint: verrouPose
     };
 
     var ETAPE_8 = {

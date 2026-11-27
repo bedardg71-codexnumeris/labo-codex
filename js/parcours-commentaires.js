@@ -553,17 +553,31 @@
             && idsDuParcours().indexOf(f.productionId) !== -1);
     }
 
-    /** Le menu « Actions » d'une ligne de la liste qui offre ce geste sur une production du parcours. */
-    function menuActions(geste) {
+    /**
+     * Le menu « Actions » d'une ligne de la liste qui offre ce geste sur une production du parcours. Avec un `statut`
+     * (l'identifiant que la Liste pose en classe sur la pastille de la ligne, `js/liste-evaluations.js`), celui d'une
+     * ligne à ce statut s'il y en a une ; sinon, le premier qui offre le geste.
+     */
+    function menuActions(geste, statut) {
         var ids = idsDuParcours();
         var lignes = document.querySelectorAll('#evaluations-liste tr[data-production-id]');
+        var premier = null;
         for (var k = 0; k < lignes.length; k++) {
             if (ids.indexOf(lignes[k].dataset.productionId) === -1) continue;
             var s = lignes[k].querySelector('select.eval-actions-select');
-            if (s && M().visible(s) && s.querySelector('option[value^="' + geste + '|"]')) return s;
+            if (!s || !M().visible(s) || !s.querySelector('option[value^="' + geste + '|"]')) continue;
+            if (!statut || lignes[k].querySelector('.travaux-badge-pill.' + statut)) return s;
+            if (!premier) premier = s;
         }
-        return null;
+        return premier;
     }
+
+    /**
+     * « Sur la ligne d'une production reçue » (« Poser tes codes ») : une ligne « Importé » s'il y en a une, sinon la
+     * première qui offre « Annoter », comme la ligne désignée de « Recevoir » (27 nov. 2026). Pas à « Ta rétroaction
+     * s'écrit seule » : la copie à rouvrir y est celle des codes, « Annoté ».
+     */
+    function menuAAnnoter() { return menuActions('annoter', 'importe'); }
 
     function palette(id) { return vis(document.getElementById(id)); }
 
@@ -755,7 +769,7 @@
             avant: async function () {
                 if (annoterOuvert() || evaluationOuverte()) return;
                 aller('evaluations', 'liste');
-                await attendre(function () { return !!menuActions('annoter'); }, 3000);
+                await attendre(function () { return !!menuAAnnoter(); }, 3000);
             },
             zones: function () {
                 // La production elle-même reste touchable : on y pose les codes.
@@ -764,12 +778,12 @@
                     return [palette('travaux-palette-erreurs-fr'), vis(document.getElementById('travaux-canvas-annotation')),
                         vis(document.getElementById('travaux-btn-actions')), vis(document.getElementById('travaux-actions-dropdown'))];
                 }
-                var s = menuActions('annoter');
+                var s = menuAAnnoter();
                 return s ? [s.closest('tr')] : [];
             },
             contour: function () {
                 if (annoterOuvert()) return palette('travaux-palette-erreurs-fr') || vis(document.getElementById('travaux-btn-actions'));
-                return menuActions('annoter');
+                return menuAAnnoter();
             },
             // Sur la Liste, « Actions › Annoter » : la bulle le nomme, la flèche y va (11 nov. 2026, 9 h 47).
             nommeLeContour: function () { return !annoterOuvert() && !evaluationOuverte(); },
