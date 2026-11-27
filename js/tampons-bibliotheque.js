@@ -163,9 +163,9 @@ async function ajouterDepuisBibliotheque(tamponId) {
     var tampon = items.find(function(t) { return t.id === tamponId; });
     if (!tampon) return;
 
-    // Vérifier qu'il n'est pas déjà dans les tampons personnalisés
+    // Déjà dans la palette, tampons intégrés compris (#1167) : même ensemble que « ✓ Déjà dans ta palette ».
     var customs = db.getSync('tamponsPersonnalises', []);
-    if (customs.find(function(c) { return c.id === tampon.id; })) {
+    if (_idsPalette().has(tampon.id)) {
         notifications.erreur('Déjà présent', 'Ce tampon est déjà dans ta palette');
         return;
     }
