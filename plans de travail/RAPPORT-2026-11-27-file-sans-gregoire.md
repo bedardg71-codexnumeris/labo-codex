@@ -36,3 +36,21 @@ La page de tri date du 16 novembre. Son « 57 » est le nombre de fiches rapides
 - Fiches de la suite de tests qui demandent un navigateur (#1255, #1267, #1275, #1284, file 36, 37, 41).
 - #869, #870, #722 (code mort, classes sans règle) : chacune demande la preuve à l'écran.
 - La page de tri n'est pas remise à jour : à refaire contre `main`, les fiches closes ci-dessus comprises.
+
+## Suite du même jour (7 h 11 : « fais le tour et continue », puis les intermédiaires et les laborieuses)
+
+### Fait
+- **#1056** (intermédiaire) : retoucher une production n'efface plus sa date d'échéance. En mode « un seul groupe », le champ s'ouvrait vide quand la date ne vivait que dans l'entrée du groupe, et « Enregistrer » écrivait `null` : la production sortait du calendrier et de la complétion. Le champ montre maintenant la date du groupe. **Source seulement** : les dates déjà effacées chez les gens le restent, rien n'est réécrit. Supposé : quand l'entrée du groupe et `dateEcheance` diffèrent, c'est celle du groupe qui s'affiche (c'est elle que lit `obtenirEcheanceEffective`).
+- **#1141** : quatre vérifications négatives qui lisaient un texte rendu ne pouvaient plus échouer depuis la norme française ; elles tolèrent l'espace.
+
+### Clos par la mesure
+#1266 (rapide) ; #1171, #1224, #1225, #1226 (preuve : le code et son banc). Non cochées faute d'une preuve relue par moi : #592, #1227, #1075, #1142 et les dix « closes par décision » du balayage.
+
+### Le tour des intermédiaires et des laborieuses
+`plans de travail/MESURE-2026-11-27-fiches-intermediaires-et-laborieuses.md` (balayage en lecture seule par un sous-agent, non relu fiche par fiche). 180 fiches non livrées, 18 en attente de Grégoire, 162 mesurées : 19 déjà réglées ou closes, 11 techniques faisables sans lui, 20 demandent un navigateur, 93 remontent à lui, 19 non mesurées. ⚠ La plupart des 93 sont rangées d'après le texte de la fiche, pas d'après le code.
+
+### Regardé, pas fait
+- #1054 (import du bilan réflexif) : il manque aussi `rendreInterface`, et l'écran est retiré ; aucun effet visible, laissé.
+- #869 : les six fonctions exportées du profil sans appelant extérieur servent par `data-action` dans le HTML que le module génère ; pas de code mort établi par cette mesure.
+- #1250, #1253, #1263 : chacune change ce que l'écran dit ; à Grégoire.
+- Restent faisables sans lui : #1278, #1128, #616, #814, #602, #1161.

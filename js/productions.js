@@ -885,6 +885,14 @@ function peuplerChampsPersonnalises(production) { peuplerBlocsConsignes(producti
  * d'échéance était une bande blanche sans rien). « à planifier », à côté du champ, tant qu'il est vide ; elle part
  * dès qu'une date y est. Relue à l'ouverture de la fiche et à chaque saisie.
  */
+/** #1056 — le champ date du mode « un seul groupe » prend la date de l'entrée du groupe, quand elle en a une. */
+function montrerDateDuGroupe(inputSimple, entree) {
+    const date = entree && entree.date;
+    if (!date || !inputSimple || inputSimple.value === date) return;
+    inputSimple.value = date;
+    majIndicationEcheance(inputSimple);
+}
+
 /** La rangée qui porte l'étiquette et le champ de la date (index.html, `.echeance-rangee`) ; null hors de la fiche. */
 function rangeeDeLEcheance(champ) {
     return champ && typeof champ.closest === 'function' ? champ.closest('.echeance-rangee') : null;
@@ -927,10 +935,7 @@ function poserCaseAssignationSimple(inputSimple, production, groupeCoursId) {
     // l'entrée du groupe avant `dateEcheance`). Rempli depuis `dateEcheance` seule, il s'ouvrait vide quand la
     // date ne vivait que dans l'entrée, et la retouche d'un autre champ l'effaçait à l'enregistrement.
     // Lecture seule ici : rien n'est écrit sans « Enregistrer ». Le stock déjà effacé reste effacé.
-    if (entree && entree.date && inputSimple && inputSimple.value !== entree.date) {
-        inputSimple.value = entree.date;
-        majIndicationEcheance(inputSimple);
-    }
+    montrerDateDuGroupe(inputSimple, entree);
     // Entrée muette ⇒ assignée, comme partout ailleurs (`obtenirEcheanceEffective`).
     // Pas d'entrée ⇒ on lit le legacy : une date saisie valait transmission.
     const assignee = entree
