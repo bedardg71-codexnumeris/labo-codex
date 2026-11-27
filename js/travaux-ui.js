@@ -4228,15 +4228,20 @@
         compteur.textContent = _texteCompteurLea(selection, da, reprisesSeulement) + _laisseesDeCoteLea(selection);
     }
 
-    /** Le nombre de PDF que l'export produira, et la part du papier (phrases validées par Grégoire le 8 nov.). */
+    /**
+     * Le nombre de PDF que l'export produira, et la part du papier (phrases validées par Grégoire le 8 nov.).
+     * #1247 (27 nov. 2026, 15 h 19) : la part de la corbeille, à part, après celle du papier (texte validé par Grégoire,
+     * invariable comme « sur papier ») ; ses synthèses partent aussi, le total les compte toujours.
+     */
     function _texteCompteurLea(selection, da, reprisesSeulement) {
         const nbCopies = selection.fichiers.length;
-        const nbPapier = selection.sansFichier.length;
-        const nbPdf = nbCopies + nbPapier;
+        const nbCorbeille = (selection.aLaCorbeille || []).length;
+        const nbPapier = selection.sansFichier.length - nbCorbeille;
+        const nbPdf = nbCopies + selection.sansFichier.length;
         const label = reprisesSeulement ? 'reprise' : 'évaluation';
         if (da) {
             if (nbCopies > 0) return `1 ${label} prête`;
-            return nbPapier > 0 ? `1 ${label} prête (synthèse seule)` : `Aucune ${label}`;
+            return nbPdf > 0 ? `1 ${label} prête (synthèse seule)` : `Aucune ${label}`;
         }
         if (nbPdf === 0) {
             if (reprisesSeulement) return 'Aucune reprise trouvée';
@@ -4246,7 +4251,8 @@
             return (selection.nonVerrouillees || []).length > 0 ? 'Aucune évaluation verrouillée' : 'Aucune évaluation trouvée';
         }
         return `${nbPdf} PDF pour ${nbPdf} ${nbPdf > 1 ? 'étudiant·es' : 'étudiant·e'}`
-            + (nbPapier > 0 ? `, dont ${nbPapier} sur papier (synthèse seule)` : '');
+            + (nbPapier > 0 ? `, dont ${nbPapier} sur papier (synthèse seule)` : '')
+            + (nbCorbeille > 0 ? `, dont ${nbCorbeille} dont la copie est à la corbeille` : '');
     }
 
     /**

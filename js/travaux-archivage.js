@@ -388,9 +388,10 @@
      * ensuite : une reprise non verrouillée (réévaluation en cours) laisse l'élève de côté, son originale ne part pas
      * à sa place. Les laissées de côté sont rendues pour que le compteur le dise.
      *
-     * @returns {{ evaluations: Array, fichiers: Array, sansFichier: Array, nonVerrouillees: Array }}
+     * @returns {{ evaluations: Array, fichiers: Array, sansFichier: Array, aLaCorbeille: Array, nonVerrouillees: Array }}
      *   `evaluations` = une par élève, verrouillée ; `fichiers` = les copies importées, qui donneront le PDF annoté
      *   avec sa synthèse ; `sansFichier` = les évaluations sans copie résolue, qui donneront la synthèse seule ;
+     *   `aLaCorbeille` = celles de `sansFichier` dont la copie est à la corbeille (#1247, comptées à part) ;
      *   `nonVerrouillees` = celles laissées de côté.
      */
     /** #1245 — les élèves du groupe-cours actif et ceux de ses copies, élèves supprimés écartés (#1013). */
@@ -414,6 +415,22 @@
      */
     function _verrouilleeDevantUnDoublon(existant, e) {
         return !_estReprise(existant) && existant.verrouillee !== true && e.verrouillee === true;
+    }
+
+    /**
+     * #1247 (décision de Grégoire, 27 nov. 2026, 15 h 19) — la copie de cette évaluation est-elle à la corbeille ? Même
+     * résolution que `trouverFichierPourEvaluation` (travaux-resolution.js) : par l'évaluation (ou celle qu'elle reprend),
+     * sinon par l'élève et la production. Seule la corbeille garde une trace : une copie supprimée pour de bon n'en
+     * laisse aucune, et son évaluation reste comptée « sur papier » (limite assumée, rien n'est ajouté aux évaluations).
+     */
+    function _copieALaCorbeille(evaluation, corbeille) {
+        return corbeille.some((f) => (f.evaluationId && (f.evaluationId === evaluation.id || f.evaluationId === evaluation.repriseDeId))
+            || (f.etudiantDA === evaluation.etudiantDA && f.productionId === evaluation.productionId));
+    }
+
+    /** #1247 — la corbeille du groupe-cours actif, celle que l'écran montre ; vide si le stockage ne la donne pas. */
+    function _corbeilleDuGroupe() {
+        return (typeof travauxStockage.obtenirCorbeille === 'function' && travauxStockage.obtenirCorbeille()) || [];
     }
 
     function selectionnerEvaluationsLea(productionId, da, reprisesSeulement) {
@@ -456,6 +473,8 @@
         const retenues = [];
         const fichiersAvecEval = [];
         const sansFichier = [];
+        const aLaCorbeille = [];   // #1247 : celles de `sansFichier` dont la copie est à la corbeille
+        const corbeille = _corbeilleDuGroupe();
         const nonVerrouillees = [];
         const evaluationDuFichier = new Map();   // relecture du 9 nov. : le PDF porte CETTE évaluation, pas une autre du couple
         for (const evaluation of evalParEtudiant.values()) {
@@ -465,9 +484,13 @@
                 ? travauxResolution.trouverFichierPourEvaluation(evaluation)
                 : null;
             if (fichier) { fichiersAvecEval.push(fichier); evaluationDuFichier.set(fichier.id, evaluation); }
-            else sansFichier.push(evaluation);
+            else {
+                sansFichier.push(evaluation);
+                if (_copieALaCorbeille(evaluation, corbeille)) aLaCorbeille.push(evaluation);
+            }
         }
-        return { evaluations: retenues, fichiers: fichiersAvecEval, sansFichier: sansFichier, nonVerrouillees: nonVerrouillees, evaluationDuFichier: evaluationDuFichier };
+        return { evaluations: retenues, fichiers: fichiersAvecEval, sansFichier: sansFichier, aLaCorbeille: aLaCorbeille,
+            nonVerrouillees: nonVerrouillees, evaluationDuFichier: evaluationDuFichier };
     }
 
     // Lot du 9 nov. 2026 : le texte validé par Grégoire quand rien n'est verrouillé (dit seul, rien n'a échoué).
