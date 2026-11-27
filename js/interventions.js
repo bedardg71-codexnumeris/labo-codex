@@ -106,7 +106,7 @@ const VOCABULAIRES = {
     interventions: {
         boutonNouvelle: 'Planifier une intervention',
         titreNouvelle: 'Planifier une intervention',
-        vide: 'Aucune intervention planifiée ou complétée.',
+        vide: 'Aucune intervention planifiée ou terminée.',   // 27 nov. 2026 (Grégoire) : « Terminée », plus « Complétée » ; la valeur reste `completee`
         videAide: 'Clique sur «Planifier une intervention» pour commencer.',
         introuvable: 'Intervention non trouvée.',
         supprimer: 'Supprimer cette intervention ?',
@@ -592,7 +592,7 @@ function genererBadgeStatut(statut) {
     const badges = {
         'planifiee': '<span class="badge-statut-planifiee">Planifiée</span>',
         'en-cours': '<span class="badge-statut-en-cours">En cours</span>',
-        'completee': '<span class="badge-statut-completee">Complétée</span>'
+        'completee': '<span class="badge-statut-completee">Terminée</span>'   // 27 nov. 2026 : le mot change, pas la valeur
     };
     return badges[statut] || '';
 }
@@ -1058,7 +1058,7 @@ function ouvrirIntervention(interventionId, options) {
                                 </label>
                                 <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
                                     <input type="radio" name="interventionStatut" value="completee" ${intervention.statut === 'completee' ? 'checked' : ''} style="width: auto; margin: 0;">
-                                    <span class="u-texte-09">Compl\u00e9t\u00e9e</span>
+                                    <span class="u-texte-09">Termin\u00e9e</span>
                                 </label>
                             </div>
                         </div>

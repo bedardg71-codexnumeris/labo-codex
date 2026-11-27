@@ -182,7 +182,7 @@
                 lignes: [
                     ['n', "Ce qui suit, tu le feras après la rencontre. Dans la démo, on le lit sans le faire."],
                     ['n', "Tu rouvres la fiche (à l'onglet « Interventions », par le bouton « Ouvrir »), tu coches sa présence et tu notes ce que tu as observé sous « Observations générales »."],
-                    ['n', "Tu choisis ensuite « Complétée » : le « Bilan post-intervention » apparaît. Pour chaque critère ciblé, il compare ses résultats avant et après."],
+                    ['n', "Tu choisis ensuite « Terminée » : le « Bilan post-intervention » apparaît. Pour chaque critère ciblé, il compare ses résultats avant et après."],
                     ['n', "Une remontée n'est qu'un signe : qui part du plus bas remonte souvent un peu, même sans intervention."],
                     ['c', "Touche « Continuer »"]
                 ]
@@ -302,7 +302,7 @@
                 lignes: [
                     ['n', "Ce qui suit, tu le feras une fois l'intervention donnée."],
                     ['n', "Tu rouvres la fiche (à l'onglet « Interventions », par le bouton « Ouvrir », ou depuis son profil), tu coches les personnes présentes et tu notes ce que tu as observé sous « Observations générales »."],
-                    ['n', "Tu choisis ensuite « Complétée »."],
+                    ['n', "Tu choisis ensuite « Terminée »."],
                     ['n', "Le « Bilan post-intervention » apparaît : pour chaque critère ciblé, les résultats avant et après, puis « Objectif atteint ? » et « Suite envisagée »."],
                     ['n', "Une remontée n'est qu'un signe : qui part du plus bas remonte souvent un peu, même sans intervention."],
                     ['c', "Touche « Continuer »"]

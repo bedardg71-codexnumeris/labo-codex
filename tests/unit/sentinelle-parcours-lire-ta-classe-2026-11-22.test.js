@@ -59,6 +59,18 @@ function sansLaCase(bulles) {
     return r.bulles;
 }
 
+/**
+ * LE 27 NOV. 2026 (décision de Grégoire, fiche 4 du lot `lot/suivi-2026-11-27` ; rapport
+ * plans de travail/RAPPORT-2026-11-27-suivi.md) : le statut d'une intervention se lit « Terminée », plus « Complétée ».
+ * Chaque temps le nomme dans une bulle ; la retouche doit y trouver sa ligne, une fois.
+ */
+const TERMINEE = { avant: '« Complétée »', apres: '« Terminée »' };
+function avecTerminee(bulles) {
+    const r = appliquerRetouches(bulles, [TERMINEE]);
+    expect(r.faites, 'la retouche du 27 nov. (« Terminée ») a trouvé sa ligne').toEqual([1]);
+    return r.bulles;
+}
+
 /** Ce que le code dit d'une bulle, dans la forme de la consigne. */
 function vuDuCode(b, k) {
     return {
@@ -82,7 +94,7 @@ function vuDeLaConsigne(c) {
 }
 
 describe.each(TEMPS)('§ %s · « %s » (%s), bulle par bulle', (repere, cle, nom, total) => {
-    const consigne = repere === '3.1' ? retouchees(bullesDu(repere)) : sansLaCase(bullesDu(repere));
+    const consigne = avecTerminee(repere === '3.1' ? retouchees(bullesDu(repere)) : sansLaCase(bullesDu(repere)));
     const code = P.textes[cle];
 
     it(`${total} bulles, numérotées « n sur ${total} », de part et d'autre`, () => {
