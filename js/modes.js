@@ -1031,14 +1031,17 @@ function champMasqueAnonymisation(champ) {
 // un titre générique daté le remplace partout où il s'affiche (cartes, profil, graphiques).
 function titreInterventionAffiche(intervention, repli, nom) {
     if (!intervention) return repli || '';
-    if (modeActuel === MODES.ANONYMISATION) {
-        const d = intervention.date ? new Date(intervention.date + 'T12:00:00') : null;
-        const quoi = nom || 'Intervention';
-        return (d && !isNaN(d.getTime()))
-            ? quoi + ' du ' + window.dateEnLettres(d, { day: 'numeric', month: 'long' })
-            : quoi;
-    }
-    return intervention.titre || repli || '';
+    if (modeActuel === MODES.ANONYMISATION) return _titreGeneriqueDate(intervention, nom);
+    // #1263 (Grégoire, 27 nov. 2026) : sans titre écrit, la carte porte le même titre daté, « Intervention du 27 novembre ».
+    // Affichage seulement : rien n'est écrit dans l'intervention, et celles déjà créées sans titre en profitent.
+    return intervention.titre || repli || _titreGeneriqueDate(intervention, nom);
+}
+function _titreGeneriqueDate(intervention, nom) {
+    const d = intervention.date ? new Date(intervention.date + 'T12:00:00') : null;
+    const quoi = nom || 'Intervention';
+    return (d && !isNaN(d.getTime()))
+        ? quoi + ' du ' + window.dateEnLettres(d, { day: 'numeric', month: 'long' })
+        : quoi;
 }
 
 /**
