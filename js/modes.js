@@ -1092,8 +1092,8 @@ function _refuserSiTrimestreClos(cleEffective, geste, discret) {
  */
 function _garderEcritureRefusee(cleEcrite, error) {
     if (typeof window.enregistrerAction !== 'function') return;
-    const cle = String(cleEcrite || '?').replace(/\d{5,}/g, '…');
-    window.enregistrerAction('ÉCRITURE REFUSÉE', cle + ' · ' + ((error && error.name) || 'erreur sans nom'));
+    const nomMasque = String(cleEcrite || '?').replace(/\d{5,}/g, '…');
+    window.enregistrerAction('ÉCRITURE REFUSÉE', nomMasque + ' · ' + ((error && error.name) || 'erreur sans nom'));
 }
 
 function _raisonNonEnregistre(error) {

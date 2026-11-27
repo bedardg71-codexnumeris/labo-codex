@@ -54,3 +54,9 @@ La page de tri date du 16 novembre. Son « 57 » est le nombre de fiches rapides
 - #869 : les six fonctions exportées du profil sans appelant extérieur servent par `data-action` dans le HTML que le module génère ; pas de code mort établi par cette mesure.
 - #1250, #1253, #1263 : chacune change ce que l'écran dit ; à Grégoire.
 - Restent faisables sans lui : #1278, #1128, #616, #814, #602, #1161.
+
+## Troisième tranche (10 h 51 : « passons à la réalisation des tâches »)
+
+- **#1278** (intermédiaire) : quand le témoin dit « Non enregistré : le navigateur a refusé l'écriture », la clé refusée et le nom de l'erreur entrent dans les « dernières actions » du rapport de bug. Le message montré ne change pas. Un DA dans la clé est masqué ; le message de l'erreur n'est pas gardé.
+- **#1161** (laborieuse) : « Tout garder dans ma bibliothèque » (et « Garder dans ma bibliothèque ») ne verse plus un second exemplaire d'une grille ramenée de la bibliothèque et restée telle quelle. Supposé : « telle quelle » veut dire même nom et mêmes critères ; modifiée depuis, elle reste un exemplaire à part, comme avant. Source seulement : les doublons déjà écrits restent.
+- Laissé : #814 (la croix du journal) est visuel, à faire avec un navigateur ; #1128, #616, #602 restent faisables sans Grégoire.
