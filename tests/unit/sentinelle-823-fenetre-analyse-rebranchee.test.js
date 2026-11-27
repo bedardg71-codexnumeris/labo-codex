@@ -231,6 +231,8 @@ describe('forme du 11 sept. 2026 · les trois seuils de détection sont des CHAM
     it('10. tapé en points, écrit en fraction : 60 → 0,60, 12 → 0,12, 7 → 0,07', () => {
         const { win, store } = monter({ champs: { 'v2-seuil-defi': 60, 'v2-seuil-progression': 12, 'v2-seuil-risque': 7 } });
         win.sauvegarderSeuilsV2();
+        // ↻ 27 nov. 2026 (fiche 2 du lot « Suivi ») : le seuil de défi s'enregistre par son seul champ.
+        win.sauvegarderSeuilDefiV2();
         expect(store.seuilsInterpretation.defiSpecifique, 'le seuil de défi n\'est pas converti').toBe(0.60);
         expect(store.seuilsInterpretation.progressionArtefacts).toBe(0.12);
         expect(store.seuilsInterpretation.directionRisque).toBe(0.07);
@@ -264,7 +266,11 @@ describe('forme du 11 sept. 2026 · les trois seuils de détection sont des CHAM
     it('13. une valeur vide retombe sur le défaut en fraction, jamais sur NaN ni sur 0', () => {
         const { win, store } = monter({ champs: { 'v2-seuil-defi': '', 'v2-seuil-progression': 'abc', 'v2-seuil-risque': 0 } });
         win.sauvegarderSeuilsV2();
+        // ↻ 27 nov. 2026 (fiche 2 du lot « Suivi ») : le seuil de défi, par son seul champ ; vidé, il revient au défaut,
+        // sans marque de choix (il suit alors le seuil de maîtrise de l'échelle).
+        win.sauvegarderSeuilDefiV2();
         expect(store.seuilsInterpretation.defiSpecifique).toBe(0.70);
+        expect(store.seuilsInterpretation.defiSpecifiqueChoisi).toBeUndefined();
         expect(store.seuilsInterpretation.progressionArtefacts).toBe(0.10);
         expect(store.seuilsInterpretation.directionRisque).toBe(0.05);
     });
@@ -274,11 +280,12 @@ describe('forme du 11 sept. 2026 · les trois seuils de détection sont des CHAM
         const debut = html.indexOf('id="labo-accompagnement"');
         const fin = html.indexOf('id="labo-modelisation"', debut);
         const ecran = html.slice(debut, fin);
-        for (const id of ['v2-seuil-progression', 'v2-seuil-risque', 'v2-seuil-defi']) {
+        // ↻ 27 nov. 2026 (fiche 2 du lot « Suivi ») : le seuil de défi s'enregistre par son propre geste.
+        for (const [id, geste] of [['v2-seuil-progression', 'sauvegarderSeuilsV2'], ['v2-seuil-risque', 'sauvegarderSeuilsV2'], ['v2-seuil-defi', 'sauvegarderSeuilDefiV2']]) {
             const champ = ecran.match(new RegExp(`<input[^>]*id="${id}"[^>]*>`));
             expect(champ, `${id} a disparu`).not.toBeNull();
             expect(champ[0]).toMatch(/type="number"/);
-            expect(champ[0]).toMatch(/data-on-change="sauvegarderSeuilsV2"/);
+            expect(champ[0]).toContain(`data-on-change="${geste}"`);
         }
         expect(ecran.includes('type="range"'), 'un curseur survit').toBe(false);
         expect(ecran.includes('v2-valeur-'), 'une étiquette de curseur survit').toBe(false);

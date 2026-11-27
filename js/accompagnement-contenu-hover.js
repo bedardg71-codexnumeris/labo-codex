@@ -163,7 +163,7 @@ const TOOLTIPS = {
     'depist-seuil-bon':
         'À partir de ce seuil, le profil écrit « Aucune absence ou presque » (A) et « Aucun travail manquant ou presque » (C). Dans la liste des étudiant·es, un chiffre à partir de ce seuil est bleu ; entre le seuil précédent et celui-ci, vert.',
     'depist-seuil-defi':
-        'Score (%) sous lequel un critère est identifié comme un défi nécessitant attention. Seuil bas = plus exigeant, seuil élevé = moins exigeant. Règle le dépistage seulement.',
+        'Résultat sous lequel un critère est signalé comme un défi. Au départ, c\'est le seuil de maîtrise de ton échelle\u00a0; tu peux le changer. Plus il est haut, plus de critères sont signalés. Règle le dépistage seulement.',
     'depist-seuil-direction':
         'Variation minimale de la moyenne d\'un critère, d\'une fenêtre d\'analyse à la précédente (la même, décalée d\'une production), pour afficher une flèche (→ ou ←) après ce critère.',
     'depist-seuil-fragile':

@@ -171,7 +171,9 @@ export function monter(store, opts = {}) {
     }
     // 30 oct. 2026 (une seule source par famille de seuils) : les seuils et leurs lecteurs sont les VRAIS, comme dans
     // l'app (`interpretation-config.js`, sur le store du banc), sauf si le banc fournit son propre `obtenirSeuil`.
-    const winConfig = {};
+    // 27 nov. 2026 (fiche 2 du lot « Suivi ») : sans choix, le seuil de défi est le seuil de maîtrise de l'échelle, que
+    // `obtenirSeuil` lit à l'appel par `window.reperesPerformance` : celle du banc, comme dans l'app.
+    const winConfig = { reperesPerformance: (...a) => (typeof win.reperesPerformance === 'function' ? win.reperesPerformance(...a) : null) };
     chargerScript('js/interpretation-config.js', { db }, winConfig);
     win.NOTE_DE_PASSAGE = winConfig.NOTE_DE_PASSAGE;
     win.SEUILS_PAR_DEFAUT = winConfig.SEUILS_PAR_DEFAUT;

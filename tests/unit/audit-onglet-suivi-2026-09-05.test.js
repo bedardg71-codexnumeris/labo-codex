@@ -199,8 +199,15 @@ function elementDom(init) {
         appendChild() {}, addEventListener() {}, removeEventListener() {}, querySelector() { return null; }, querySelectorAll() { return []; }, insertAdjacentHTML() {}, remove() {} }, init || {});
 }
 
+// ↻ 27 nov. 2026 (fiche 2 du lot « Suivi ») : sans choix, le seuil de défi suit le seuil de maîtrise de l'échelle
+// (75 sur E0). Les calculs à la main de cet audit sont écrits pour un défi à 70 : le banc pose un 70 CHOISI, comme
+// quelqu'un qui l'a tapé au champ. La règle neuve est éprouvée par seuil-defi-suit-la-maitrise-2026-11-27.test.js.
+const SEUILS_DEFI_CHOISI_A_70 = Object.assign(clone(chargerScript('js/interpretation-config.js', { db: { getSync: (k, d) => d, setSync() {} } }).SEUILS_PAR_DEFAUT),
+    { defiSpecifique: 0.70, defiSpecifiqueChoisi: true });
+
 function monter(jeu, opts = {}) {
     const store = Object.assign({
+        seuilsInterpretation: clone(SEUILS_DEFI_CHOISI_A_70),
         infoCours: { id: 'GC1', nom: 'Cours banc', groupe: '01', _groupeCoursId: 'GC1' },
         groupeCoursActif: { id: 'GC1', trimestreId: 'test', nom: 'Groupe 01' },
         test_groupesCours: [{ id: 'GC1', coursId: 'GC1', trimestreId: 'test', actif: true, groupeNum: '01', pratiqueId: jeu.pratiqueId }],
