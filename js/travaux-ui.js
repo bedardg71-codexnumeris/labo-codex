@@ -7918,9 +7918,14 @@
        WRAPPERS DELEGATION (Phase 5)
        =============================== */
 
-    /** Annuler import : vide la file + rafraîchit l'UI */
+    /**
+     * Annuler import (« Annuler tout ») : vide la file + rafraîchit l'UI.
+     * #1271 (décision de Grégoire, 27 nov. 2026) — la production choisie pour le lot tombe
+     * avec lui : le dépôt suivant suit le nom porté par ses fichiers.
+     */
     function annulerImport() {
         travauxImport.viderFileDAttente();
+        travauxImport.oublierProductionDuLot();
         afficherImport();
     }
 
