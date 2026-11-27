@@ -957,15 +957,91 @@
      * toute attente), puis il reçoit le PDF quand il est prêt (`montrerDansLOnglet`). S'il n'y a finalement pas
      * exactement un PDF (rien de verrouillé, un échec, plusieurs fichiers), l'onglet se referme. Si le navigateur
      * refuse l'onglet (les fenêtres surgissantes bloquées), le PDF est téléchargé comme avant : rien n'est perdu.
-     * Seulement quand un·e étudiant·e est choisi·e : « — Tous — » donne un ZIP, téléchargé.
+     * Fiche 7 (27 nov. 2026) : l'onglet s'ouvre quand la sélection annonce UN SEUL PDF, un·e étudiant·e choisi·e ou
+     * « — Tous — » avec une seule évaluation prête ; plusieurs PDF donnent un ZIP, téléchargé.
      */
-    function ouvrirOngletDuPdf() {
+    /**
+     * FICHE 7 DU LOT « ÉVALUATION » (décision de Grégoire, 22 nov. 2026, 14 h 21 ; textes acceptés) — LA PAGE D'ATTENTE
+     * DE L'ONGLET. Vécu sur l'iPad le 22 nov. : l'onglet passait devant, page nue à `about:blank` avec la seule phrase de
+     * la préparation, et il a cru « sortir de l'application ». Elle est maintenant habillée aux couleurs de l'application
+     * et dit, à l'enseignant·e, ce qui se passe et comment revenir.
+     * ⚠ AUCUN SCRIPT DANS L'ONGLET (CSP `script-src 'self'`) : l'application l'habille d'ici, par le DOM (l'onglet vide
+     * est de la même origine), avec les couleurs qu'elle affiche à cet instant, lues sur son `body` (thème sombre ou
+     * clair, `mode-clair`). Le nom passe en texte (`textContent`), jamais en HTML.
+     */
+    const TEXTE_ONGLET_ATTENTE = (nom) => [
+        `Labo Codex prépare la rétroaction de ${nom}.`,
+        'Le PDF s\'affichera ici. Pour revenir à l\'application, ferme cet onglet.'
+    ];
+
+    /**
+     * [Prénom Nom] de la page d'attente : ce que l'écran affiche pour cette personne. `obtenirDonneesSelonMode` rend les
+     * noms anonymes en anonymisation (« Élève 32 », sans nom de famille), les noms réels sinon. Vide si l'élève est
+     * introuvable : l'onglet dit alors la phrase de la préparation.
+     */
+    function _nomPourLOnglet(da) {
+        const etudiant = da ? (obtenirDonneesSelonMode('groupeEtudiants') || []).find((e) => e && e.da === da) : null;
+        return etudiant ? [etudiant.prenom, etudiant.nom].filter(Boolean).join(' ') : '';
+    }
+
+    /** Les couleurs que l'application affiche à cet instant (ses variables, sur son `body`), avec celles du thème sombre en repli. */
+    function _couleursDeLApplication() {
+        let cs = null;
+        try { cs = window.getComputedStyle(document.body); } catch (e) { cs = null; }
+        const lire = (variable, repli) => String((cs && cs.getPropertyValue(variable)) || '').trim() || repli;
+        return {
+            page: lire('--surface-page', '#0c1a22'), carte: lire('--surface-carte', '#1a3040'),
+            texte: lire('--texte-principal', '#d0e0e4'), discret: lire('--texte-muted', '#80a0b0'),
+            accent: lire('--accent-primaire', '#6aacb8'), bordure: lire('--bordure-moyenne', 'rgba(106, 172, 184, 0.35)'),
+            police: (cs && cs.fontFamily) || 'system-ui, -apple-system, sans-serif'
+        };
+    }
+
+    function _habillerOnglet(onglet, nom) {
+        const d = onglet.document;
+        const c = _couleursDeLApplication();
+        d.title = TEXTES_LEA.onglet;
+        d.documentElement.setAttribute('lang', 'fr');
+        const largeur = d.createElement('meta');   // l'iPad : la largeur de l'appareil, pas une page de bureau réduite
+        largeur.setAttribute('name', 'viewport');
+        largeur.setAttribute('content', 'width=device-width, initial-scale=1');
+        d.head.appendChild(largeur);
+        d.body.style.cssText = `margin:0;min-height:100vh;box-sizing:border-box;padding:24px;display:flex;align-items:center;`
+            + `justify-content:center;background:${c.page};color:${c.texte};font-family:${c.police};font-size:16px;line-height:1.6;`;
+        const carte = d.createElement('main');
+        carte.style.cssText = `max-width:32rem;padding:28px 32px;border-radius:12px;background:${c.carte};`
+            + `border:1px solid ${c.bordure};border-left:4px solid ${c.accent};`;
+        (nom ? TEXTE_ONGLET_ATTENTE(nom) : [TEXTES_LEA.preparation]).forEach((texte, i) => {
+            const p = d.createElement('p');
+            p.textContent = texte;
+            p.style.cssText = i === 0 ? 'margin:0 0 12px;font-size:1.25rem;font-weight:600;' : `margin:0;color:${c.discret};`;
+            carte.appendChild(p);
+        });
+        d.body.replaceChildren(carte);
+    }
+
+    /**
+     * L'onglet du PDF d'une rétroaction, ouvert DANS LE GESTE (avant toute attente) et habillé. Lu par « Exporter pour
+     * Léa » et, par `travauxArchivage.ongletDuPdf`, par « Dossier PDF » et « Exporter le PDF » (travaux-export-pdf.js).
+     * @param {string} [da] - l'élève dont la rétroaction se prépare
+     * @returns {Window|null} null si le navigateur refuse l'onglet : l'appelant télécharge le PDF
+     */
+    function ouvrirOngletDuPdf(da) {
         let onglet = null;
         try { onglet = window.open('', '_blank'); } catch (e) { onglet = null; }
         if (!onglet) return null;
-        // Ce que l'onglet dit en attendant (un texte, jamais de HTML) : la phrase de la préparation.
-        try { onglet.document.title = TEXTES_LEA.onglet; onglet.document.body.textContent = TEXTES_LEA.preparation; } catch (e) { /* l'onglet reste vide */ }
+        try { _habillerOnglet(onglet, _nomPourLOnglet(da)); } catch (e) { /* l'onglet reste vide, le PDF y viendra */ }
         return onglet;
+    }
+
+    /** Fiche 7 — le nombre de PDF qu'une sélection de « Exporter pour Léa » donnera : un par copie, un par synthèse seule. */
+    function _nombreDePdfLea(selection) {
+        return selection.fichiers.length + selection.sansFichier.length;
+    }
+
+    /** Fiche 7 — l'élève du seul PDF d'une sélection, pour nommer la page d'attente. */
+    function _daDuSeulPdfLea(selection) {
+        return ((selection.fichiers[0] || selection.sansFichier[0]) || {}).etudiantDA;
     }
 
     /** Le PDF, dans l'onglet ouvert pour lui. @returns {boolean} false si l'onglet n'est plus là (fermé entre-temps) */
@@ -993,8 +1069,11 @@
             alert('Sélectionne une production.');
             return;
         }
-        // Dans le geste, avant toute attente : l'onglet du PDF d'un·e seul·e étudiant·e (voir plus haut).
-        const onglet = da ? ouvrirOngletDuPdf() : null;
+        // Dans le geste, avant toute attente : l'onglet du PDF, quand UN SEUL est annoncé (voir plus haut). Fiche 7
+        // (27 nov. 2026) : la décision du 20 nov. vaut pour tout export d'un seul PDF, « — Tous — » compris quand une
+        // seule évaluation est prête ; la même sélection que le compteur et que l'export, lue tout de suite.
+        const annonce = selectionnerEvaluationsLea(productionId, da, reprisesSeulement);
+        const onglet = _nombreDePdfLea(annonce) === 1 ? ouvrirOngletDuPdf(_daDuSeulPdfLea(annonce)) : null;
 
         try {
             const date = new Date().toISOString().split('T')[0];
@@ -1069,6 +1148,8 @@
         lancerExportEtudiant: lancerExportEtudiant,
         lancerExportLea: lancerExportLea,
         selectionnerEvaluationsLea: selectionnerEvaluationsLea,   // #566 — lue par le compteur de l'écran
+        // Fiche 7 (27 nov. 2026) : l'onglet d'un seul PDF de rétroaction, le même pour « Dossier PDF » et « Exporter le PDF ».
+        ongletDuPdf: { ouvrir: ouvrirOngletDuPdf, montrer: montrerDansLOnglet, fermer: fermerOnglet },
         telechargerBlob: telechargerBlob,
         // #572 — exposés pour la sentinelle : deux fonctions pures dont les cas
         // limites (nom contenant « / », fichier sans extension) ne sont pas

@@ -1,5 +1,12 @@
 import { test, expect } from '@playwright/test';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { ouvrirEspaceVide, mettreLaClasseEnPlace } from './harness/classe-de-banc.js';
+
+// Captures : CAPTURES_PARCOURS=1 les écrit dans « plans de travail/captures-2026-11-27-evaluation/ ».
+const DOSSIER = process.env.CAPTURES_PARCOURS
+    ? path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..', 'plans de travail', 'captures-2026-11-27-evaluation')
+    : '';
 
 // =======================================================================
 // LOT « ÉVALUATION » DU 27 NOV. 2026, À L'ÉCRAN : #598 VOLET B ET #1271
@@ -12,8 +19,11 @@ import { ouvrirEspaceVide, mettreLaClasseEnPlace } from './harness/classe-de-ban
 //  · #1271 : la production choisie en haut tombe après « Annuler tout » : au dépôt suivant, le
 //    menu revient à « — Choisir une production — » et le nom porté par le fichier propose la
 //    production.
-// La logique est tenue par tests/unit/balance-du-lot-598-volet-b.test.js et
-// tests/unit/production-du-lot-1271.test.js. Données manifestement fictives (règle 6) : la classe
+//  · Fiche 7 (décision de Grégoire du 22 nov., relayée le 27) : sous « Exporter pour Léa », une seule évaluation
+//    prête, la phrase « Un seul PDF : il s'ouvrira dans un nouvel onglet. » ; l'onglet ouvert passe devant avec une page
+//    d'attente habillée aux couleurs de l'application (sombre, puis clair), au nom de l'étudiant·e, puis reçoit le PDF.
+// La logique est tenue par tests/unit/balance-du-lot-598-volet-b.test.js, tests/unit/production-du-lot-1271.test.js
+// et tests/unit/onglet-du-pdf-attente.test.js. Données manifestement fictives (règle 6) : la classe
 // du banc (classe-de-banc.js), deux productions « Journal 3 » et « Journal 4 ».
 
 const PRODUCTIONS = [
@@ -124,5 +134,88 @@ test('Optimisation : la case « Balance des blancs » vaut pour le lot ; la prod
     expect(appels).toBe(0);
     await expect.poll(() => page.evaluate(() => travauxStockage.obtenirFichiersGroupeActif().length)).toBe(1);
 
+    expect(erreurs).toEqual([]);
+});
+
+const ATTENTE = 'Labo Codex prépare la rétroaction de Cléo Cormoran. Le PDF s\'affichera ici. Pour revenir à l\'application, ferme cet onglet.';
+
+/** Exporter pour Léa, une seule évaluation prête : l'onglet, sa page d'attente, puis le PDF. */
+async function exporterUnSeulPdf(page, clair) {
+    await page.evaluate((c) => document.body.classList.toggle('mode-clair', c), clair);
+    // La synthèse attend le banc : la page d'attente se lit le temps qu'elle se prépare.
+    await page.evaluate(() => {
+        window.__liberer = null;
+        travauxExportPDF.genererDocSyntheseSeule = () => new Promise((fin) => {
+            window.__liberer = () => {
+                const doc = new window.jspdf.jsPDF();
+                doc.text('Synthese fictive', 20, 20);
+                fin({ doc, synthese: { ajoutee: true } });
+            };
+        });
+    });
+    const ongletAttendu = page.waitForEvent('popup');
+    await page.click('[data-action="travauxUI.lancerExportLea"]');
+    const onglet = await ongletAttendu;
+    await expect.poll(() => onglet.evaluate(() => document.body.innerText.replace(/\s+/g, ' ').trim())).toBe(ATTENTE);
+    const lu = await onglet.evaluate(() => ({
+        fond: getComputedStyle(document.body).backgroundColor,
+        texte: getComputedStyle(document.body).color,
+        scripts: document.querySelectorAll('script').length,
+        titre: document.title,
+        largeur: (document.querySelector('meta[name="viewport"]') || {}).content
+    }));
+    const attendu = await page.evaluate(() => {
+        const t = document.createElement('div');
+        t.style.cssText = 'background:var(--surface-page);color:var(--texte-principal)';
+        document.body.appendChild(t);
+        const r = { fond: getComputedStyle(t).backgroundColor, texte: getComputedStyle(t).color };
+        t.remove();
+        return r;
+    });
+    expect(lu.fond, 'le fond de la page de l\'application').toBe(attendu.fond);
+    expect(lu.texte, 'le texte de l\'application').toBe(attendu.texte);
+    expect(lu.scripts).toBe(0);
+    expect(lu.titre).toBe('Rétroaction en PDF');
+    expect(lu.largeur).toBe('width=device-width, initial-scale=1');
+    if (DOSSIER) {
+        await onglet.setViewportSize({ width: 820, height: 1180 });
+        await onglet.screenshot({ path: path.join(DOSSIER, 'onglet-attente-' + (clair ? 'clair' : 'sombre') + '-820.png') });
+    }
+    // Le PDF arrive dans le même onglet.
+    await page.evaluate(() => window.__liberer());
+    await expect.poll(() => onglet.url()).toMatch(/^blob:/);
+    await onglet.close();
+    return lu;
+}
+
+test('Exporter pour Léa, une seule évaluation prête : la phrase sous le bouton, l\'onglet habillé (sombre et clair), puis le PDF', async ({ page }) => {
+    test.setTimeout(240000);
+    const erreurs = [];
+    page.on('pageerror', (e) => erreurs.push(e.message));
+    await ouvrirEspaceVide(page, 1180);
+    await mettreLaClasseEnPlace(page);
+    await page.evaluate(() => {
+        const gc = db.getSync('groupeCoursActif', null);
+        db.setSync(cle('productions'), [{ id: 'PROD_journal3', titre: 'Journal 3', type: 'travail', ponderation: 50, coursId: gc && gc.coursId, dansBibliotheque: true }]); // security-ok: fixture
+        // Une seule évaluation verrouillée, sans copie : la synthèse seule, un seul PDF.
+        db.setSync(cle('evaluationsSauvegardees'), [{ id: 'EVAL_banc_1', etudiantDA: '2390003', productionId: 'PROD_journal3', groupeCoursId: gc && gc.id, verrouillee: true, criteres: [] }]); // security-ok: fixture
+        if (window.backupReminder) window.backupReminder.reporterApresMiseAJourDuCodex();
+        afficherSection('evaluations');
+        afficherSousSection('evaluations-exporter');
+    });
+    await page.waitForFunction(() => !!document.getElementById('travaux-archivage-lea-production'));
+    await page.selectOption('#travaux-archivage-lea-production', 'PROD_journal3');
+    await expect(page.locator('#travaux-lea-un-seul-pdf')).toHaveText('Un seul PDF : il s\'ouvrira dans un nouvel onglet.');
+    // Sous le bouton, et pas ailleurs.
+    const ordre = await page.evaluate(() => {
+        const b = document.querySelector('[data-action="travauxUI.lancerExportLea"]');
+        return b.nextElementSibling && b.nextElementSibling.id;
+    });
+    expect(ordre).toBe('travaux-lea-un-seul-pdf');
+
+    const sombre = await exporterUnSeulPdf(page, false);
+    const clair = await exporterUnSeulPdf(page, true);
+    expect(clair.fond, 'le thème clair n\'a pas le fond du sombre').not.toBe(sombre.fond);
+    expect(page.context().pages().length, 'l\'application reste dans son onglet').toBe(1);
     expect(erreurs).toEqual([]);
 });

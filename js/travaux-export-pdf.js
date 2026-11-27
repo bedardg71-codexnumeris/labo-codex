@@ -74,6 +74,30 @@
         return { doc, nomSortie, fichierId, synthese };
     }
 
+    /*
+     * FICHE 7 DU LOT « ÉVALUATION » (27 nov. 2026) — LA RÉTROACTION D'UN·E ÉTUDIANT·E EN UN SEUL PDF S'OUVRE DANS UN
+     * NOUVEL ONGLET, comme « Exporter pour Léa » (décision de Grégoire du 20 nov., « pour tout export d'un seul PDF ») :
+     * « Exporter le PDF » (la révision) et « Dossier PDF » (la liste des évaluations, synthèse seule comprise). L'onglet
+     * et sa page d'attente habillée sont ceux de `travauxArchivage.ongletDuPdf` ; il s'ouvre dans le geste, avant toute
+     * attente (sous WebKit, un onglet ouvert plus tard est bloqué). Le navigateur le refuse : le PDF est téléchargé.
+     */
+    function _ouvrirOngletPour(da) {
+        const o = (typeof travauxArchivage !== 'undefined') ? travauxArchivage.ongletDuPdf : null;
+        return o ? o.ouvrir(da) : null;
+    }
+
+    function _fermerOngletPdf(onglet) {
+        const o = (typeof travauxArchivage !== 'undefined') ? travauxArchivage.ongletDuPdf : null;
+        if (o && onglet) o.fermer(onglet);
+    }
+
+    /** Le PDF dans son onglet ; téléchargé si l'onglet manque (refusé, ou fermé entre-temps). */
+    function _livrerLePdf(doc, nom, onglet) {
+        const o = (typeof travauxArchivage !== 'undefined') ? travauxArchivage.ongletDuPdf : null;
+        const montre = !!(o && onglet) && o.montrer(onglet, doc.output('blob'), nom);
+        if (!montre) doc.save(nom);
+    }
+
     /**
      * Exporte le fichier courant en PDF avec annotations et synthese
      * @param {string} fichierId - ID du fichier a exporter
@@ -83,6 +107,9 @@
             alert('Aucun fichier sélectionné.');
             return;
         }
+        // Fiche 7 : l'onglet, dans le geste, à la page d'attente au nom de l'étudiant·e de cette copie.
+        const copie = typeof travauxStockage.obtenirFichierParId === 'function' ? travauxStockage.obtenirFichierParId(fichierId) : null;
+        const onglet = _ouvrirOngletPour(copie && copie.etudiantDA);
 
         const _hasProg = typeof window.afficherProgression === 'function';
         if (_hasProg) {
@@ -93,13 +120,14 @@
         try {
             const { doc, nomSortie, synthese } = await genererDocPDF(fichierId);
             if (_hasProg) window.majProgression(90, 'Téléchargement…');
-            doc.save(nomSortie);
+            _livrerLePdf(doc, nomSortie, onglet);
             travauxStockage.marquerExporte(fichierId);
             // #674 — le PDF est livré, mais si sa rétroaction ne conclut pas, on le DIT.
             if (synthese && synthese.ajoutee && synthese.avertissement) {
                 alert('Le PDF a été exporté, mais ' + synthese.avertissement + '.');
             }
         } catch (e) {
+            _fermerOngletPdf(onglet);
             if (e && e.auxArchives) {
                 alert(window.ReserveCopies.MOTS.copie.message(window.ReserveCopies.nomDuTrimestre(window.ReserveCopies.trimestreDeLaCopie(fichierId))));
                 return;
@@ -833,13 +861,15 @@
             alert('Étudiant ou production non spécifié.');
             return;
         }
+        // Fiche 7 : l'onglet, dans le geste, avant toute attente ; la synthèse seule le reçoit aussi.
+        const onglet = _ouvrirOngletPour(da);
 
         // Trouver le fichier associé (résolution centralisée)
         const fichier = travauxResolution.trouverFichierPourEvaluation({ etudiantDA: da, productionId });
 
         if (!fichier) {
             // #912 — sans copie, « Dossier PDF » rend la synthèse seule (Grégoire, 17 sept. 2026).
-            return exporterSyntheseSeule(da, productionId);
+            return exporterSyntheseSeule(da, productionId, onglet);
         }
 
         const blob = await travauxStockage.recupererBlob(fichier.id);
@@ -848,8 +878,9 @@
             // et le dit.
             if (window.ReserveCopies && window.ReserveCopies.estAuxArchives(fichier.id)) {
                 if (typeof notifications !== 'undefined') notifications.info(window.ReserveCopies.MOTS.copie.etiquette, window.ReserveCopies.MOTS.copie.dossierPdf);
-                return exporterSyntheseSeule(da, productionId);
+                return exporterSyntheseSeule(da, productionId, onglet);
             }
+            _fermerOngletPdf(onglet);
             alert('Impossible de récupérer le fichier.');
             return;
         }
@@ -882,7 +913,7 @@
             const etudiant = obtenirDonneesSelonMode('groupeEtudiants').find(e => e.da === da);
             const nomEtudiant = etudiant ? `${etudiant.prenom}_${etudiant.nom}` : da;
             const nomSortie = `dossier_${nomEtudiant}_${productionId}.pdf`;
-            doc.save(nomSortie);
+            _livrerLePdf(doc, nomSortie, onglet);
 
             // Marquer le fichier comme exporte (cycle de vie)
             travauxStockage.marquerExporte(fichier.id);
@@ -898,6 +929,7 @@
             }
 
         } catch (e) {
+            _fermerOngletPdf(onglet);
             console.error('[Travaux-Export] Erreur export dossier complet:', e);
             alert('Erreur lors de l\'export du dossier. Voir la console.');
         } finally {
@@ -936,9 +968,11 @@
         return { doc, synthese };
     }
 
-    async function exporterSyntheseSeule(da, productionId) {
+    /** @param {Window|null} [onglet] - fiche 7 : l'onglet ouvert par « Dossier PDF », qui reçoit la synthèse */
+    async function exporterSyntheseSeule(da, productionId, onglet) {
         const sansCopie = { id: null, etudiantDA: da, productionId: productionId };
         if (!trouverEvaluationPourSynthese(sansCopie, productionId)) {
+            _fermerOngletPdf(onglet);
             alert('Aucune copie ni évaluation enregistrée pour cet·te étudiant·e et cette production.');
             return;
         }
@@ -952,6 +986,7 @@
         try {
             const { doc, synthese } = await genererDocSyntheseSeule(da, productionId);
             if (!doc) {
+                _fermerOngletPdf(onglet);
                 alert('La rétroaction n\'a pas pu être exportée (' + ((synthese && synthese.raison) || 'raison inconnue') + ').');
                 return;
             }
@@ -961,13 +996,14 @@
             // ✅ ANONYMISATION (Tier 0.1) : prenom/nom sont anonymisés par obtenirDonneesSelonMode
             const etudiant = obtenirDonneesSelonMode('groupeEtudiants').find(e => e.da === da);
             const nomEtudiant = etudiant ? `${etudiant.prenom}_${etudiant.nom}` : da;
-            doc.save(`synthese_${nomEtudiant}_${productionId}.pdf`);
+            _livrerLePdf(doc, `synthese_${nomEtudiant}_${productionId}.pdf`, onglet);
 
             // #674 — la page est là, mais elle ne conclut pas : dit avant la remise.
             if (synthese.avertissement) {
                 alert('Le PDF a été exporté, mais ' + synthese.avertissement + '.');
             }
         } catch (e) {
+            _fermerOngletPdf(onglet);
             console.error('[Travaux-Export] Erreur export de la synthèse seule:', e);
             alert('Erreur lors de l\'export de la synthèse. Voir la console.');
         } finally {

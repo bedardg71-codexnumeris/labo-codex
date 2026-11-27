@@ -60,6 +60,10 @@ const MONTER = `({ T }) => {
         return html;
     };
     window.jspdf.jsPDF.API.save = function (nom) { window._pdf1028.push(nom); return this; };
+    // Fiche 7 du lot « Évaluation » (27 nov. 2026) : le PDF d'une rétroaction s'ouvre dans un nouvel onglet. Ce banc
+    // juge le CONTENU du PDF : l'onglet est refusé ici, le PDF passe par le téléchargement observé ci-dessus. L'onglet
+    // est jugé par evaluation-lot-2026-11-27.spec.js.
+    window.open = () => null;
     const construire = window.syntheseRetroactionData.construireFeedback;
     window.syntheseRetroactionData.construireFeedback = function (evaluation) {
         const f = construire.apply(this, arguments);

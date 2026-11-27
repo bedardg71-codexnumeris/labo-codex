@@ -1505,6 +1505,7 @@
                         <div id="travaux-barre-progression-lea" class="travaux-barre-progression"></div>
                     </div>
                     <button class="btn btn-confirmer" data-action="travauxUI.lancerExportLea">Exporter pour Léa</button>
+                    <p id="travaux-lea-un-seul-pdf" class="texte-muted u-texte-petit" style="margin:6px 0 0 0;"></p>
                 </div>
             </div>
 
@@ -4210,6 +4211,7 @@
 
         if (!productionId) {
             compteur.textContent = '';
+            _poserPhraseUnSeulPdfLea(null);
             return;
         }
 
@@ -4220,12 +4222,14 @@
         // n'en produira pas est dit.
         if (typeof travauxArchivage === 'undefined' || typeof travauxArchivage.selectionnerEvaluationsLea !== 'function') {
             compteur.textContent = '';
+            _poserPhraseUnSeulPdfLea(null);
             return;
         }
         // #1245 (8 nov. 2026) — une copie évaluée sur papier donne aussi un PDF, la synthèse seule : le compteur
         // compte les deux et dit la part du papier (phrases validées par Grégoire le 8 nov.).
         const selection = travauxArchivage.selectionnerEvaluationsLea(productionId, da, reprisesSeulement);
         compteur.textContent = _texteCompteurLea(selection, da, reprisesSeulement) + _laisseesDeCoteLea(selection);
+        _poserPhraseUnSeulPdfLea(selection);
     }
 
     /**
@@ -4259,6 +4263,19 @@
      * Lot du 9 nov. 2026 — l'export ne prend que les évaluations verrouillées ; le compteur dit celles qu'il laisse
      * de côté (texte validé par Grégoire mot pour mot, accordé au nombre). Rien quand tout est verrouillé.
      */
+    /**
+     * Fiche 7 du lot « Évaluation » (décision de Grégoire, 22 nov. 2026, 14 h 21 ; texte accepté) — sous « Exporter pour
+     * Léa », quand une seule évaluation est prête : le PDF s'ouvrira dans un nouvel onglet (`lancerExportLea`, même
+     * sélection, même compte). Rien sinon.
+     * @param {Object|null} selection - celle du compteur ; null quand il n'y a rien à compter
+     */
+    function _poserPhraseUnSeulPdfLea(selection) {
+        const ligne = document.getElementById('travaux-lea-un-seul-pdf');
+        if (!ligne) return;
+        const unSeul = !!selection && selection.fichiers.length + selection.sansFichier.length === 1;
+        ligne.textContent = unSeul ? 'Un seul PDF : il s\'ouvrira dans un nouvel onglet.' : '';
+    }
+
     function _laisseesDeCoteLea(selection) {
         const nbNon = (selection.nonVerrouillees || []).length;
         if (nbNon === 0) return '';
