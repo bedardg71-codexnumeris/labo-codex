@@ -40,6 +40,11 @@
     // réellement utilisée (uniformisation DPI du traitement par lots). Mémorisé
     // ici, et en session comme le filtre de production ci-dessus.
     let dpiPipelineChoisi = sessionStorage.getItem('travaux-pipeline-dpi') || '250';
+    // #598 volet B (décision de Grégoire, 27 nov. 2026) — la case « Balance des blancs », à côté de
+    // « Rés. max. », vaut pour tout le lot. Cochée au départ ; retenue d'un lot à l'autre comme
+    // « Rés. max. » : cette variable, et la session sous un nom nu comme `travaux-pipeline-dpi` (une
+    // préférence sans identifiant, #596). Lue par `balanceActiveePour`, écrite par `basculerBalanceDuLot`.
+    let balanceDuLotActive = sessionStorage.getItem('travaux-pipeline-balance') !== 'false';
     let _htmlBadgesGrille = ''; // HTML badges pré-généré pour injection dans toolbar unique
     let _htmlDropdownProduction = ''; // HTML dropdown production séparé (fixe, hors scroll)
     let selectionFusion = new Set(); // IDs des fichiers selectionnes pour fusion
@@ -1627,11 +1632,9 @@
        TRAITEMENT AUTOMATIQUE DES IMAGES (#598)
        =============================== */
 
-    // Réglage global de la balance des blancs. Constante POUR L'INSTANT : les
-    // cases de l'écran Optimisation ont été retirées en Beta 99.30 (1er mai
-    // 2026) et le volet B de #598 les fera revenir sous forme de réglage
-    // persistant. Ce qui compte aujourd'hui, c'est qu'un SEUL endroit décide.
-    const BALANCE_GLOBALE_ACTIVE = true;
+    // Réglage global de la balance des blancs : `balanceDuLotActive` (#598 volet B, en tête du
+    // module), posé par la case « Balance des blancs » de l'Inspecteur. Un SEUL endroit décide :
+    // `balanceActiveePour`, ci-dessous.
 
     /**
      * Dit si un fichier reçoit la balance des blancs.
@@ -1654,7 +1657,35 @@
         // lot/perspective-coins (17 nov. 2026, décision de Grégoire, 19 h 04) : un réglage de couleur ou de lumière
         // posé dans les réglages spécifiques REMPLACE la balance automatique au lieu de s'y ajouter ; la géométrie seule
         // (rotation, rognage, perspective) la laisse s'appliquer. L'import et les deux aperçus lisent cette seule source.
-        return BALANCE_GLOBALE_ACTIVE && !(f && f.skipBalance) && !aUnReglageDeCouleurOuDeLumiere(f);
+        // #598 volet B : décochée, la case du lot retire la balance automatique de TOUT le lot — les deux
+        // aperçus et l'import. Elle ne touche pas un réglage posé dans les réglages spécifiques : celui-là
+        // est déjà cuit dans l'image (`renduFinal`, travaux-preparation.js).
+        return balanceDuLotActive && !(f && f.skipBalance) && !aUnReglageDeCouleurOuDeLumiere(f);
+    }
+
+    /**
+     * #598 volet B — la case « Balance des blancs » de l'Inspecteur, posée à côté de « Rés. max. ».
+     * Son état vient de `balanceDuLotActive` à chaque rendu, jamais du DOM (le défaut B2 de #558, et
+     * la case fantôme `pipeline-opt-balance` du volet A).
+     * @returns {string} HTML
+     */
+    function htmlCaseBalanceDuLot() {
+        return `<label style="white-space:nowrap;"><input type="checkbox" id="pipeline-opt-balance-lot" data-on-change="travauxUI.basculerBalanceDuLot"${balanceDuLotActive ? ' checked' : ''}> Balance des blancs</label>`;
+    }
+
+    /**
+     * #598 volet B — le geste de la case : le réglage change pour tout le lot, la session le retient,
+     * et les aperçus se refont (le cache des vignettes garde les deux versions, `bal` et `raw`).
+     * @param {HTMLInputElement|boolean} elOuCoche - la case (dispatcher data-on-change), ou l'état voulu
+     */
+    function basculerBalanceDuLot(elOuCoche) {
+        balanceDuLotActive = (typeof elOuCoche === 'object' && elOuCoche !== null) ? !!elOuCoche.checked : !!elOuCoche;
+        try {
+            sessionStorage.setItem('travaux-pipeline-balance', String(balanceDuLotActive));
+        } catch (e) {
+            console.warn('[Travaux-UI] Choix de la balance des blancs non persisté :', e);
+        }
+        mettreAJourPreviewsPipeline();
     }
 
     /** Les réglages spécifiques qui touchent la couleur ou la lumière (les types que le poste de préparation écrit). */
@@ -2308,7 +2339,7 @@
         const optionsDpi = [['0', 'désactivée'], ['200', '200 dpi'], ['250', '250 dpi'], ['300', '300 dpi']]
             .map(([v, libelle]) => `<option value="${v}"${v === dpiPipelineChoisi ? ' selected' : ''}>${libelle}</option>`)
             .join('');
-        colCentre += `<div class="pipeline-reglages-ligne" style="display:flex; align-items:center; gap:10px; margin:8px 0 4px 0;"><label style="white-space:nowrap;">Rés. max. <select id="pipeline-opt-dpi" data-on-change="travauxUI.mettreAJourPreviewsPipeline" class="controle-form-compact" style="width:auto;display:inline-block;font-size:inherit;padding:2px 4px;">${optionsDpi}</select></label><button class="btn btn-secondaire" ${btnReglagesDisabled ? 'disabled' : ''} data-action="travauxUI.ouvrirPreparationFichier" data-param="${fichierSelectionneIndex}" title="Réglages spécifiques" aria-label="Réglages spécifiques"><img src="icons/icon-gear.svg" alt="" class="btn-inline-icon"></button></div>`;
+        colCentre += `<div class="pipeline-reglages-ligne" style="display:flex; align-items:center; gap:10px; margin:8px 0 4px 0;"><label style="white-space:nowrap;">Rés. max. <select id="pipeline-opt-dpi" data-on-change="travauxUI.mettreAJourPreviewsPipeline" class="controle-form-compact" style="width:auto;display:inline-block;font-size:inherit;padding:2px 4px;">${optionsDpi}</select></label>${htmlCaseBalanceDuLot()}<button class="btn btn-secondaire" ${btnReglagesDisabled ? 'disabled' : ''} data-action="travauxUI.ouvrirPreparationFichier" data-param="${fichierSelectionneIndex}" title="Réglages spécifiques" aria-label="Réglages spécifiques"><img src="icons/icon-gear.svg" alt="" class="btn-inline-icon"></button></div>`;
 
         // Alerte globale : blobs manquants après restauration session
         const nbBlobsManquants = queue.filter(f => !f.fichier && !f.reglagesEnRejeu).length;
@@ -4700,9 +4731,9 @@
         const queue = travauxImport.obtenirFileDAttente();
 
         const dpiCible = parseInt(document.getElementById('pipeline-opt-dpi')?.value) || 0;
-        // Beta 99.30 : balance des blancs et assemblage automatique appliqués
-        // par défaut (les checkbox UI ont été retirées pour simplifier le pipeline).
-        // Documenté via le tooltip de l'étape Optimisation et la section Aide.
+        // Beta 99.30 : assemblage automatique appliqué par défaut (sa case a été retirée
+        // pour simplifier le pipeline). La balance des blancs a retrouvé la sienne (#598
+        // volet B) : `balanceActiveePour`, ci-dessous.
         const optAssemblage = true;
 
         // === Traitement batch (images a-optimiser) ===
@@ -4718,7 +4749,7 @@
                 await Promise.all(lot.map(async (f) => {
                     let blob = f.fichier;
 
-                    // Balance des blancs auto (globale + par fichier : activee sauf si skipBalance)
+                    // Balance des blancs auto (case du lot + par fichier : activee sauf si skipBalance)
                     if (balanceActiveePour(f) && typeof travauxPreparation.autoBalanceBlancs === 'function') {
                         try {
                             blob = await travauxPreparation.autoBalanceBlancs(blob);
@@ -8161,6 +8192,12 @@
         supprimerPageEditeur: supprimerPageEditeur,
         pivoterPageEditeur: pivoterPageEditeur,
         dimensionsResMax: dimensionsResMax,   // 15 nov. 2026 : lue par son banc
+        // #598 volet B (27 nov. 2026) : la case « Balance des blancs » du lot, son geste, et la décision
+        // qu'elle nourrit (lue par son banc, comme l'import, qui reste interne : `_executerImportPipeline`).
+        basculerBalanceDuLot: basculerBalanceDuLot,
+        htmlCaseBalanceDuLot: htmlCaseBalanceDuLot,
+        balanceActiveePour: balanceActiveePour,
+        _executerImportPipeline: executerImportPipeline,
         ajouterPagesEditeur: ajouterPagesEditeur,
         sauvegarderEdition: sauvegarderEdition,
         reparerImagePerdue: reparerImagePerdue,   // #1233

@@ -7038,7 +7038,7 @@ Huit flux tracés en bac à sable (banc `tests/unit/audit-onglet-suivi-2026-09-0
   effectivement rendu selon l'onglet actif. ⮕ **Manipulation requise** : ouvrir Évaluations, passer
   chaque sous-onglet, relever l'arbre de titres rendu.
 
-- [ ] **#598 — La balance des blancs est appliquée sans être ni réglable ni visible.**
+- [x] **#598 — La balance des blancs est appliquée sans être ni réglable ni visible.**
   Créé le 30 août 2026. **Symptôme vécu par Grégoire**, pendant l'import du Portrait de lecteur :
   « des modifications par défaut étaient appliquées aux photos (contraste, balance des blancs) mais
   je ne vois pas de confirmation ou de réglage à cet effet dans l'écran d'optimisation ».
@@ -7119,6 +7119,27 @@ Huit flux tracés en bac à sable (banc `tests/unit/audit-onglet-suivi-2026-09-0
   éclaircit et creuse le contraste, ce qui explique qu'on puisse s'en souvenir ainsi. Le texte de
   `etats-vides.js` l'affirme d'ailleurs depuis le 19 avril 2026, alors que le code du même commit
   ne faisait déjà que la balance.
+
+  ✅ **VOLET B LIVRÉ le 27 nov. 2026** (`lot/evaluation-2026-11-27`, décision de Grégoire du même jour :
+  issue (a), une case). Dans l'Inspecteur de Préparer, à côté de « Rés. max. », la case « Balance des
+  blancs », cochée au départ, vaut pour tout le lot. Décochée, la balance automatique ne s'applique ni
+  aux deux aperçus ni à l'image importée : les trois lisent `balanceActiveePour`, qui lit
+  `balanceDuLotActive` (la constante `BALANCE_GLOBALE_ACTIVE` est retirée). Le geste
+  (`basculerBalanceDuLot`) refait les aperçus ; le cache des vignettes garde déjà les deux versions
+  (`bal` / `raw`). **Retenue d'un lot à l'autre comme « Rés. max. »** (mesuré : `dpiPipelineChoisi`
+  survit à l'import et à « Annuler tout », et la session le relit) : variable du module, et la session
+  sous `travaux-pipeline-balance`, nom nu comme `travaux-pipeline-dpi` (une préférence sans identifiant,
+  la règle de #596 ; le piège du 30 août, « passer par `cle()` », date d'avant cette règle).
+  **Composition avec les réglages spécifiques** (inchangés) : le bouton « Balance des blancs » (la
+  pipette, une image) pose une correction cuite dans l'image par `renduFinal` ; elle s'applique case
+  cochée ou non, et remplace la balance automatique (lot/perspective-coins, 17 nov.). La case « Ne pas
+  appliquer la balance des blancs à ce document » reste une exception qui ne peut qu'enlever : case du
+  lot décochée, elle n'a plus rien à enlever. Preuve : `tests/unit/balance-du-lot-598-volet-b.test.js`
+  (6 rouges sur le code d'avant, six break-tests rouges), sentinelle 598 verte (cas 3 lit le nouveau
+  nom). Aucun mot nouveau hors « Balance des blancs ». ⚠ Non vu à l'écran : la place de la case sur la
+  ligne, sur l'iPad, et sa cible tactile. Textes laissés tels quels (consigne) : l'aide survolée de
+  l'étape (« Traitements automatiques appliqués aux images : balance des blancs… ») reste exacte case
+  cochée, et en dit trop case décochée.
 
 - [x] **#597 — Les remises HEIC ne s'affichent nulle part : aucun décodeur dans le dépôt.**
   Créé le 30 août 2026, pendant l'import réel du Portrait de lecteur (601-101, 49 fichiers).

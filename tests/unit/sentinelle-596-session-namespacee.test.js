@@ -13,7 +13,9 @@ import { fileURLToPath } from 'node:url';
 // namespacées, les lectures ne trouveraient plus rien.
 // Une cinquième, `travaux-mode-courant`, était écrite et jamais lue : retirée.
 // Restent nues, à dessein : `travaux-pipeline-dpi` et `travaux-sidebar-replie` (des préférences
-// d'affichage, sans identifiant), `travaux_bulle_annoter_vu` (une bulle d'aide vue une fois).
+// d'affichage, sans identifiant), `travaux_bulle_annoter_vu` (une bulle d'aide vue une fois) ; et,
+// depuis #598 volet B (27 nov. 2026), `travaux-pipeline-balance`, la case « Balance des blancs » du
+// lot, retenue comme « Rés. max. ».
 // Stock : ce qu'un onglet déjà ouvert a rangé sous l'ancien nom meurt avec l'onglet ; rien n'est recopié.
 
 const RACINE = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
