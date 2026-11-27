@@ -19,9 +19,11 @@ Aucun `404.html` ; la liste blanche de `construire-publication.mjs` ~21 n'en pr�
 Neuf restent (voir la vérification). Code mort : le retirer, après la preuve qu'aucun écran n'y mène.
 
 ### 29. « ← Utiliser » sur un tampon intégré n'écrit pas de doublon (#1167)
+**Fait le 27 nov. sur `lot/file-sans-gregoire-2026-11-27`, pas fusionné** (`RAPPORT-2026-11-27-file-sans-gregoire.md`).
 `js/tampons-bibliotheque.js` ~155-160. La garde ; aucune donnée existante à reprendre.
 
 ### 30. L'essai de la carte d'alignement ne suppose plus un Mac (#1115)
+**Essai récrit le 27 nov. sur `lot/file-sans-gregoire-2026-11-27`, non joué (aucun navigateur dans le conteneur) ; la baseline Linux reste à retoucher après le premier vert de GitHub.**
 `tests/integration/planif-menu-vue.spec.js` ~447 et ~574 attendent ⌘. Lire la plateforme ; retirer les deux essais de `playwright-baseline-linux.json` une fois verts. Aide la bascule de la vérification vers GitHub.
 
 ### 31. Le skill `alignement` porte les réponses du 28 août (#589)
