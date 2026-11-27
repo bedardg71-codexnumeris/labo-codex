@@ -219,6 +219,10 @@
        =============================== */
 
     let fichiersEnAttente = [];
+    // La production choisie pour le lot (« S'applique à tout le lot ») ; elle tombe avec le lot (#1271,
+    // `oublierProductionDuLot`). Lu au code le 27 nov. 2026, sans symptôme vécu : après un rechargement en
+    // plein lot, cette variable repart vide alors que l'Inspecteur peut encore afficher la production gardée
+    // en session (`genererEtape2Colonnes`, troisième repli) ; les fichiers déposés ensuite ne la reçoivent pas.
     let productionSelectionnee = '';
     let importEnCours = false;
 

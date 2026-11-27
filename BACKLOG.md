@@ -7136,8 +7136,10 @@ Huit flux tracés en bac à sable (banc `tests/unit/audit-onglet-suivi-2026-09-0
   appliquer la balance des blancs à ce document » reste une exception qui ne peut qu'enlever : case du
   lot décochée, elle n'a plus rien à enlever. Preuve : `tests/unit/balance-du-lot-598-volet-b.test.js`
   (6 rouges sur le code d'avant, six break-tests rouges), sentinelle 598 verte (cas 3 lit le nouveau
-  nom). Aucun mot nouveau hors « Balance des blancs ». ⚠ Non vu à l'écran : la place de la case sur la
-  ligne, sur l'iPad, et sa cible tactile. Textes laissés tels quels (consigne) : l'aide survolée de
+  nom). Aucun mot nouveau hors « Balance des blancs ». Vu sous Chromium (banc
+  `tests/integration/evaluation-lot-2026-11-27.spec.js`) : la case sur la ligne de « Rés. max. » à 820 et
+  1180 px, sans débordement ; la vignette perd la balance case décochée (mesuré au pixel) ; cible portée
+  à 44 px (mesurée à 26). ⚠ Pas vu sous Safari ni sur l'iPad. Textes laissés tels quels (consigne) : l'aide survolée de
   l'étape (« Traitements automatiques appliqués aux images : balance des blancs… ») reste exacte case
   cochée, et en dit trop case décochée.
 
