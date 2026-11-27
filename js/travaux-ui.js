@@ -1670,7 +1670,8 @@
      * @returns {string} HTML
      */
     function htmlCaseBalanceDuLot() {
-        return `<label style="white-space:nowrap;"><input type="checkbox" id="pipeline-opt-balance-lot" data-on-change="travauxUI.basculerBalanceDuLot"${balanceDuLotActive ? ' checked' : ''}> Balance des blancs</label>`;
+        // La cible tactile est l'étiquette entière, 44 px de haut (iPad) : mesurée à 26 px sans cela.
+        return `<label style="white-space:nowrap;display:inline-flex;align-items:center;gap:6px;min-height:44px;cursor:pointer;"><input type="checkbox" id="pipeline-opt-balance-lot" data-on-change="travauxUI.basculerBalanceDuLot"${balanceDuLotActive ? ' checked' : ''}>Balance des blancs</label>`;
     }
 
     /**

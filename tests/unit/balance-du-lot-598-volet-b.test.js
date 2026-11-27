@@ -79,7 +79,8 @@ describe('#598 volet B — la case « Balance des blancs » vaut pour tout le lo
         const html = ui.htmlCaseBalanceDuLot();
         expect(html).toMatch(/<input type="checkbox"[^>]*\schecked>/);
         expect(html).toContain('data-on-change="travauxUI.basculerBalanceDuLot"');
-        expect(html).toMatch(/> Balance des blancs<\/label>$/);
+        expect(html).toMatch(/>Balance des blancs<\/label>$/);
+        expect(html).toContain('min-height:44px');   // la cible tactile de l'iPad (mesurée à 26 px sans)
     });
 
     it('décochée, plus aucun fichier du lot ne la reçoit, et les aperçus se refont', () => {
