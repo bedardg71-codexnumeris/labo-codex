@@ -389,13 +389,13 @@ describe('§ 4 — l\'Aide dit le modèle tel que codé', () => {
 
 describe('ce qui entoure le niveau (retouches du lot 2)', () => {
     it('la phrase de progression favorable ne compte que le pattern Stable', () => {
-        const ech = { id: 'I', niveaux: [{ code: 'D', min: 50, max: 74 }, { code: 'M', min: 75, max: 100 }], seuilMaitrise: 'M' };
-        const { interne, store } = classe([{ P: 70, copies: [70] }]);
+        // ↻ 27 nov. 2026 (#1190) : la phrase lit les repères de l'échelle du banc (D 65, M 75) ; 70 est entre les deux.
+        const { interne, store, win } = classe([{ P: 70, copies: [70] }]);
         store.test_indicesPatternsRaI = { a: { pattern: 'Défi spécifique', niveauRai: 1 } };
-        const phrase = interne.genererInterpretationPerformance([{ da: 'a', valeur: 0.6 }], ech);
+        const phrase = interne.genererInterpretationPerformance([{ da: 'a', valeur: 0.7 }], win.reperesPerformance());
         expect(phrase).not.toContain('progression favorable');
         store.test_indicesPatternsRaI = { a: { pattern: 'Stable', niveauRai: 2 } };
-        expect(interne.genererInterpretationPerformance([{ da: 'a', valeur: 0.6 }], ech)).toContain('progression favorable');
+        expect(interne.genererInterpretationPerformance([{ da: 'a', valeur: 0.7 }], win.reperesPerformance())).toContain('progression favorable');
     });
 
     it('les passages hors lot de la liste et des patterns sont encadrés', () => {

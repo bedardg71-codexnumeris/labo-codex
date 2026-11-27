@@ -129,8 +129,10 @@ describe('niveau sans seuils · A — le niveau atteint du profil et des interve
 describe('niveau sans seuils · B — le Suivi branche la lecture commune', () => {
     const suivi = lire('js/tableau-bord-apercu.js');
 
-    it('B.a la répartition et son interprétation rangent par `niveauQuiRecoit`, sur les seuls niveaux à seuils', () => {
-        for (const fonction of ['function genererInterpretationPerformance(', 'function calculerDistributionPerformance(']) {
+    // ↻ 27 nov. 2026 (#1190) : l'interprétation ne range plus par niveau ; elle lit les deux seuils de l'échelle
+    // (`reperesPerformance`), éprouvée par apercu-phrase-performance-seuils-1190.test.js. Reste la répartition.
+    it('B.a la répartition range par `niveauQuiRecoit`, sur les seuls niveaux à seuils', () => {
+        for (const fonction of ['function calculerDistributionPerformance(']) {
             const corps = tranche(suivi, fonction, '\nfunction ');
             expect(corps).toContain('window.niveauQuiRecoit(niveaux, etudiant.valeur * 100)');
             expect(corps).toContain('window.niveauADesSeuils(n)');

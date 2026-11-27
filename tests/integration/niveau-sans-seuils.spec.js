@@ -86,7 +86,9 @@ test.describe('niveau sans seuils — la vue étendue', () => {
         await expect(suivi).toContainText('Distribution : Incomplet : 1 • Développement : 0 • Maîtrise : 1 • Étendu : 2');
         await expect(suivi).not.toContainText('Aucun :');
         await expect(suivi).not.toContainText('Exemplaire :');
-        await expect(suivi).toContainText('3 étudiant·es (75 %) ont atteint ou dépassé le niveau de maîtrise.');
+        // ↻ 27 nov. 2026 (#1190) : la phrase lit les deux seuils de l'échelle, et « Mes niveaux » (copie de l'échelle de
+        // départ) n'en pose aucun : elle se tait, comme la bande reste neutre. Rien n'est deviné par les codes M et E.
+        await expect(suivi).not.toContainText('atteint ou dépassé');
         expect(erreurs).toEqual([]);
     });
 
