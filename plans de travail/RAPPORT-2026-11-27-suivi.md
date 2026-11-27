@@ -2,7 +2,9 @@
 
 Branche `lot/suivi-2026-11-27`, partie de `lot/file-sans-gregoire-2026-11-27` à `951de3f8`. **Aucune fusion vers `main`, aucun bump, rien au changelog.** Un commit par fiche : `bb13738b` (fiche 1), `24bc8a44` (fiche 3), `528f68a6` (fiche 4) ; puis, sur la consigne de 14 h 33, `8e616980` (fiche 2, reprise) et `a6156e4d` (fiche 6, #1321). **La fiche 5 est arrêtée avant tout code** : elle change ce que lisent les élèves (section 7).
 
-**Reste** : la décision de Grégoire sur la fiche 5 (section 7) ; les cinq textes d'aide qui disent encore « 70 % par défaut » (section 8) ; le regard à l'écran, réduit (section 10) ; le verdict du Mac avant toute fusion.
+Puis, sur la consigne de 15 h 06 : `4b0cdf5a` (fiche 5, reprise : l'échelle de départ et ses deux seuils, à deux portées), `4e1e6972` (fiche 7, cinq aides), `fa86ebde` (fiche 8, #1322 inscrit).
+
+**Reste** : le regard sous Safari et sur l'iPad (section 14) ; le verdict du Mac avant toute fusion ; #1322 à mesurer sur les vraies grilles, après la publication.
 
 Les sections 1 à 6 sont l'état du matin, gardées telles quelles ; la suite commence à la section 7.
 
@@ -204,3 +206,87 @@ Non touchés : leurs mots sont à Grégoire, par Cowork.
 - Avant toute fusion : le verdict du Mac.
 
 **Vitest complet** (27 nov., après-midi, conteneur, depuis `tests/`, sur `a6156e4d` plus ce rapport) : 969 fichiers, 12 514 essais verts.
+
+## 11. Fiche 5, reprise : l'échelle de départ et ses deux seuils, une lecture à deux portées, faite (`4b0cdf5a`)
+
+Décisions de Grégoire (27 nov., 15 h 06), « Mes niveaux » tranché par Cowork.
+
+**A. Semée maintenant, l'échelle de départ porte ses deux seuils** (`assurerEchelleIdmeDeDepart`, `js/echelles.js`) :
+- seuil minimal de réussite sur D (65 %) ;
+- seuil de maîtrise sur M (75 %) ;
+- les bornes ne bougent pas.
+Tout ce qui en découle vient avec, PDF des élèves compris.
+
+**B. Semée avant et restée sans seuils, elle est lue à D et M en un seul lieu** : la source de la famille P (`_echelleDeLaPerformance`, `js/contexte-qualification.js`), que lisent les seuls écrans de l'enseignant·e.
+- Le résolveur d'échelle (`obtenirEchelleResolue`) n'est pas touché : le bilan et la synthèse passent par lui et restent aveugles.
+- Rien n'est écrit.
+- Un seuil posé, un seul suffit : ce sont ceux de la personne, partout.
+- Le repli ne vaut que si TOUTES les échelles des copies sont des échelles de départ sans seuils (dans le doute, non).
+
+**Ce que je compare pour reconnaître une échelle de départ** :
+- **L'échelle de l'application** : son identifiant `ECHELLE_IDME_DEPART`, même modifiée. D et M doivent encore exister, et leurs `min` sont ceux de la personne : D déplacé à 60 se lit 60 %. Un code supprimé : ce seuil manque.
+- **Une « Mes niveaux » d'avant ce jour**, reconnue si elle remplit quatre conditions :
+  - nom « Mes niveaux » ;
+  - un `pratiqueId` (née de la Vue simple) ;
+  - aucune marque `origine` ;
+  - des niveaux identiques à ceux de l'échelle `ECHELLE_IDME_DEPART` de la même bibliothèque, comparés niveau par niveau, dans l'ordre : le code et le nom (sans les espaces de bord), `min`, `max` et `valeurCalcul`.
+  
+  Ne sont pas comparés : la couleur, la description, l'étiquette SOLO. Une valeur, un nom, une borne ou l'ordre changés : elle n'est pas reconnue. Une bibliothèque dont l'échelle de départ a été supprimée : non reconnue (dans le doute).
+- **Une échelle créée par la personne** (un autre nom), même aux niveaux identiques : reste sans seuils.
+
+**C. « Mes niveaux » née maintenant** (`echelleReglee`, `js/vue-simple-donnees.js`) :
+- elle porte la marque `origine: 'ECHELLE_IDME_DEPART'` et ses deux seuils : ceux de l'échelle de départ, ou D et M quand celle-ci, semée avant ce jour, n'en a pas ;
+- **copiée au réglage**, elle garde les seuils dont le niveau existe encore, et sa marque. Sans cela, une copie perdait ses seuils en silence, ce qui défaisait A au premier réglage.
+- L'import ne transporte pas la marque (son schéma ne garde que les champs déclarés), mais il transporte les deux seuils : c'est sans effet.
+
+**Les lecteurs des deux seuils, un par un, et leur côté** (mesurés au code, onze fichiers) :
+
+| Lecteur | Côté |
+|---|---|
+| La phrase sous la bande de performance (`genererInterpretationPerformance`) | enseignant·e : repli |
+| La bande P et ses zones ; la couleur de P, les pastilles et le filtre « P < … » de la liste (`zonePerformance`, `zonesDeLaBarre`, `borneBassePerformance`, `js/etudiants.js:1181`) | enseignant·e : repli |
+| Le dépistage et le niveau RàI (`ligneDeReussite`, `bornesDepistage`, `js/profil-etudiant-calculs.js` : 1691, 1980, 2070, 2102), donc les captures hebdomadaires (des niveaux calculés ; aucun seuil écrit) | enseignant·e : repli |
+| Le seuil de défi (fiche 2), donc le défi principal, les forces, l'IPB, les critères pré-cochés d'une intervention, la pratique Standards | enseignant·e : repli |
+| Le bilan d'une intervention et la suggestion d'objectif (`js/interventions.js:1174, 1431`) | enseignant·e : repli |
+| Le parcours 7 « Lire ta classe » (il lit ce que montre l'écran) | enseignant·e : repli |
+| Le bilan de l'évaluation, copié dans ce qui est remis à l'élève (`zoneDuNiveau`, `js/evaluation-retroaction.js:898`) | élève : aucun repli |
+| Le PDF de synthèse (`zoneDuNiveau`, `js/synthese-retroaction-data.js:909`) | élève : aucun repli |
+| La grille d'autoévaluation du PDF des consignes (`reperesAutoevaluation`, `pageAutoevaluation`, `js/export-pdf.js`) | élève : aucun repli |
+| L'avis de l'aperçu « la page manque » (`autoevaluationSansReperes`) | élève (dans le doute) : il décrit le PDF de l'élève, il doit dire ce que l'élève recevra |
+| Le modèle de cartouche remis à l'assistant (`composerModeleCartouche`, `js/cartouches.js:2386`) | élève (dans le doute) : il produit les commentaires que l'élève lira |
+| L'étiquette « Seuil minimal de réussite » / « Seuil de maîtrise » sur la case d'un niveau, dans l'éditeur de grilles (`js/grilles.js:5284`) | élève (dans le doute) : c'est là qu'on écrit les textes que le PDF imprime aux deux seuils ; un repli annoncerait un seuil que le PDF ignore |
+| L'éditeur d'échelles : le bloc des deux seuils et ses refus, la chaîne d'étapes (« Seuils : à poser »), les libellés de zone de l'aperçu, la copie d'une échelle (`js/echelles.js`) | élève et données (dans le doute) : un repli y montrerait des seuils non posés, et « Enregistrer » les écrirait |
+| L'assistant de pratique (« non posés : la rétroaction ne pourra ni nommer les priorités ni dire ce qui est acquis », `js/wizard-pratique-v2.js`) | élève (dans le doute) : la phrase reste vraie pour ce que reçoit l'élève |
+| Import, export et partage (`js/import-export.js`, `js/partage-schemas.js`, `js/partage-validation.js`) | données : les seuils enregistrés, tels quels |
+
+⚠ Avec une ancienne échelle de départ, l'enseignant·e lit donc des seuils au Suivi alors que l'éditeur d'échelles dit « Seuils : à poser ». Ce n'est pas une contradiction (lus d'un côté, pas posés de l'autre), mais rien à l'écran ne l'explique.
+
+**Les essais** : `tests/unit/echelle-de-depart-deux-seuils-2026-11-27.test.js`, 12 essais.
+- A : l'échelle de départ semée porte D et M, et ses bornes ne bougent pas.
+- B1 : pour l'ancienne, 65 et 75 ; la phrase parle ; le défi vaut 0,75 ; rien n'est écrit en base.
+- B2 : `zoneDuNiveau` rend `null` partout, comme avant, et le résolveur rend l'échelle telle qu'enregistrée.
+- B3 : pas de grille d'autoévaluation, avec un témoin qui la fait paraître quand les seuils sont posés.
+- B4 : aucun lecteur côté élève n'appelle la source de P.
+- B5 : des seuils posés (I et E) gardés des deux côtés.
+- B6 : une échelle perso aux mêmes niveaux reste sans seuils.
+- C1 à C5 : « Mes niveaux » née, copiée, ancienne, modifiée de quatre façons, marquée.
+
+Break-tests, tous rouges :
+- le repli retiré : B1 et C3 ;
+- le repli fui dans le résolveur : B2 ;
+- le semis sans seuils : A.
+
+La sentinelle #555 (d) compte les nouveaux emplois de `seuilMaitrise`. L'essai Playwright `niveau-sans-seuils.spec.js` attend de nouveau la phrase : « Mes niveaux » y naît avec D et M, et la phrase dit « 3 étudiant·es (75 %) ont atteint ou dépassé le seuil de maîtrise. » (vert sous Chromium).
+
+## 12. Fiche 7 : cinq aides qui disaient « 70 % par défaut », faite (`4e1e6972`)
+
+Les textes de Grégoire (15 h 07), mot pour mot.
+- **index.html, les quatre parenthèses** : l'IPB et la RàI deviennent « (au départ, le seuil de maîtrise de ton échelle) » ; le profil, « (au départ, le seuil de maîtrise de ton échelle, réglable dans Labo → Observation) » ; la grille de dépistage, « (au départ, le seuil de maîtrise de ton échelle, de 1 à 100 %, dans « Paramètres d'analyse ») ».
+- **L'aide « i » des paramètres d'analyse** : « Défi : ≤ 70 %. » devient « Défi : sous le seuil de défi, qui part du seuil de maîtrise de ton échelle. »
+- « de 1 à 100 % » : laissé tel quel, comme demandé.
+
+Essai : `tests/unit/aides-seuil-de-defi-2026-11-27.test.js` (rouge avant). Quatre sentinelles de l'aide ont suivi. Celle de la carte « Suivi de l'apprentissage » refusait toute mention du « seuil de maîtrise » (un ancien sens) : elle admet maintenant cette seule parenthèse.
+
+## 13. Fiche 8 : #1322 inscrit, sans code (`fa86ebde`)
+
+Le dépistage reconnaît aussi un critère à son début (`js/profil-etudiant-calculs.js`, 873 et 1075). On n'y touche pas avant la publication (Grégoire, 14 h 37). Le compteur du BACKLOG est à #1322 ; #1323 et #1324 restent réservés à ce lot.
