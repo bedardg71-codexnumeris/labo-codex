@@ -50,7 +50,8 @@ function creerDom() {
         'enseignant-formulaire-edition': creerElement([UHIDE]),
         'v2-selectEnseignant': creerElement(),
         'v2-titreFormEnseignant': creerElement(),
-        'v2-btnCreerEnseignant': creerElement([UHIDE])
+        'v2-btnCreerEnseignant': creerElement([UHIDE]),
+        'v2-btnSupprimerEnseignant': creerElement()
     };
     ['prenom', 'nom', 'courriel', 'institution', 'departement', 'discipline', 'siteWeb']
         .forEach(ch => { ids['v2-ens-' + ch] = creerElement(); });
@@ -140,6 +141,16 @@ describe('#306 · Enseignant·e : patron « état vide masqué »', () => {
         expect(estVisible(dom.ids['enseignant-etat-vide'])).toBe(false);
         expect(dom.ids['v2-titreFormEnseignant'].textContent).toBe('Nouveau profil');
         expect(estVisible(dom.ids['v2-btnCreerEnseignant'])).toBe(true);
+    });
+
+    it('#1254 · « Supprimer » ne paraît pas en création, et revient sur un profil enregistré', async () => {
+        charger([PROFIL]);
+        await win.nouveauProfilEnseignantV2();
+        expect(estVisible(dom.ids['v2-btnSupprimerEnseignant'])).toBe(false);
+
+        dom.ids['v2-selectEnseignant'].value = PROFIL.id;
+        win.chargerEnseignantSelectionneV2();
+        expect(estVisible(dom.ids['v2-btnSupprimerEnseignant'])).toBe(true);
     });
 
     it('E · « Fermer » (ex-« Annuler », lot E2) referme le formulaire ET désélectionne (patron Cours)', async () => {

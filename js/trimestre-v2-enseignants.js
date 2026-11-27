@@ -136,6 +136,9 @@ function rendreModeFicheEnseignantV2(enCreation) {
     if (btn) btn.classList[enCreation ? 'remove' : 'add']('u-hide');
     const titre = document.getElementById('v2-titreFormEnseignant');
     if (titre) titre.textContent = enCreation ? 'Nouveau profil' : 'Modifier le profil';
+    // #1254 : rien à supprimer tant que le profil n'est pas enregistré.
+    const supprimer = document.getElementById('v2-btnSupprimerEnseignant');
+    if (supprimer) supprimer.classList[enCreation ? 'add' : 'remove']('u-hide');
 }
 
 /** Lot E2 : « la fiche est en création et porte une saisie » (ui-dialogues.js). */
