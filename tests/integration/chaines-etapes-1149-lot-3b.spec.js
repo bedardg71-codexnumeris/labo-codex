@@ -343,7 +343,7 @@ test('Pratiques : sommative (Pondération à 70 %, puis 110 % critique) ; standa
     expect(c.visible).toBe(true);
     expect(c.aria).toBe('Étapes de la pratique');
     expect(c.ids).toEqual(['methode', 'ponderation', 'groupe-cours']);
-    expect(c.etapes.methode).toMatchObject({ reglee: true, info: 'Sommative' });
+    expect(c.etapes.methode).toMatchObject({ reglee: true, info: 'Cumulative' });   // ↻ 27 nov. 2026 : trois familles
     expect(c.etapes.ponderation).toMatchObject({ reglee: false, attention: false, critique: false, info: '70 %' });
     expect(c.etapes['groupe-cours']).toMatchObject({ reglee: false, info: 'à activer' });
     // 110 % : critique.
@@ -368,7 +368,7 @@ test('Pratiques : sommative (Pondération à 70 %, puis 110 % critique) ; standa
     await OUVRIR.pratique(page, 'pratique_banc_std');
     c = await lireChaine(page, 'chainePratique');
     expect(c.ids).toEqual(['methode', 'echelle', 'groupe-cours']);
-    expect(c.etapes.methode.info).toBe('Par sélection de productions');   // ↻ 21 nov. 2026, 7 h 44 : plus de « PAN » pour cette pratique
+    expect(c.etapes.methode.info).toBe('Hybride');   // ↻ 21 nov. 2026, 7 h 44 : plus de « PAN » pour cette pratique ; ↻ 27 nov. 2026 : « Hybride »
     expect(c.etapes.echelle).toMatchObject({ reglee: false, info: 'à choisir' });
     await cliquerSansEcrire(page, 'chainePratique', 'echelle');
     expect(await dansLaVue(page, '#mat-echelle-id')).toBe(true);

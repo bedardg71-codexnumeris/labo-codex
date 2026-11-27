@@ -678,8 +678,8 @@
             page: function () {
                 return [
                     note("Cette fois, c'est ton propre matériel : ce que tu crées ici reste dans ton application."),
-                    note("Tu additionnes des points d'un travail à l'autre, selon leur pondération ? C'est une pratique de notation, la plus répandue : la notation sommative, qu'on appelle aussi cumulative."),
-                    note("Ici, le mot ne parle pas du moment de l'évaluation (par opposition à formative) mais de la façon dont la note se construit."),
+                    note("Tu additionnes des points d'un travail à l'autre, selon leur pondération ? C'est une pratique de notation, la plus répandue : la notation cumulative, qu'on appelle aussi sommative."),
+                    note("Ici, « sommative » ne parle pas du moment de l'évaluation (en fin d'apprentissage, par opposition à formative) mais de la façon dont la note se construit : par le « cumul » des points, ou leur « somme »."),
                     note("Il en existe d'autres, dites alternatives : la note s'y construit à partir de niveaux de maîtrise plutôt que de points."),
                     note("Ta pratique, c'est l'ensemble des règles que l'application suivra pour établir la note de l'étudiant·e."),
                     consigne("Touche « + Nouvelle pratique »")
@@ -701,7 +701,7 @@
                 choix: function () {
                     return [
                         note("Chaque carte est une pratique toute prête, décrite en une ligne."),
-                        note("Le code à côté du nom dit sa famille : SOM pour la sommative, SEL pour la sélection de productions, STD pour les standards ; les autres codes désignent d'autres pratiques."),
+                        note("Le code à côté du nom dit sa famille : CUM pour la cumulative, HYB pour l'hybride, STD pour les standards ; les autres codes désignent d'autres pratiques."),
                         note("Adopter un modèle ne t'engage pas : tu pourras le renommer et l'ajuster ensuite."),
                         consigne("Touche le modèle le plus proche de ta façon de noter, puis « Suivant → »")
                     ];
@@ -1319,8 +1319,8 @@
             lieuSuite: ": c'est là que tu dis comment se construit la note de ton cours.",
             phrase: "Dans la démo, tu évalues une première production de ton deuxième groupe, avec le matériel de l'exemple. Rien ne touche à tes données.",
             lignes: [
-                "Tu additionnes des points d'un travail à l'autre, selon leur pondération ? C'est une pratique de notation, la plus répandue : la notation sommative, qu'on appelle aussi cumulative",
-                "Ici, le mot ne parle pas du moment de l'évaluation (en fin d'apprentissage, par opposition à formative) mais de la façon dont la note se construit : en faisant la « somme » des résultats aux productions antérieures, ou le « cumul » de leurs points",
+                "Tu additionnes des points d'un travail à l'autre, selon leur pondération ? C'est une pratique de notation, la plus répandue : la notation cumulative, qu'on appelle aussi sommative",
+                "Ici, « sommative » ne parle pas du moment de l'évaluation (en fin d'apprentissage, par opposition à formative) mais de la façon dont la note se construit : par le « cumul » des points, ou leur « somme »",
                 "Il en existe d'autres, dites alternatives. L'exemple en prend une : la note s'y construit à partir de niveaux de maîtrise plutôt que de points",
                 "Ta pratique, c'est l'ensemble des règles que l'application suivra pour établir la note de l'étudiant·e"
             ],
@@ -1340,14 +1340,14 @@
             confirme: "C'est fait : tu es à l'écran « Choisis un modèle ».",
             lignes: [
                 "Chaque carte est une pratique toute prête, décrite en une ligne",
-                "Le code à côté du nom dit sa famille : SOM pour la sommative, SEL pour la sélection de productions, STD pour les standards ; les autres codes désignent d'autres pratiques",
-                "L'exemple prend « N meilleures évaluations », par sélection de productions : chaque production reçoit un niveau de maîtrise et la note retient les 7 meilleures évaluations sur 10",
+                "Le code à côté du nom dit sa famille : CUM pour la cumulative, HYB pour l'hybride, STD pour les standards ; les autres codes désignent d'autres pratiques",
+                "L'exemple prend « N meilleures évaluations », une pratique hybride : chaque production reçoit un niveau de maîtrise et la note retient les 7 meilleures évaluations sur 10",
                 "Avec ta classe, tu choisiras la tienne, qu'elle soit traditionnelle ou alternative"
             ],
             consignes: ["Touche « N meilleures évaluations », puis « Suivant → »"],
             devient: {
                 lignes: [
-                    "Le récapitulatif dit sa famille et ce qu'elle fait : « Par sélection de productions »",
+                    "Le récapitulatif dit sa famille et ce qu'elle fait : « Hybride »",
                     "Son nom reste modifiable ; l'exemple le garde tel quel"
                 ],
                 consignes: ["Touche « Créer la pratique »"]

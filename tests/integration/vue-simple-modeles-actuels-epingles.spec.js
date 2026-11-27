@@ -33,7 +33,7 @@ const LISTE = '9990001, Albatros, Ada\n9990002;Baobab;Boréal\n9990003\tCormoran
 const ACTUELS = ['STD-n-meilleurs', 'SPE-simple'];
 
 const MODELES = [
-    { modele: 'STD-n-meilleurs', nom: 'Par sélection de productions', bloc: '#vs-bloc-regle', type: null, touche: 'e' },
+    { modele: 'STD-n-meilleurs', nom: 'Hybride', bloc: '#vs-bloc-regle', type: null, touche: 'e' },
     { modele: 'SPE-simple', nom: 'Par spécifications', bloc: '#vs-bloc-paliers', type: 'Projet', touche: 'a' }
 ];
 
@@ -145,4 +145,8 @@ for (const m of MODELES) {
  * l'écran « pratique », le repère de l'écran « resultats ») ; ces deux fragments, et eux seuls, ont été reportés à la
  * main dans la référence. ⚠ Sous Chromium, ce banc rougit aussi sur la base : la référence est WebKit. Son verdict
  * reste celui du Mac.
+ *
+ * REPRISE VOULUE (27 nov. 2026, lot des trois familles, sans navigateur) : six fragments de la référence reportés à la
+ * main, chacun un mot posé par le lot : le titre du modèle « Hybride » (deux écrans), « Modèle Hybride », le badge HYB
+ * et le nom « Hybride » du tableau, la carte « … ou hybride. » (deux écrans). Rien d'autre. Verdict : celui du Mac.
  */

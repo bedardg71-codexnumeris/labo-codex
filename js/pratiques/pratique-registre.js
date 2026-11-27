@@ -64,8 +64,8 @@ function normaliserIdPratique(id) {
 // - couleurVar : variable CSS canonique du design system (styles.css). Les classes
 //   .badge-type-* lisent la même couleur ; obtenirCouleurPratique renvoie var(--…)
 //   pour les usages hors badge (style inline, Chart.js).
-// - famille : « Sommative » (SOM) ou « PAN » (STD/SPE/DEN) — « PAN » est un libellé
-//   de famille, plus un préfixe technique (décision 29 mai 2026).
+// - famille : « Cumulative » (SOM), « Hybride » (STD) ou « PAN » (SPE/DEN/CIB), 27 nov. 2026 — « PAN » est un
+//   libellé de famille, plus un préfixe technique (décision 29 mai 2026).
 // Taxonomie (#318, DEN-F) : le badge « PAN » est conservé pour l'UI (cohérence avec
 // le billet CoP vulgarisé), MAIS la dénotation est académiquement une PRÉN (pratique
 // de réduction/élimination de la notation), pas une PAN (Girouard-Gagné et al. 2024).
@@ -74,14 +74,19 @@ function normaliserIdPratique(id) {
 //   - `code` : l'identifiant INTERNE de la famille. Le moteur le compare (`obtenirCode() === 'STD'`, une douzaine de
 //     branchements du portfolio), et les pratiques rangées chez les gens le portent (`pratiques: ['STD']`). Il ne
 //     change pas : aucune donnée n'est réécrite.
-//   - `sigle` : ce que l'écran AFFICHE. « Par sélection de productions » (code STD) s'affiche SEL ; « Par standards »
+//   - `sigle` : ce que l'écran AFFICHE. « Hybride » (code STD) s'affiche HYB (SEL avant le 27 nov.) ; « Par standards »
 //     (code CIB) s'affiche STD ; « CIB » ne s'affiche nulle part. Tout écran qui montre un sigle le lit ici
 //     (`obtenirSiglePratique`, `sigleDuCode`, `genererBadgePratiqueHTML`), jamais le `code`.
 // Couleurs (décision de Grégoire, 21 nov. 2026, 6 h 59) : « Par standards » garde le bleu du badge STD ; « Par sélection
 // de productions » prend la sarcelle.
+// ⚠ TROIS FAMILLES À L'ÉCRAN (décisions de Grégoire, 27 nov. 2026, 14 h 07 à 14 h 21) : « Sommative » s'appelle
+//   « Cumulative » (sigle CUM) ; « Par sélection de productions » s'appelle « Hybride » (sigle HYB) ; les PAN gardent le
+//   sigle de leur pratique (STD, SPE, DEN). `famille` prend trois valeurs : « Cumulative », « Hybride », « PAN ». Le code,
+//   les ids et les couleurs ne changent pas. Un seul lecteur affiche `famille` : le repli de `_nomPratique` du Comparateur
+//   (une pratique sans nom), mesuré le 27 nov.
 const REPRESENTATIONS_PRATIQUES = {
-    sommative:      { code: 'SOM', sigle: 'SOM', couleurVar: '--som-orange', famille: 'Sommative' },
-    standards:      { code: 'STD', sigle: 'SEL', couleurVar: '--sel-sarcelle', famille: 'PAN' },  // « Par sélection de productions »
+    sommative:      { code: 'SOM', sigle: 'CUM', couleurVar: '--som-orange', famille: 'Cumulative' },
+    standards:      { code: 'STD', sigle: 'HYB', couleurVar: '--sel-sarcelle', famille: 'Hybride' },  // « Hybride » (27 nov. 2026)
     specifications: { code: 'SPE', sigle: 'SPE', couleurVar: '--spe-vert',   famille: 'PAN' },
     denotation:     { code: 'DEN', sigle: 'DEN', couleurVar: '--den-violet', famille: 'PAN' }, // PRÉN académiquement (voir note ci-dessus)
     // La pratique « Par standards » (lot 1, 21 nov. 2026) : un niveau par cible d'apprentissage, une famille de code à
@@ -138,7 +143,7 @@ function obtenirCodePratique(id) {
     return obtenirRepresentationPratique(id).code;
 }
 
-/** Sigle AFFICHÉ (SOM/SEL/SPE/DEN/STD), 21 nov. 2026. @param {string} id @returns {string} */
+/** Sigle AFFICHÉ (CUM/HYB/SPE/DEN/STD), 21 et 27 nov. 2026. @param {string} id @returns {string} */
 function obtenirSiglePratique(id) {
     return obtenirRepresentationPratique(id).sigle;
 }
@@ -148,7 +153,7 @@ function obtenirCouleurPratique(id) {
     return 'var(' + obtenirRepresentationPratique(id).couleurVar + ')';
 }
 
-/** Libellé de famille (« Sommative » / « PAN »). @param {string} id @returns {string} */
+/** Libellé de famille (« Cumulative » / « Hybride » / « PAN »). @param {string} id @returns {string} */
 function obtenirLabelFamillePratique(id) {
     return obtenirRepresentationPratique(id).famille;
 }
@@ -158,7 +163,7 @@ function obtenirLabelFamillePratique(id) {
  * Sortie 100 % contrôlée (codes du registre, jamais de donnée utilisateur) → pas
  * d'échappement requis, zéro handler inline (conforme CSP script-src 'self').
  * @param {string} id - identifiant de pratique
- * @returns {string} `<span class="badge-type-pratique badge-type-std">SEL</span>` (la classe suit le code interne,
+ * @returns {string} `<span class="badge-type-pratique badge-type-std">HYB</span>` (la classe suit le code interne,
  *          le texte, le sigle affiché)
  */
 function genererBadgePratiqueHTML(id) {
@@ -961,7 +966,7 @@ function obtenirIdsPoolStdDuCorpus(productions) {
  */
 function causeNoteStdSansProductionNotee(avecArtefacts, terminaleNotee) {
     if (terminaleNotee) {
-        return 'Seule l\'évaluation terminale a une note. Par sélection de productions, la note du cours s\'appuie aussi sur '
+        return 'Seule l\'évaluation terminale a une note. En pratique hybride, la note du cours s\'appuie aussi sur '
             + (avecArtefacts ? 'les artefacts du portfolio' : 'les productions retenues')
             + ' : elle ne se calcule pas sur la terminale seule.';
     }

@@ -416,7 +416,7 @@ describe('F · les mots validés', () => {
         // n'a plus de remplacement à lui : il écrit la cause que le calcul lui rend, telle quelle.
         expect(registre.causeNoteStdSansProductionNotee(true, false)).toBe('Aucune production n\'est encore évaluée.');
         expect(registre.causeNoteStdSansProductionNotee(false, false)).toBe('Aucune production retenue pour la note n\'est encore évaluée.');   // la jumelle ne bouge pas
-        expect(registre.causeNoteStdSansProductionNotee(true, true)).toBe('Seule l\'évaluation terminale a une note. Par sélection de productions, la note du cours s\'appuie aussi sur les artefacts du portfolio : elle ne se calcule pas sur la terminale seule.');
+        expect(registre.causeNoteStdSansProductionNotee(true, true)).toBe('Seule l\'évaluation terminale a une note. En pratique hybride, la note du cours s\'appuie aussi sur les artefacts du portfolio : elle ne se calcule pas sur la terminale seule.');
         expect(lire('js/pratiques/pratique-registre.js')).not.toContain("'Aucun artefact du portfolio n");
         const sim = (cause) => () => ({ noteConstructible: false, P: 0, causeNonConstructible: cause, details: null });
         const avecCause = (cause) => chargerScript('js/tableau-notation.js', { db: { getSync: (k, d) => (d !== undefined ? d : null) }, simulerIndices: sim(cause), echapperHtml: echapper, navigator: MAC },
@@ -430,7 +430,7 @@ describe('F · les mots validés', () => {
         expect(finalisee).not.toContain('Note provisoire');
     });
     it('F2 les états sans tableau, la légende des spécifications, la sous-section et l\'avis du formulaire', () => {
-        expect(ecran.construireHTML({ etat: 'autre-famille' })).toContain('Le tableau de notation sert aux pratiques par sélection de productions et par spécifications. Pour la pratique de ce groupe-cours, la Liste reste la vue de tes évaluations.');
+        expect(ecran.construireHTML({ etat: 'autre-famille' })).toContain('Le tableau de notation sert aux pratiques hybrides et par spécifications. Pour la pratique de ce groupe-cours, la Liste reste la vue de tes évaluations.');
         expect(ecran.construireHTML({ etat: 'aucune-pratique' })).toContain('Ce groupe-cours n’a pas de pratique de notation. Choisis-en une dans Conception › Pratiques : le tableau suivra ses réglages.');
         const source = lire('js/tableau-notation.js');
         expect(source).toContain("aideSpe: 'Touche une case pour changer le résultat. Au clavier : A ou N, Retour arrière pour vider, les flèches pour se déplacer.',");

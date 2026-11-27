@@ -57,7 +57,7 @@ test('la liste des modèles : les cinq d\'avant, dans leur ordre, puis « Modèl
     await jusquAuxModeles(page);
     const titres = await page.locator('.wizard-v2-radio-card .wizard-v2-card-title').allTextContents();
     expect(titres.map(t => t.replace(/\s+/g, ' ').trim())).toEqual([
-        'N plus récentes SEL · Général', 'N meilleures évaluations SEL · Général', 'Modèle sommatif SOM · Général',
+        'N plus récentes HYB · Général', 'N meilleures évaluations HYB · Général', 'Modèle sommatif CUM · Général',
         'Modèle simple SPE · Général', 'Modèle de base DEN · Général', 'Modèle par standards STD · Général À l’essai']);
     const laCarte = carte(page, 'Modèle par standards');
     await expect(laCarte.locator('.etiquette-essai')).toHaveText('À l’essai');

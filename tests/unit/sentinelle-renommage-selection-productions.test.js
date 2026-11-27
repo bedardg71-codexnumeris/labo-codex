@@ -29,7 +29,12 @@ const REMPLACES = ['A1', 'A2', 'A3', 'F3', 'F4', 'F10', 'P1', 'P2'];
 // REMPLACE, pour V1 seulement, la citation du 20 nov., qui reste intacte ; et, décision A du même jour, V2, V5 et V6.
 const PORTE_STD = sectionsDe(lire('plans de travail/TEXTES-2026-11-22-vue-simple-porte-par-standards.md'));
 const REMPLACES_22 = ['V1', 'V2', 'V5', 'V6'];
-const section = (repere) => (REMPLACES_22.includes(repere) && PORTE_STD.find((s) => s.repere === repere))
+// ↻ 27 nov. 2026 (trois familles : « Par sélection de productions » s'appelle « Hybride ») : le fichier du 27 nov. REMPLACE,
+// pour les repères qu'il porte et que liste REMPLACES_27, les citations des trois fichiers précédents, qui restent intacts.
+const FAMILLES_27 = sectionsDe(lire('plans de travail/TEXTES-2026-11-27-familles-cum-hyb.md'));
+const REMPLACES_27 = ['V1', 'V2', 'V3', 'V5', 'V6', 'T1', 'A1', 'A2', 'A3', 'A6', 'M1', 'F3', 'F4', 'F10', 'P1', 'P2', 'M5'];
+const section = (repere) => (REMPLACES_27.includes(repere) && FAMILLES_27.find((s) => s.repere === repere))
+    || (REMPLACES_22.includes(repere) && PORTE_STD.find((s) => s.repere === repere))
     || (REMPLACES.includes(repere) && SANS_PAN.find((s) => s.repere === repere)) || SECTIONS.find((s) => s.repere === repere);
 const source = (repere) => net(lire(section(repere).fichier));
 
@@ -37,6 +42,7 @@ describe('Renommage « Par sélection de productions » — les vingt textes acc
     it('le fichier validé du 20 nov. porte les vingt repères, vingt-trois textes ; celui du 21 nov. en remplace huit', () => {
         expect(REMPLACES.every((r) => SANS_PAN.some((s) => s.repere === r))).toBe(true);
         expect(REMPLACES_22.every((r) => PORTE_STD.some((s) => s.repere === r && s.textes.length === 1))).toBe(true);
+        expect(REMPLACES_27.every((r) => FAMILLES_27.some((s) => s.repere === r && s.textes.length >= 1))).toBe(true);
         expect(REMPLACES.flatMap((r) => section(r).textes).join(' ')).not.toMatch(/\bPAN\b/);
         expect(SECTIONS.map((s) => s.repere)).toEqual(['V1', 'V2', 'V3', 'V4', 'V5', 'V6', 'T1', 'A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'M1',
             'F3', 'F4', 'F10', 'P1', 'P2', 'M5']);
@@ -56,7 +62,8 @@ describe('Renommage « Par sélection de productions » — les vingt textes acc
         const assistant = source('A1');
         // ↻ 21 nov. 2026 (« le sigle suit le nom », décision de Grégoire) : le sigle affiché de cette pratique devient SEL,
         // et sa couleur au récapitulatif la sarcelle (classe `sel`) ; son nom et sa description ne changent pas.
-        expect(assistant).toContain(`'standards': { code: 'SEL', classe: 'sel', label: '${section('A1').textes[0]}', description: '${net(section('A1').textes[1])}' }`);
+        // ↻ 27 nov. 2026 : le sigle HYB ; la classe `sel` (la couleur) ne change pas.
+        expect(assistant).toContain(`'standards': { code: 'HYB', classe: 'sel', label: '${section('A1').textes[0]}', description: '${net(section('A1').textes[1])}' }`);
         expect(assistant).toContain(`{ value: 'niveaux', label: '${section('A2').textes[0]}', description: '${section('A2').textes[1]}' }`);
         expect(assistant).toContain(`'<h4>${section('A3').textes[0]}</h4>'`);
         expect(source('F3')).toContain(`<option value="standards">${section('F3').textes[0]}</option>`);
@@ -67,7 +74,7 @@ describe('Renommage « Par sélection de productions » — les vingt textes acc
     it('M5 : le calcul rend les deux phrases, selon qu\'il y a des artefacts', () => {
         const registre = source('M5');
         const [productions, artefacts] = section('M5').textes;
-        const debut = 'Seule l\'évaluation terminale a une note. Par sélection de productions, la note du cours s\'appuie aussi sur ';
+        const debut = 'Seule l\'évaluation terminale a une note. En pratique hybride, la note du cours s\'appuie aussi sur ';   // ↻ 27 nov. 2026
         expect(productions.startsWith(debut) && artefacts.startsWith(debut)).toBe(true);
         expect(registre).toContain(`return '${debut}'`);
         expect(registre).toContain('(avecArtefacts ? \'les artefacts du portfolio\' : \'les productions retenues\')');
@@ -82,7 +89,7 @@ describe('Renommage « Par sélection de productions » — les vingt textes acc
         // carte de la NOUVELLE famille (`cibles`, à l'essai), une seule fois ; la carte du modèle par sélection garde le sien.
         expect(vue.split('titre: \'Par standards\'').length - 1).toBe(1);
         expect(vue).toContain('{ famille: \'cibles\', modele: \'par-standards\', titre: \'Par standards\',');
-        expect(vue).toContain('{ famille: \'standards\', modele: \'STD-n-meilleurs\', titre: \'Par sélection de productions\',');
+        expect(vue).toContain(`{ famille: 'standards', modele: 'STD-n-meilleurs', titre: '${section('V3').textes[0]}',`);   // ↻ 27 nov. 2026 : « Hybride »
         expect(lire('js/tableau-notation.js')).not.toContain('par standards et par');
         const assistant = lire('js/wizard-pratique-v2.js');
         for (const ancien of ['PAN – Standards', 'Configuration PAN-Standards', 'cette pratique PAN-Standards', 'PAN – Sélection de productions']) expect(assistant, ancien).not.toContain(ancien);

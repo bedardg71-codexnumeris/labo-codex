@@ -151,8 +151,11 @@ const texteRenomme = (repere, fichier = RENOMMAGE) => fichier.split(/^## /m).fin
 // 21 nov. 2026, 7 h 44 (choix de Grégoire ; les sources ne tranchent pas) : la pratique n'est plus dite « PAN ». L'encadré F4
 // se lit dans le fichier du 21 nov., qui remplace pour lui celui du 20 nov.
 const SANS_PAN = readFileSync(join(resolve(import.meta.dirname, '..', '..'), 'plans de travail/TEXTES-2026-11-21-selection-sans-PAN.md'), 'utf8');
-const TERMINALE_SEULE_PRODUCTIONS = texteRenomme('M5')[0];
-const TERMINALE_SEULE_ARTEFACTS = texteRenomme('M5')[1];
+// ↻ 27 nov. 2026 (trois familles : « Par sélection de productions » s'appelle « Hybride ») : M5, T2 et F4 se lisent dans le
+// fichier du 27 nov., qui remplace pour eux ceux du 20 et du 21 nov. (intacts).
+const FAMILLES_27 = readFileSync(join(resolve(import.meta.dirname, '..', '..'), 'plans de travail/TEXTES-2026-11-27-familles-cum-hyb.md'), 'utf8');
+const TERMINALE_SEULE_PRODUCTIONS = texteRenomme('M5', FAMILLES_27)[0];
+const TERMINALE_SEULE_ARTEFACTS = texteRenomme('M5', FAMILLES_27)[1];
 
 /* ================================================================ A. LE POOL */
 describe('A · le pool sans « Artefact » prend les productions évaluées, quelle que soit leur pondération', () => {
@@ -580,7 +583,7 @@ describe('G · lot 3 : les Productions ne poussent plus vers une terminale', () 
         const sans = (ids, plus = []) => prodGreg().filter(p => !ids.includes(p.id)).concat(plus);
         expect(avertir(prodGreg())).toEqual([]);
         expect(avertir(sans([], [exercice('W1', 1, 10)]))).toEqual([
-            { message: '« Exercice 1 » porte une pondération (10 %) mais n\'entre pas dans le calcul SEL : seuls le pool d\'artefacts et l\'évaluation terminale comptent.' }
+            { message: '« Exercice 1 » porte une pondération (10 %) mais n\'entre pas dans le calcul HYB : seuls le pool d\'artefacts et l\'évaluation terminale comptent.' }   // ↻ 27 nov. 2026 : le sigle HYB
         ]);
         expect(avertir(sans(['PF']))).toEqual([
             { message: 'Aucune production « Portfolio (conteneur) » : le pool d\'artefacts vaut le complément de la terminale, soit 60 % (100 − 40). C\'est permis — vérifie que c\'est voulu.' }
@@ -608,7 +611,7 @@ describe('G · lot 3 : les Productions ne poussent plus vers une terminale', () 
         // ↻ 21 nov. 2026, 7 h 44 (choix de Grégoire) : « En PAN – Standards, » devient « Par sélection de productions, » ; le
         // texte se lit dans le fichier du 21 nov. (repère T2), qui remplace pour lui le texte 2 du lot 3, resté intact.
         expect(await texteValide(2)).toContain('En PAN – Standards, elle entre dans le calcul');
-        expect(definition('terminale')).toBe('<strong>Évaluation terminale :</strong> ' + texteRenomme('T2', SANS_PAN)[0].replace(/ %/g, '\u00a0%'));
+        expect(definition('terminale')).toBe('<strong>Évaluation terminale :</strong> ' + texteRenomme('T2', FAMILLES_27)[0].replace(/ %/g, '\u00a0%'));   // ↻ 27 nov. 2026
         expect(definition('artefact-portfolio')).toContain('<em>Pour paramétrer la valeur des artefacts, va dans « Structure des évaluations » dans les Pratiques de notation.</em>');
     });
 });
@@ -777,7 +780,10 @@ const citations = (n) => sectionLot5(n).split('\n').filter(l => l.startsWith('> 
 const approcheSansArtefact = () => [citations(1)[0], citations(1)[1], texteRenomme('A5')[0]];
 /** La colonne « Sans Artefact » de la table du texte 4, par endroit. */
 const nombreRetenu = (ou) => sectionLot5(4).split('\n').find(l => l.startsWith('| ' + ou)).split('|')[3].trim();
-const HYBRIDE = 'Hybride (N meilleures + Obligatoires)';
+// ↻ 27 nov. 2026 : le mode à deux blocs ne dit plus « Hybride » dans la famille « Hybride » (repère D1 du fichier du 27 nov.) ;
+// son aide (texte 5 du lot 5) commence de même par « Deux blocs : ». Le fichier du lot 5 reste intact.
+const HYBRIDE = FAMILLES_27.split(/^## /m).find(s => s.startsWith('D1 ·')).split('\n').find(l => l.startsWith('> ')).slice(2).trim();
+const aideDeuxBlocs = () => citations(5)[0].replace(/^Hybride : /, 'Deux blocs : ');
 const net = (t) => t.replace(/&nbsp;/g, ' ').replace(/ /g, ' ').replace(/<\/?strong>/g, '').replace(/’/g, '\'').replace(/\s+/g, ' ');
 
 const assistant = (pratique, productions) => banc({ pratique, productions, evaluations: [],
@@ -835,7 +841,7 @@ describe('I · lot 5 : l\'assistant et les mots', () => {
         expect(a.modes).toEqual([citations(3)[0], citations(3)[1], citations(3)[2], HYBRIDE]);
         expect(a.retenu).toBe(nombreRetenu('Assistant'));
         expect(a.minimum).toBe(citations(6)[1]);
-        expect(a.aideHybride).toBe(citations(5)[0]);
+        expect(a.aideHybride).toBe(aideDeuxBlocs());
         expect(a.champs).not.toContain('utiliserPortfolio');
         expect(a.champs).not.toContain('nbArtefactsSoumis');
         expect(a.recap).toContain('Approche : ' + citations(1)[0]);
@@ -852,7 +858,7 @@ describe('I · lot 5 : l\'assistant et les mots', () => {
         expect(a.modes).toEqual(['N meilleurs artefacts', 'Tous les artefacts', 'N derniers artefacts', HYBRIDE]);
         expect(a.retenu).toBe('Nombre d\'artefacts retenus pour la note finale');
         expect(a.minimum).toBe(citations(6)[0]);
-        expect(a.aideHybride).toBe(citations(5)[0]);
+        expect(a.aideHybride).toBe(aideDeuxBlocs());
         expect(a.champs).not.toContain('utiliserPortfolio');
         expect(a.champs).not.toContain('nbArtefactsSoumis');
         expect(a.recap).toContain('Artefacts retenus : 3');
@@ -942,7 +948,9 @@ describe('I · lot 5 : l\'assistant et les mots', () => {
 
     it('les textes statiques : la fiche (7), l\'Aide (8, 9, 11, 12), au caractère près sauf l\'insécable', () => {
         const page = net(lireDuDepot('index.html'));
-        const attendus = [texteRenomme('F4', SANS_PAN)[0], citations(8)[0], ...citations(9), ...citations(11), ...citations(12)];   // 7 : le repère F4 du renommage (21 nov., sans « PAN »)
+        // ↻ 27 nov. 2026 : dans l'Aide, le mode cité par son libellé s'appelle « Deux blocs (N meilleures + Obligatoires) » (D1).
+        const attendus = [texteRenomme('F4', FAMILLES_27)[0], citations(8)[0], ...citations(9), ...citations(11), ...citations(12)]
+            .map((t) => t.replace('« Hybride (N meilleures + Obligatoires) »', '« ' + HYBRIDE + ' »'));   // 7 : le repère F4 du renommage (21 nov., sans « PAN »)
         expect(attendus).toHaveLength(7);
         for (const t of attendus) expect(page, t).toContain(net(t));
         for (const ancien of ['Le meilleur résultat est retenu pour chaque standard', 'traces retenues au portfolio', 'C\'est une moyenne de notes', 'Minimum d\'artefacts avant calcul formatif']) {

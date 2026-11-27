@@ -77,7 +77,7 @@ const GLOSSAIRE = {
         terme: 'Portfolio',
         categorie: 'Structure',
         etape: 'numerisation',
-        definition: 'Un type de production qui regroupe plusieurs artefacts. Ta pratique de notation décide lesquels comptent, selon son « Mode de sélection » : « N meilleurs artefacts », « N derniers artefacts », « Tous les artefacts » ou « Hybride (N meilleures + Obligatoires) ». Les artefacts individuels n\'ont pas de pondération propre : c\'est le portfolio conteneur qui porte le poids dans la note finale.',
+        definition: 'Un type de production qui regroupe plusieurs artefacts. Ta pratique de notation décide lesquels comptent, selon son « Mode de sélection » : « N meilleurs artefacts », « N derniers artefacts », « Tous les artefacts » ou « Deux blocs (N meilleures + Obligatoires) ». Les artefacts individuels n\'ont pas de pondération propre : c\'est le portfolio conteneur qui porte le poids dans la note finale.',
         voir: 'Conception › Productions · Conception › Pratiques'
     },
 
@@ -212,7 +212,7 @@ const GLOSSAIRE = {
         terme: 'Pratique de notation',
         categorie: 'Structure',
         etape: 'numerisation',
-        definition: 'Ta recette complète pour construire la note. Quatre pratiques sont disponibles : sommative (SOM), PAN par standards (STD), PAN par spécifications (SPE) et dénotation (DEN). La pratique détermine comment les résultats de tes évaluations se transforment en note finale. Tu peux toujours la changer.',
+        definition: 'Ta recette complète pour construire la note. Cinq pratiques sont disponibles : cumulative (CUM), hybride (HYB), PAN par standards (STD), PAN par spécifications (SPE) et dénotation (DEN). La pratique détermine comment les résultats de tes évaluations se transforment en note finale. Tu peux toujours la changer.',
         voir: 'Conception › Pratiques'
     },
 
@@ -460,10 +460,10 @@ const GLOSSAIRE = {
 
     'som-sommative': {
         cle: 'som-sommative',
-        terme: 'SOM — Sommative',
+        terme: 'CUM — Cumulative',
         categorie: 'Pratiques de notation',
         etape: 'transversal',
-        definition: 'Pratique de notation traditionnelle qui calcule une moyenne pondérée des résultats. Chaque production contribue à la note finale selon sa pondération.',
+        definition: 'Pratique de notation traditionnelle, souvent appelée sommative : la note est le cumul pondéré des résultats. Chaque production contribue à la note finale selon sa pondération.',
         voir: 'Conception › Pratiques'
     },
 
@@ -606,7 +606,7 @@ const GLOSSAIRE = {
         terme: 'Notes finalisées',
         categorie: 'Pratiques de notation',
         etape: 'transversal',
-        definition: 'Une case de la pratique de notation, à cocher quand les notes sont arrêtées. Les PDF de rétroaction titrent alors « Note finale », à la place de « Note actuelle du cours » (pratique sommative) ou de « Note provisoire » (pratique alternative), et ne listent plus les « Artefacts à venir ». En mode « Hybride », une production obligatoire non remise compte alors pour zéro ; avant, elle est laissée de côté.',
+        definition: 'Une case de la pratique de notation, à cocher quand les notes sont arrêtées. Les PDF de rétroaction titrent alors « Note finale », à la place de « Note actuelle du cours » (pratique sommative) ou de « Note provisoire » (pratique alternative), et ne listent plus les « Artefacts à venir ». En mode « Deux blocs », une production obligatoire non remise compte alors pour zéro ; avant, elle est laissée de côté.',
         voir: 'Conception › Pratiques'
     },
 

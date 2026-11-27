@@ -102,7 +102,7 @@ for (const cas of ['identique', null]) {
 
         const r = rangeeBiblio(page, 'Modèle sommatif');
         await expect(r).toHaveCount(1);
-        await expect(r.locator('.biblio2-rangee-meta')).toHaveText('Sommative · ' + MENTION);
+        await expect(r.locator('.biblio2-rangee-meta')).toHaveText('Cumulative · ' + MENTION);
         await expect(r.locator('.biblio2-kebab'), 'aucun ⋮ : il n’aurait rien à offrir').toHaveCount(0);
         await expect(r.locator('.biblio2-passage'), '« Utiliser dans ce trimestre » reste').toHaveCount(1);
         await expect(page.locator(SEL + ' .biblio2-panneau--bibliotheque').getByRole('menuitem', { name: 'Supprimer de ma bibliothèque' })).toHaveCount(0);
@@ -140,7 +140,7 @@ test('copie DIFFÉRENTE du modèle : « Supprimer » reste offert, et le geste f
     const dialogues = await ouvrir(page, { copie: 'differente', homonyme: true });
 
     const r = rangeeBiblio(page, 'Modèle sommatif');
-    await expect(r.locator('.biblio2-rangee-meta')).toHaveText(/^Sommative · par Gabarit Labo Codex/);
+    await expect(r.locator('.biblio2-rangee-meta')).toHaveText(/^Cumulative · par Gabarit Labo Codex/);
     await expect(groupeDoublon(page, 'Modèle sommatif').locator('.biblio-doublon-action[data-param="' + ID_MODELE + '"]', { hasText: 'Supprimer' })).toHaveCount(1);
     await r.locator('.biblio2-kebab').click();
     await page.locator(SEL + ' .biblio-menu-popover.actif').getByRole('menuitem', { name: 'Supprimer de ma bibliothèque' }).click();
@@ -150,7 +150,7 @@ test('copie DIFFÉRENTE du modèle : « Supprimer » reste offert, et le geste f
     expect(await page.evaluate(() => window.__codex)).toBe(1);
     expect(await idsBibliotheque(page), 'la copie différente est effacée, comme avant').toEqual([]);
     // Le prédéfini reprend sa place : il est, lui, intact.
-    await expect(rangeeBiblio(page, 'Modèle sommatif').locator('.biblio2-rangee-meta')).toHaveText('Sommative · ' + MENTION);
+    await expect(rangeeBiblio(page, 'Modèle sommatif').locator('.biblio2-rangee-meta')).toHaveText('Cumulative · ' + MENTION);
 });
 
 test('une pratique qui appartient à l’enseignant·e : « Supprimer » et la suppression, inchangés', async ({ page }) => {
@@ -159,7 +159,7 @@ test('une pratique qui appartient à l’enseignant·e : « Supprimer » et la s
         type: 'sommative', pratiques: ['SOM'], auteur: 'Auteur fictif', dansBibliotheque: true, configuration: {} }] });
 
     const r = rangeeBiblio(page, 'Pratique fictive personnelle');
-    await expect(r.locator('.biblio2-rangee-meta')).toHaveText('Sommative · par Auteur fictif');
+    await expect(r.locator('.biblio2-rangee-meta')).toHaveText('Cumulative · par Auteur fictif');
     await r.locator('.biblio2-kebab').click();
     await expect(page.locator(SEL + ' .biblio-menu-popover.actif .biblio-menu-item')).toHaveText(['Supprimer de ma bibliothèque']);
     await page.locator(SEL + ' .biblio-menu-popover.actif').getByRole('menuitem', { name: 'Supprimer de ma bibliothèque' }).click();

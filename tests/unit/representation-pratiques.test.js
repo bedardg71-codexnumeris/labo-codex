@@ -42,9 +42,9 @@ describe('Session B · représentations canoniques', () => {
         expect(win.obtenirCouleurPratique('denotation')).toBe('var(--den-violet)');
     });
 
-    it('rend le libellé de famille (Sommative vs PAN)', () => {
-        expect(win.obtenirLabelFamillePratique('sommative')).toBe('Sommative');
-        expect(win.obtenirLabelFamillePratique('standards')).toBe('PAN');
+    it('rend le libellé de famille (Cumulative, Hybride, PAN : trois familles, 27 nov. 2026)', () => {
+        expect(win.obtenirLabelFamillePratique('sommative')).toBe('Cumulative');
+        expect(win.obtenirLabelFamillePratique('standards')).toBe('Hybride');
         expect(win.obtenirLabelFamillePratique('specifications')).toBe('PAN');
         expect(win.obtenirLabelFamillePratique('denotation')).toBe('PAN');
     });
@@ -59,7 +59,7 @@ describe('Session B · représentations canoniques', () => {
 
     it('remappe pan-objectifs vers la représentation Standards (décision D1, fold Session C)', () => {
         expect(win.obtenirCodePratique('pan-objectifs')).toBe('STD');
-        expect(win.obtenirLabelFamillePratique('pan-objectifs')).toBe('PAN');
+        expect(win.obtenirLabelFamillePratique('pan-objectifs')).toBe('Hybride');   // ↻ 27 nov. 2026 : la famille de `standards`
     });
 
     it('retombe sur la représentation par défaut (STD) pour un id inconnu ou vide', () => {
@@ -70,10 +70,10 @@ describe('Session B · représentations canoniques', () => {
 
     it('génère un badge HTML cohérent (classe + code, sans donnée utilisateur)', () => {
         expect(win.genererBadgePratiqueHTML('sommative'))
-            .toBe('<span class="badge-type-pratique badge-type-som">SOM</span>');
-        // 21 nov. 2026 (« le sigle suit le nom ») : la classe suit le code interne (STD), le texte le sigle affiché (SEL).
+            .toBe('<span class="badge-type-pratique badge-type-som">CUM</span>');   // ↻ 27 nov. 2026
+        // 21 nov. 2026 (« le sigle suit le nom ») : la classe suit le code interne (STD), le texte le sigle affiché (HYB depuis le 27 nov.).
         expect(win.genererBadgePratiqueHTML('standards'))
-            .toBe('<span class="badge-type-pratique badge-type-std">SEL</span>');
+            .toBe('<span class="badge-type-pratique badge-type-std">HYB</span>');
         expect(win.genererBadgePratiqueHTML('pan-specifications'))
             .toBe('<span class="badge-type-pratique badge-type-spe">SPE</span>');
         expect(win.genererBadgePratiqueHTML('denotation'))
@@ -81,9 +81,9 @@ describe('Session B · représentations canoniques', () => {
     });
 
     it('expose une représentation complète {code, sigle, couleurVar, famille, classe}', () => {
-        // 21 nov. 2026 : le sigle affiché (SEL) à côté du code interne (STD) ; la sarcelle à « Par sélection de productions ».
+        // 21 nov. 2026 : le sigle affiché à côté du code interne (STD) ; la sarcelle à « Hybride » (HYB, 27 nov. 2026).
         const rep = win.obtenirRepresentationPratique('standards');
-        expect(rep).toEqual({ code: 'STD', sigle: 'SEL', couleurVar: '--sel-sarcelle', famille: 'PAN', classe: 'badge-type-std' });
+        expect(rep).toEqual({ code: 'STD', sigle: 'HYB', couleurVar: '--sel-sarcelle', famille: 'Hybride', classe: 'badge-type-std' });
     });
 
     describe('variante stricte (états non-famille préservés par les consommateurs)', () => {

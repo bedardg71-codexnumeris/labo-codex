@@ -39,7 +39,7 @@
 
    LA FAMILLE « CIBLES » (21 nov. 2026) — la pratique « Par standards » (type « cibles », sigle affiché STD).
    Elle n'avait aucune branche ici : elle tombait dans les branches par défaut, écrites pour l'ancienne famille
-   « standards » (devenue « Par sélection de productions », sigle SEL), et sa colonne disait « Sélection
+   « standards » (l'ancienne famille, « Hybride » depuis le 27 nov., sigle HYB), et sa colonne disait « Sélection
    d'artefacts », « Non couvert (la note se rapporte à des instruments) » et « La reprise prend la place de la
    copie d'origine » : trois lignes fausses. Elle a maintenant SES lignes (`_lignesCibles`), tirées de sa config
    et des règles de plans de travail/CONCEPTION-2026-11-20-pratique-par-standards.md.

@@ -3977,7 +3977,7 @@ function genererSectionPerformance(da) {
         <div id="details-calculs-performance-${da}" class="carte-info-toggle carte-info-note u-hide">
             <strong>Méthodologie de calcul</strong>
             <br><br>
-            <strong>Pratique de notation active :</strong> ${indices.pratique === 'PAN' ? 'Par sélection de productions' : 'Sommative'}
+            <strong>Pratique de notation active :</strong> ${indices.pratique === 'PAN' ? 'Hybride' : 'Cumulative'}
             <br><br>
 ${noteLue ? `
             <strong>Règle de sélection :</strong> ${_genererTexteRegleSelectionPortfolio(noteLue.methodeCle, noteLue.nombreARetenir, noteLue.configCategories)}

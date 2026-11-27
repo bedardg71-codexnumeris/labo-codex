@@ -83,7 +83,7 @@ class PratiquePANStandards {
     // ========================================================================
 
     obtenirNom() {
-        return "Par sélection de productions";
+        return "Hybride";
     }
 
     obtenirId() {

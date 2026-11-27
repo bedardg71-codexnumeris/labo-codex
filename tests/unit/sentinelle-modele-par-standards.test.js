@@ -123,12 +123,13 @@ describe('M3 · la liste « Choisis un modèle »', () => {
         expect(JSON.stringify(carte)).not.toMatch(/CIB/);
     });
     it('les cinq autres cartes sont celles d\'avant, et aucune ne porte la marque', () => {
+        // ↻ 27 nov. 2026 (trois familles) : les sigles HYB et CUM ; « Modèle sommatif » garde son nom (rapport du lot).
         const { win, M } = monter();
         const autres = win.obtenirOptionsModeles().filter(o => o.value !== M.id);
         expect(autres).toEqual([
-            { value: 'STD-n-recents', label: 'N plus récentes <span class="wizard-v2-modele-famille">SEL · Général</span>', description: 'Garde les 5 évaluations les plus récentes, valorise l&#39;état actuel' },
-            { value: 'STD-n-meilleurs', label: 'N meilleures évaluations <span class="wizard-v2-modele-famille">SEL · Général</span>', description: 'Garde les 7 meilleures évaluations sur 10, valorise la progression' },
-            { value: 'SOM-litterature', label: 'Modèle sommatif <span class="wizard-v2-modele-famille">SOM · Général</span>', description: 'Pour débuter avec une pratique sommative' },
+            { value: 'STD-n-recents', label: 'N plus récentes <span class="wizard-v2-modele-famille">HYB · Général</span>', description: 'Garde les 5 évaluations les plus récentes, valorise l&#39;état actuel' },
+            { value: 'STD-n-meilleurs', label: 'N meilleures évaluations <span class="wizard-v2-modele-famille">HYB · Général</span>', description: 'Garde les 7 meilleures évaluations sur 10, valorise la progression' },
+            { value: 'SOM-litterature', label: 'Modèle sommatif <span class="wizard-v2-modele-famille">CUM · Général</span>', description: 'Pour débuter avec une pratique sommative' },
             { value: 'SPE-simple', label: 'Modèle simple <span class="wizard-v2-modele-famille">SPE · Général</span>', description: 'Pour débuter avec PAN – Spécifications' },
             { value: 'DEN-base', label: 'Modèle de base <span class="wizard-v2-modele-famille">DEN · Général</span>', description: win.MODELES_PRATIQUES_PREDEFINIS['DEN-base'].description.replace(/'/g, '&#39;') }
         ]);
