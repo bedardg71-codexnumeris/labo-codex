@@ -1734,7 +1734,8 @@ function construireModeleDocument(grille, cartouche, options, echelle) {
  * ↻ 20 nov. 2026 (retouche 2, décision de Cowork ; règle du 14 nov. : un·e novice ne reste pas bloqué·e sans savoir
  * pourquoi) — vrai quand la grille porte au moins un descripteur de niveau (un critère par niveaux, un texte écrit à
  * un niveau, n'importe lequel) et que l'échelle choisie n'a pas `seuilSuffisance` ou pas `seuilMaitrise`. Sans aucun
- * descripteur, rien à dire. L'échelle de départ (IDME) n'a pas de repères d'origine. Pure.
+ * descripteur, rien à dire. L'échelle de départ (IDME) semée avant le 27 nov. 2026 n'a pas de repères d'origine ; la
+ * page lui manque donc, pour l'élève, tant que la personne ne les a pas posés (fiche 5 du lot « Suivi »). Pure.
  */
 function autoevaluationSansReperes(grille, echelle, production) {
     if (!production) return false;

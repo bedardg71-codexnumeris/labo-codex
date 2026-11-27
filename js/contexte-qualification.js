@@ -14,7 +14,8 @@
    |                        | de Labo › Outils d'observation                          |
    | Performance (P)        | les repères de l'échelle de l'enseignant                |
    |                        | (`seuilSuffisance`, `seuilMaitrise`), lus par           |
-   |                        | `reperesPerformance`                                    |
+   |                        | `reperesPerformance` ; une échelle de départ sans       |
+   |                        | seuils y est lue à D et M (27 nov. 2026, plus bas)      |
    | Note de passage        | `NOTE_DE_PASSAGE` (`interpretation-config.js`)          |
 
    ⮕ LES MOTS (15 oct. 2026, décision de Grégoire, groupe 4 question 3) : des mots qui
@@ -193,9 +194,49 @@ function _echelleDeLaPerformance() {
         echelle: Object.assign({}, memes[0], {
             seuilSuffisance: reperes('seuilSuffisance')[0],
             seuilMaitrise: reperes('seuilMaitrise')[0]
-        }),
+        }, _seuilsDeDepartPourEnseignant(memes)),
         raison: null
     };
+}
+
+/* ===============================
+   L'ÉCHELLE DE DÉPART RESTÉE SANS SEUILS : UNE LECTURE À DEUX PORTÉES (fiche 5 du lot « Suivi », décisions de Grégoire
+   du 27 nov. 2026, 15 h 06 ; « Mes niveaux » tranché par Cowork)
+   Une échelle de départ semée avant le 27 nov. n'a pas ses deux seuils ; depuis, elle les porte (D et M, `echelles.js`).
+   L'ancienne est LUE à D et M ICI, et seulement ici : la source de la famille P, que lisent les écrans de
+   l'enseignant·e (phrase sous la bande, pastilles, bande, filtres, dépistage et niveau RàI, seuil de défi, bilan d'une
+   intervention). Ce que lit l'élève passe par l'échelle ENREGISTRÉE (`obtenirEchelleResolue` pour le bilan et la
+   synthèse, la bibliothèque pour le PDF des consignes et le modèle de cartouche) : rien n'y change tant que la personne
+   n'a pas posé ses seuils. Rien n'est écrit. Un seuil posé, un seul suffit, et ce sont les siens, partout.
+   =============================== */
+
+const ID_ECHELLE_DE_DEPART = 'ECHELLE_IDME_DEPART';
+const SEUILS_DE_L_ECHELLE_DE_DEPART = Object.freeze({ seuilSuffisance: 'D', seuilMaitrise: 'M' });
+const NOM_MES_NIVEAUX = 'Mes niveaux';   // `NOM_ECHELLE`, vue-simple-donnees.js
+
+/** Ce qui fait qu'un niveau est le même : son code, son nom, ses deux bornes et sa valeur, dans l'ordre de l'échelle. */
+function _empreinteDesNiveaux(niveaux) {
+    return JSON.stringify((niveaux || []).map((n) => [String((n && n.code != null) ? n.code : '').trim(), String((n && n.nom) || '').trim(),
+        Number(n && n.min), Number(n && n.max), Number(n && n.valeurCalcul)]));
+}
+
+/**
+ * Une échelle de départ restée sans seuils : celle de l'application (`ECHELLE_IDME_DEPART`), même modifiée ; ou une
+ * « Mes niveaux » de la Vue simple née avant le 27 nov. (sans marque d'origine) dont les niveaux sont restés ceux de
+ * l'échelle de départ de la même bibliothèque. Dans le doute, non.
+ */
+function _estEchelleDeDepartSansSeuils(echelle, bibliotheque) {
+    if (!echelle || echelle.seuilSuffisance || echelle.seuilMaitrise) return false;
+    if (echelle.id === ID_ECHELLE_DE_DEPART) return true;
+    if (echelle.origine || echelle.nom !== NOM_MES_NIVEAUX || !echelle.pratiqueId) return false;
+    const depart = bibliotheque.find((e) => e && e.id === ID_ECHELLE_DE_DEPART);
+    return !!depart && _empreinteDesNiveaux(echelle.niveaux) === _empreinteDesNiveaux(depart.niveaux);
+}
+
+/** Les seuils prêtés, pour l'enseignant·e, quand TOUTES les échelles des copies sont des échelles de départ sans seuils. */
+function _seuilsDeDepartPourEnseignant(memes) {
+    const bibliotheque = db.getSync(cle('echellesTemplates'), []) || [];
+    return memes.every((e) => _estEchelleDeDepartSansSeuils(e, bibliotheque)) ? SEUILS_DE_L_ECHELLE_DE_DEPART : {};
 }
 
 /**

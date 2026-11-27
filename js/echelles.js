@@ -419,6 +419,12 @@ async function assurerEchelleIdmeDeDepart() {
         // Copie PROFONDE : la constante partagée ne doit jamais devenir mutable
         // par l'utilisateur (une douzaine de lecteurs s'appuient dessus).
         niveaux: JSON.parse(JSON.stringify(niveauxDefaut)),
+        // 27 nov. 2026 (décision de Grégoire, 15 h 06, fiche 5 du lot « Suivi ») : la personne part avec ses deux seuils,
+        // modifiables comme le reste. Le seuil minimal de réussite sur D (65 % ; aucun niveau ne commence à 60, et les
+        // bornes ne bougent pas), le seuil de maîtrise sur M (75 %). Une échelle de départ semée avant ce jour n'est pas
+        // réécrite : l'enseignant·e la lit à D et M (`contexte-qualification.js`), l'élève non.
+        seuilSuffisance: 'D',
+        seuilMaitrise: 'M',
         verrouille: false,
         dansBibliotheque: true
     };
