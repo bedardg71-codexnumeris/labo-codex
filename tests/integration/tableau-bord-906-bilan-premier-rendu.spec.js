@@ -48,6 +48,16 @@ test('tableau de bord · la phrase du bilan des fondamentaux décrit le groupe a
         await window.activerModeDemo();
         await pause(1500);
 
+        // ↻ 27 nov. 2026 (verdict de l'assemblage) : le seuil de défi est FIXÉ à 0,70, par un choix marqué. Depuis le lot
+        // suivi du 27 nov., sans choix, il suit le seuil de maîtrise de l'échelle (0,75 sur la démo), et le bilan de la démo
+        // devient « 6 maîtrisent, 1 en plateau, 3 en difficulté » : DEMO004 ne « maîtrise » plus, DEMO015 n'est plus « le
+        // seul en difficulté », et les trois scénarios ci-dessous ne jugeraient plus ce qu'ils disent. Ce banc juge le
+        // PREMIER RENDU de la phrase, pas le seuil : le défaut du seuil est jugé par seuil-defi-suit-la-maitrise-2026-11-27.
+        const seuilsDuBanc = chargerSeuilsInterpretation();
+        seuilsDuBanc.defiSpecifique = 0.70;
+        seuilsDuBanc.defiSpecifiqueChoisi = true;
+        sauvegarderSeuilsInterpretation(seuilsDuBanc);
+
         // La carte des patterns se reconnaît à son titre (`data-tooltip="tdb-patterns"`) : la carte RàI, sa voisine dans le
         // même conteneur, porte elle aussi une `.interpretation-barre`.
         const lire = () => {
@@ -85,11 +95,12 @@ test('tableau de bord · la phrase du bilan des fondamentaux décrit le groupe a
         sauvegarderDonneesSelonMode('groupeEtudiants', sans('DEMO015'));
         const retireEnDifficulte = await unRendu();
 
-        return { nbEleves: complet.length, depart, retire, rajoute, retireEnDifficulte };
+        return { nbEleves: complet.length, seuilDeDefi: obtenirSeuil('defiSpecifique'), depart, retire, rajoute, retireEnDifficulte };
     });
 
     // Le départ est bien celui que la sonde a relevé (sinon les phrases figées ne jugeraient rien).
     expect(m.nbEleves).toBe(10);
+    expect(m.seuilDeDefi, 'le seuil de défi fixé par le banc').toBe(0.70);
     expect(m.depart).toMatchObject({ carte: true, phrase: PHRASE_DIX, groupeBarre: 10 });
 
     // (A) retiré : la barre ET la phrase décrivent les neuf, au premier rendu.
