@@ -2,9 +2,9 @@
 
 Branche `lot/familles-cum-hyb-2026-11-27`, partie de `lot/file-sans-gregoire-2026-11-27` à `951de3f8`. **Aucune fusion vers `main`, aucun bump, rien au changelog.** Affichage seulement : aucun calcul, aucun identifiant, aucune donnée ne change (`SOM`, `STD`, les ids `sommative`, `standards`, les classes CSS et les couleurs restent). Les textes 1 à 28 du mandat sont posés mot pour mot ; les mots neufs vivent aussi dans `plans de travail/TEXTES-2026-11-27-familles-cum-hyb.md`, le point unique à corriger si tu en changes un avant la fusion.
 
-**Reste** : ta décision sur « Modèle sommatif » (section 2) ; le regard sous Safari (section 6) ; le verdict Playwright WebKit du Mac (ici, Chromium seulement) ; la fusion.
+**Reste** : ta décision sur « Modèle sommatif » (section 2) ; « Hybride (démo) », à poser dans le push de la release (section 2) ; le regard sous Safari (section 6) ; le verdict Playwright WebKit du Mac (ici, Chromium seulement) ; la fusion.
 
-**Source, pas stock** : une pratique déjà créée chez quelqu'un garde le nom qu'elle porte (« Sommative traditionnelle », « Par sélection de productions », « Par sélection de productions (démo) » dans une démo déjà ouverte). Seuls les badges, les menus et les libellés de famille, calculés à l'affichage, changent chez tout le monde. C'est assumé, et dit dans la ligne de Nouvelles (« Une pratique que tu as déjà créée garde son nom. »).
+**Source, pas stock** : une pratique déjà créée chez quelqu'un garde le nom qu'elle porte (« Sommative traditionnelle », « Par sélection de productions »). Seuls les badges, les menus et les libellés de famille, calculés à l'affichage, changent chez tout le monde. C'est assumé, et dit dans la ligne de Nouvelles (« Une pratique que tu as déjà créée garde son nom. »).
 
 ## 1. Ce qui est fait
 
@@ -12,7 +12,7 @@ Branche `lot/familles-cum-hyb-2026-11-27`, partie de `lot/file-sans-gregoire-202
 
 **Qui lit `famille` (mesuré, comme demandé)** : un seul écran. `_nomPratique` du Comparateur (`js/comparateur-pratiques.js:266`) s'en sert en dernier repli, pour une pratique sans nom ni instance : il dira « Cumulative » ou « Hybride » au lieu de « Sommative » ou « PAN ». `obtenirLabelFamille()` des quatre classes de pratique n'a aucun appelant. Les autres `famille` du code (`ctx.famille` du tableau, `recit.famille`, `designation.famille`) sont des codes internes, sans lien avec ce champ.
 
-**Les textes** : 1 à 13, 15 à 28 posés tels quels. Le 14 l'est pour trois noms sur quatre (section 2). Quatre précisions :
+**Les textes** : 1 à 13, 15 à 28 posés tels quels. Le 14 l'est pour deux noms sur quatre (section 2). Quatre précisions :
 - **Textes 3 et 5** : les cartes des lignes 230 et 231 sont sur l'écran « Choisis directement ta famille » (la voie rapide), pas sur « Décrire ma pratique ». Le mandat dit « Décrire ma pratique », ses numéros de ligne désignent la voie rapide : j'ai suivi les numéros. « Décrire ma pratique » ne nomme aucune famille.
 - **Texte 26** : « la ligne suivante » existe sous deux formes, « Je regarde » (ligne 1323) et « Nous faisons » (ligne 682, plus courte, sans « (en fin d'apprentissage…) »). Les deux portent maintenant ton texte entier.
 - **Les insécables d'origine sont gardés** (« ex.&nbsp;: I-D-M-E » dans la description de l'hybride, les `&nbsp;` d'`index.html`).
@@ -36,7 +36,9 @@ Deux voies, que je ne tranche pas :
 1. garder « Modèle sommatif » (le nom d'un modèle, pas d'une famille) ;
 2. le renommer **et** apprendre à `estModeleFourniIntact` à tenir l'ancien nom pour intact (un lot à part, qui touche une garde de suppression).
 
-Les trois autres noms du texte 14 sont posés : « Cumulative traditionnelle » et « Cumulative avec remplacement » (`js/pratiques/pratiques-predefines.js`, lus seulement par une migration qui ne regarde que les clés : aucun écran ne les montre), « Hybride (démo) » (`js/pack-demo-10.js`, reconnu partout par l'id `demo-std-litt`, jamais par son nom ; le pack se charge avec le jeton du build, donc il parviendra aux navigateurs avec la prochaine version).
+Posés : « Cumulative traditionnelle » et « Cumulative avec remplacement » (`js/pratiques/pratiques-predefines.js`, lus seulement par une migration qui ne regarde que les clés : aucun écran ne les montre).
+
+**« Hybride (démo) » : prêt, mais RETIRÉ du lot, à poser dans le push de la release.** Le renommage ne casse aucune reconnaissance (la démo se reconnaît partout par l'id `demo-std-litt`, jamais par son nom), mais `js/pack-demo-10.js` se sert sous le jeton du **build** : la sentinelle #825 refuse au pre-push tout commit qui le touche sans release dans le même push (une URL immuable servirait deux contenus). Le mandat interdit le bump : je n'ai pas contourné le hook. La ligne à changer, au moment de la release : `js/pack-demo-10.js:7422`, `"nom": "Par sélection de productions (démo)"` devient `"nom": "Hybride (démo)"` ; puis remettre « Hybride (démo) » dans `tests/integration/bibliotheque-deux-colonnes-1156.spec.js` (six noms et la confirmation de suppression), retirer l'exception de la démo dans `sentinelle-sel-sans-pan-2026-11-21` (C) et dans `sentinelle-familles-cum-hyb-2026-11-27` (D). D'ici là, la démo montre une pratique nommée « Par sélection de productions (démo) », de famille « Hybride » (badge HYB).
 
 ## 3. Mesures demandées (section D)
 
@@ -88,7 +90,7 @@ Le calcul à deux blocs (troisième lot) n'est pas touché.
 6. **L'Aide** (Conception) : « Cumulative », « Hybride », et le paragraphe « Hybride. … en « Deux blocs » … ».
 7. **Le parcours « Évaluer une première production »**, bulles 1 et 2, dans ses deux temps.
 8. **Labo › Comparateur** : les menus des colonnes (« CUM · … », « HYB · … »), l'en-tête du CSV.
-9. **La démo neuve** : la pratique s'appelle « Hybride (démo) » (après la prochaine version seulement : jeton du build).
+9. **La démo** : sa pratique garde « Par sélection de productions (démo) » (renommage à la release) ; sa famille dit « Hybride », son badge HYB.
 
 ## 7. La ligne de Nouvelles (pour la release, PAS au changelog)
 
@@ -107,4 +109,4 @@ Mesuré contre `951de3f8` :
 ## Verdict Vitest
 
 Depuis `tests/` : **965 fichiers, 12 491 essais, 0 rouge** (`npx vitest run`), puis, après la dernière retouche (le glossaire, ligne 609), les 18 fichiers qui lisent le glossaire : 291 verts. 
-**Playwright sous Chromium (un indice, pas le verdict Safari)**, les bancs touchés par le lot, un fichier à la fois : `chaines-etapes-1149-lot-3b`, `modele-par-standards`, `standards-sans-portfolio-lot-3` (15 verts, 2 captures sautées) ; `je-regarde-evaluer-2026-11-18`, `modele-fourni-non-supprimable`, `bibliotheque-deux-colonnes-1156`, `standards-sans-portfolio-lot-1` (29 verts, 1 rouge) ; `vue-simple` (61 verts). **Le rouge** (`bibliotheque-deux-colonnes-1156`, « productions : « Tout garder dans ma bibliothèque » … », ligne 218) rougit à l'identique sur la base `951de3f8` sous Chromium : il ne vient pas de ce lot, et il porte sur les productions. Non joués : `vue-simple-modeles-actuels-epingles` (sa référence est WebKit, il rougit aussi sur la base sous Chromium). **Le verdict WebKit reste à prendre sur le Mac.**
+**Playwright sous Chromium (un indice, pas le verdict Safari)**, les bancs touchés par le lot, un fichier à la fois : `chaines-etapes-1149-lot-3b`, `modele-par-standards`, `standards-sans-portfolio-lot-3` (15 verts, 2 captures sautées) ; `je-regarde-evaluer-2026-11-18`, `modele-fourni-non-supprimable`, `bibliotheque-deux-colonnes-1156`, `standards-sans-portfolio-lot-1` (29 verts, 1 rouge ; après le retrait de « Hybride (démo) », les six essais « pratiques » de `bibliotheque-deux-colonnes-1156` rejoués : 6 verts) ; `vue-simple` (61 verts). **Le rouge** (`bibliotheque-deux-colonnes-1156`, « productions : « Tout garder dans ma bibliothèque » … », ligne 218) rougit à l'identique sur la base `951de3f8` sous Chromium : il ne vient pas de ce lot, et il porte sur les productions. Non joués : `vue-simple-modeles-actuels-epingles` (sa référence est WebKit, il rougit aussi sur la base sous Chromium). **Le verdict WebKit reste à prendre sur le Mac.**
