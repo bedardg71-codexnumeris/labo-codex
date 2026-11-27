@@ -156,7 +156,7 @@ const PRATIQUE_PAN_STANDARDS_CINQ_NIVEAUX = {
 
 const PRATIQUE_SOMMATIVE_TRADITIONNELLE = {
     id: 'sommative-traditionnelle',
-    nom: 'Sommative traditionnelle',
+    nom: 'Cumulative traditionnelle',
     auteur: 'Labo Codex',
     etablissement: 'Cégep',
     description: 'Moyenne pondérée traditionnelle avec critères fixes',
@@ -479,7 +479,7 @@ const PRATIQUE_PAN_MAITRISE = {
 
 const PRATIQUE_SOMMATIVE_REMPLACEMENT = {
     id: 'sommative-remplacement',
-    nom: 'Sommative avec remplacement',
+    nom: 'Cumulative avec remplacement',
     auteur: 'Labo Codex',
     etablissement: 'Cégep',
     description: 'Évaluation finale peut remplacer mi-session si note supérieure. Valorise la progression.',

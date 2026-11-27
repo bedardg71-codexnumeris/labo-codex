@@ -14,6 +14,10 @@
  *   C. Chaque endroit corrigé : le nom qu'il affiche pour cette pratique ne contient ni « PAN » ni « Standards ».
  *   D. Ce qui NE change PAS (point 4 de la consigne) : la logique qui peut afficher un badge « PAN » est intacte ; les
  *      autres familles gardent leurs noms ; le code interne STD reste.
+ *
+ * ↻ 27 nov. 2026 (décisions de Grégoire, 14 h 07 à 14 h 21) : cette pratique s'appelle maintenant « Hybride » (badge HYB).
+ * Ce qui reste verrouillé ici : son nom ne dit ni « PAN » ni « standards ». Les textes des repères que porte
+ * TEXTES-2026-11-27-familles-cum-hyb.md se lisent dans ce fichier-là, qui remplace pour eux celui du 21 nov. (intact).
  * BREAK-TESTS : journal en fin de fichier.
  */
 import { describe, it, expect } from 'vitest';
@@ -23,7 +27,6 @@ import { chargerScript } from './_helpers/charger-script.js';
 import { chargerAvecInterne, RACINE } from './_helpers/bac-suivi.js';
 
 const lire = (f) => readFileSync(path.join(RACINE, f), 'utf8');
-const NOM = 'Par sélection de productions';
 const INTERDIT = /\bPAN\b|standards/i;
 const echapperHtml = (s) => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const db = { getSync: (k, d) => (d !== undefined ? d : null), setSync() {} };
@@ -31,7 +34,12 @@ const REG = chargerScript('js/pratiques/pratique-registre.js', { db, cle: (k) =>
 
 /** Les textes `> …` d'un repère du fichier validé du 21 nov. */
 const TEXTES = lire('plans de travail/TEXTES-2026-11-21-selection-sans-PAN.md');
-const texte = (repere) => TEXTES.split(/^## /m).find(s => s.startsWith(repere + ' ·')).split('\n').filter(l => l.startsWith('> ')).map(l => l.slice(2).trim());
+const TEXTES_27 = lire('plans de travail/TEXTES-2026-11-27-familles-cum-hyb.md');
+const REMPLACES_27 = ['A1', 'A2', 'A3', 'F3', 'F4', 'F10', 'P1', 'P2', 'G1', 'G5', 'T2', 'H1', 'H2'];
+const citer = (fichier, repere) => fichier.split(/^## /m).find(s => s.startsWith(repere + ' ·')).split('\n').filter(l => l.startsWith('> ')).map(l => l.slice(2).trim());
+const texte = (repere) => citer(REMPLACES_27.includes(repere) ? TEXTES_27 : TEXTES, repere);
+// Le nom de la pratique à l'écran : « Hybride » depuis le 27 nov. 2026 (lu dans le menu « Type », repère F3).
+const NOM = texte('F3')[0];
 
 function gestion() {
     const win = {};
@@ -80,7 +88,7 @@ describe('B · les bulles G1, G2 et l\'assistant (A1, A2, A3)', () => {
     it('G5 : la bulle de « Type de pratique », mot pour mot', () => {
         const bulle = lire('js/accompagnement-contenu-hover.js').replace(/\\'/g, '\'');
         expect(bulle).toContain(`'cn-pratique-type':\n        '${texte('G5')[0]}'`);
-        expect(/SEL = ([^(]*)\(/.exec(texte('G5')[0])[1]).not.toMatch(INTERDIT);
+        expect(/HYB = ([^(]*)\(/.exec(texte('G5')[0])[1]).not.toMatch(INTERDIT);   // ↻ 27 nov. 2026 : le sigle HYB
     });
     it('l\'assistant : le nom du récapitulatif, la carte de la voie rapide, le titre de la configuration', () => {
         const win = { addEventListener() {}, removeEventListener() {}, echapperHtml };
@@ -99,7 +107,7 @@ const ENDROITS = [
     ['index.html', /<option value="standards">([^<]*)<\/option>/g, 1],                                     // F3
     ['index.html', /<strong>([^<]*)<\/strong>&nbsp;: la note retient les résultats/g, 1],                    // F4
     ['index.html', /est utilisée dans la pratique ([^.]*)\./g, 1],                                           // la carte « Note » des échelles
-    ['index.html', /<h4 class="u-mb-10 u-texte-bleu">Sommative<\/h4>[\s\S]*?<h4 class="u-mb-10 u-texte-bleu">([^<]*)<\/h4>/g, 1], // Aide
+    ['index.html', /<h4 class="u-mb-10 u-texte-bleu">Cumulative<\/h4>[\s\S]*?<h4 class="u-mb-10 u-texte-bleu">([^<]*)<\/h4>/g, 1], // Aide (↻ 27 nov.)
     ['index.html', /<p><strong>([^<]*)\.<\/strong> Si ta pratique compte au moins une production/g, 1],     // Aide
     ['js/pratiques/pratique-pan-standards.js', /obtenirNom\(\) \{\s*return "([^"]*)";/g, 1],                 // F10, donc E1
     ['js/profil-etudiant-actions.js', /pratique: '([^']*)',/g, 2],                                           // P1, P2
@@ -107,7 +115,7 @@ const ENDROITS = [
     ['js/profil-etudiant-actions.js', /return 'Pratique ([^,]*), mais/g, 2],
     ['js/etudiants.js', /\(isPAN \? '([^']*)'/g, 1],                                                         // l'aide des indices
     ['js/etudiants.js', /<strong>([^<]*)<\/strong> : Moyenne des/g, 1],
-    ['js/etudiants.js', /pratique pédagogique choisie \(Sommative, ([^,]*), ou autre\)/g, 1],
+    ['js/etudiants.js', /pratique pédagogique choisie \(Cumulative, ([^,]*), ou autre\)/g, 1],   // ↻ 27 nov.
     ['js/comparateur-pratiques.js', /Pour certaines pratiques — surtout ([^—]*) —/g, 1],                      // la note de l'Exploration
     ['js/donnees-v2.js', /'pan-standards': '([^']*)'/g, 1],
     ['js/profil-etudiant-sections-affichage.js', /indices\.pratique === 'PAN' \? '([^']*)'/g, 1],
@@ -120,6 +128,9 @@ describe('C · aux endroits corrigés, le nom affiché pour SEL ne contient ni �
         expect(noms).toHaveLength(n);
         for (const nom of noms) {
             expect(nom, fichier).not.toMatch(INTERDIT);
+            // ↻ 27 nov. 2026 : la démo garde « Par sélection de productions (démo) » jusqu'à la release qui la renommera
+            // « Hybride (démo) » (pack servi sous le jeton du build : sentinelle #825). Son nom reste sans « PAN » ni « standards ».
+            if (fichier === 'js/pack-demo-10.js') continue;
             expect(nom.replace(/[«»]/g, '').trim().toLowerCase(), fichier).toContain(NOM.toLowerCase().replace(/ \(démo\)$/, ''));
         }
     });
@@ -136,7 +147,9 @@ describe('D · ce qui ne change pas', () => {
     it('point 4 : la logique qui peut afficher un badge « PAN » (fiche, `pratiques[0]` à « PAN ») est intacte', () => {
         expect(lire('js/pratiques-gestion.js')).toContain("const typesValides = ['SOM', 'STD', 'SPE', 'DEN', 'CIB', 'PAN'];");
         expect((/>([^<]*)<\/span>$/.exec(G.genererBadgeTypePratique({ pratiques: ['PAN'] })) || [])[1]).toBe('PAN');
-        expect(REG.obtenirLabelFamillePratique('standards')).toBe('PAN');   // le libellé du registre, lu par aucun écran (mesuré)
+        // ↻ 27 nov. 2026 : le libellé de famille du registre est « Hybride » (trois familles) ; un seul écran le lit, le repli
+        // de `_nomPratique` du Comparateur (mesuré le 27 nov.).
+        expect(REG.obtenirLabelFamillePratique('standards')).toBe('Hybride');
     });
     it('les autres familles gardent leurs noms ; le code interne de SEL reste STD', () => {
         expect(G.familleDeLaPratique({ type: 'specifications' }).nom).toBe('PAN-Spécifications');

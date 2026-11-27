@@ -19,7 +19,21 @@ import { magasinBanc, CAS_RECAP, monterAssistant, recapDuCas } from './_helpers/
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const RACINE = path.resolve(__dirname, '..', '..');
-const AVANT = JSON.parse(readFileSync(path.join(__dirname, 'fixtures', 'recap-familles-avant.json'), 'utf8'));
+// ↻ 27 nov. 2026 (trois familles, `lot/familles-cum-hyb-2026-11-27`) : la référence reste celle d'avant ; les SEULS mots
+// changés du jour lui sont appliqués ici, et rien d'autre ne doit différer (sigles, noms et description des deux familles,
+// l'exemple du nom, le titre de la configuration, le mode « Deux blocs »).
+const RETOUCHES_27_NOV = [
+    ['recap-badge">SOM<', 'recap-badge">CUM<'], ['recap-badge">SEL<', 'recap-badge">HYB<'],
+    ['badge-label">Sommative<', 'badge-label">Cumulative<'], ['badge-label">Par sélection de productions<', 'badge-label">Hybride<'],
+    ["Ta note finale est calculée par une moyenne pondérée des évaluations. C'est la méthode traditionnelle, largement utilisée.",
+        "Ta note finale est le cumul pondéré de tes évaluations. C'est la méthode traditionnelle, souvent appelée sommative."],
+    ['que ta règle retient, pas de la moyenne de toutes.', "que ta règle retient ; d'autres peuvent compter d'office."],
+    ['Ex\u00a0: Sommative', 'Ex\u00a0: Cumulative'], ['Ex\u00a0: Par sélection de productions', 'Ex\u00a0: Hybride'],
+    ['Configuration – Par sélection de productions</h4>', 'Configuration – Hybride</h4>'],
+    ['Hybride (N meilleures + Obligatoires)', 'Deux blocs (N meilleures + Obligatoires)']
+];
+const AVANT = Object.fromEntries(Object.entries(JSON.parse(readFileSync(path.join(__dirname, 'fixtures', 'recap-familles-avant.json'), 'utf8')))
+    .map(([nom, html]) => [nom, RETOUCHES_27_NOV.reduce((t, [avant, apres]) => t.split(avant).join(apres), html)]));
 const srcComparateur = readFileSync(path.join(RACINE, 'js', 'comparateur-pratiques.js'), 'utf8');
 
 describe('A · le récapitulatif de l\'assistant rend exactement le HTML d\'avant, famille par famille', () => {
@@ -101,7 +115,7 @@ describe('B · le comparateur montre d\'une pratique enregistrée ce que l\'assi
             portfolio: { nombreARetenir: 6, minimumCompletion: 7, methodeSelection: 'meilleurs' } } };
         const avant = JSON.stringify(demo);
         const s = win.syntheseConfigurationDePratique(demo);
-        expect(s).toContain('<h4>Configuration – Par sélection de productions</h4>');
+        expect(s).toContain('<h4>Configuration – Hybride</h4>');   // ↻ 27 nov. 2026
         expect(s).toContain('<strong>Artefacts retenus\u00a0:</strong> 6');
         expect(JSON.stringify(demo)).toBe(avant);   // la pratique lue n'est pas modifiée
     });

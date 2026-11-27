@@ -17,7 +17,7 @@ const indexHtml = 'file://' + path.join(path.resolve(__dirname, '..', '..'), 'in
 const T = 'tstd1028';
 const DA = '1028601';
 const TEMOIN = '1028602';
-const TERMINALE_SEULE = 'Seule l\'évaluation terminale a une note. Par sélection de productions, la note du cours s\'appuie aussi sur les productions retenues : elle ne se calcule pas sur la terminale seule.';
+const TERMINALE_SEULE = 'Seule l\'évaluation terminale a une note. En pratique hybride, la note du cours s\'appuie aussi sur les productions retenues : elle ne se calcule pas sur la terminale seule.';
 // La phrase d'un pool d'artefacts sans évaluation (9 nov. 2026, 17 h 38 : Grégoire remplace « Aucun artefact du portfolio n'est encore évalué. », validée le 28 oct., par cette phrase, partout).
 const AUCUN_ARTEFACT = 'Aucune production n\'est encore évaluée.';
 

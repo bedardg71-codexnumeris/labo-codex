@@ -125,11 +125,13 @@ async function afficherListePratiquesMateriel() {
  * telle qu'avant.
  */
 const FAMILLES_TAXONOMIQUES = {
-    'sommative': { nom: 'Sommative', anglais: 'Traditional Grading', resume: 'Moyenne pondérée des évaluations' },
+    // 27 nov. 2026 (trois familles, décision de Grégoire) : « Sommative » → « Cumulative », « Par sélection de productions »
+    // → « Hybride ». Les clés (ids internes) ne changent pas.
+    'sommative': { nom: 'Cumulative', anglais: 'Traditional Grading', resume: 'Cumul pondéré des évaluations' },
     // 21 nov. 2026 (choix de Grégoire, 7 h 44 ; les sources ne tranchent pas) : l'application n'affirme plus que cette
     // pratique est une PAN, ni qu'elle n'en est pas une. Le nom accepté le 20 nov., sans préfixe ni parenthèse anglaise ;
     // le résumé reprend les mots acceptés de la carte de la voie rapide (D5), à la place de « Maîtrise de standards/objectifs ».
-    'standards': { nom: 'Par sélection de productions', resume: 'Des niveaux (ex. I-D-M-E) ; la note retient certaines productions' },
+    'standards': { nom: 'Hybride', resume: 'Des niveaux (ex. I-D-M-E) ; la note retient certaines productions' },
     'specifications': { nom: 'PAN-Spécifications', anglais: 'Specifications Grading', resume: 'Évaluation dichotomique par forfaits' },
     'denotation': { nom: 'PAN-Dénotation', resume: 'Note finale certificative posée (non calculée) selon l\'atteinte de cibles d\'apprentissage' },
     // Lot 1 de la pratique « Par standards » (21 nov. 2026). Mots PROPOSÉS.
@@ -192,12 +194,12 @@ function genererBadgeTypePratique(pratique) {
     // (pas de donnée utilisateur) repris des cartes « voie rapide » du wizard, donc
     // pas d'échappement requis. Apostrophes seules → sûres dans un attribut "double".
     // 21 nov. 2026 (« le sigle suit le nom ») : les bulles sont rangées par CODE interne (celui de `pratiques[0]`) ; le
-    // badge affiche le SIGLE (`sigleDuCode`). Code STD = « Par sélection de productions », sigle SEL (mots acceptés du
+    // badge affiche le SIGLE (`sigleDuCode`). Code STD = « Hybride » (27 nov.), sigle HYB (avant : SEL, mots acceptés du
     // renommage, A1 et D5) ; code CIB = « Par standards », sigle STD (F3, version de Grégoire). 21 nov., 7 h 44 (choix de
     // Grégoire) : aucune bulle ne dit « PAN » de SEL (G1), et la bulle PAN ne liste plus de sigles (G2).
     const TOOLTIPS_FAMILLE = {
-        SOM: 'Sommative — note finale par moyenne pondérée des évaluations.',
-        STD: 'Par sélection de productions : des niveaux (ex. I-D-M-E) ; la note retient certaines productions.',
+        SOM: 'Cumulative — note finale par cumul pondéré des évaluations.',
+        STD: 'Hybride : des niveaux (ex. I-D-M-E) ; la note retient certaines productions.',
         SPE: 'PAN – Spécifications — travaux acceptables ou non ; note selon les forfaits réussis.',
         DEN: 'PAN – Dénotation — note finale certificative posée (non calculée) selon l\'atteinte de cibles d\'apprentissage explicites ; abandonne la fonction de tri.',
         CIB: 'Par standards : un niveau par cible d\'apprentissage du cours ; la note vient du meilleur niveau démontré pour chaque cible.',

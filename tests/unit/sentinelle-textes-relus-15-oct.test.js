@@ -153,7 +153,7 @@ describe('Bloc 3 — les bulles de l\'assistant de pratique', () => {
     });
 
     it('« Approche d\'évaluation » : la phrase corrigée par Cowork, et l\'étape suivante est bien le portfolio', () => {
-        expect(bulle('wizard-etape-approche-evaluation')).toBe('Par sélection de productions, la note se construit sur le portfolio ; à l’étape suivante, tu choisis quels artefacts comptent.');
+        expect(bulle('wizard-etape-approche-evaluation')).toBe('En pratique hybride, la note se construit sur le portfolio ; à l’étape suivante, tu choisis quels artefacts comptent.');
         expect(HOVER).not.toContain('pas la moyenne de tous les essais');
         const approche = tranche(WIZARD, "id: 'approche-evaluation',", "\n    },");
         expect(approche).toMatch(/suivant: \(\) => 'config-portfolio'/);

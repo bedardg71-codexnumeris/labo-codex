@@ -56,7 +56,13 @@ const PRESENCES = paragraphes('## Trou 3');
 const SUPPRIMER = paragraphes('## Trou 1');
 const RENCONTRES = citation('## Trou 5');
 const CE_QUI_SORT = paragraphes('## Trou 6');
-const INTRO_SOMMATIVE = paragraphes('✅ **Introduction et Sommative');
+// ↻ 27 nov. 2026 (trois familles, mandat du lot `lot/familles-cum-hyb-2026-11-27`, texte 25) : les titres « Cumulative. » et
+// « Hybride. » ; dans le paragraphe hybride, le mode « Hybride » s'appelle « Deux blocs » (texte 12, porté à l'Aide pour
+// qu'elle ne nomme pas un choix disparu du menu). Les fichiers TEXTES restent intacts : les retouches s'appliquent ici.
+const RETOUCHES_27_NOV = [['Sommative. La note est', 'Cumulative. La note est'], ['Par sélection de productions. Si ta pratique', 'Hybride. Si ta pratique'],
+    ['ou, en « Hybride », les N meilleures', 'ou, en « Deux blocs », les N meilleures'], ['En hybride, une obligatoire', 'En deux blocs, une obligatoire']];
+const retoucher27 = (p) => RETOUCHES_27_NOV.reduce((t, [avant, apres]) => t.replace(avant, apres), p);
+const INTRO_SOMMATIVE = paragraphes('✅ **Introduction et Sommative').map(retoucher27);
 const SPECIFICATIONS = paragraphes('✅ **Spécifications');
 // Le lot 5 des standards sans portfolio retouche ce paragraphe (textes 8, 11 et 12, validés le 29 oct., 21 h 43 à 21 h 47) :
 // chaque paire « aujourd'hui → nouveau » est lue dans son fichier TEXTES, et chacune doit s'appliquer.
@@ -70,7 +76,7 @@ const STANDARDS = paragraphes('✅ **Standards, réécriture').map((p) => {
     // lit dans le fichier du 21 nov. (repère H2), qui le remplace pour ce bloc ; le fichier du 28 oct. reste intact.
     const titre = SANS_PAN.split(/^## /m).find((s) => s.startsWith('H2 ·')).split('\n').find((l) => l.startsWith('> ')).slice(2).trim();
     expect(p.startsWith('PAN – Standards. ')).toBe(true);
-    return faites.reduce((t, [avant, apres]) => t.replace(avant, apres), p).replace(/^PAN – Standards\. /, titre + ' ');
+    return retoucher27(faites.reduce((t, [avant, apres]) => t.replace(avant, apres), p).replace(/^PAN – Standards\. /, titre + ' '));
 });
 const STANDARDS_DU_28 = paragraphes('✅ **Standards : validées');
 const DENOTATION = paragraphes('✅ **Dénotation');

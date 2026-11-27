@@ -52,18 +52,18 @@ describe('#310 · source consolidée de la note A/C/P (terme dynamique)', () => 
 
     it('pratique standards : utilise « artefact(s) », jamais « production »', () => {
         const html = win.genererExplicationCalculIndices();
-        expect(html).toContain('Par sélection de productions');   // ↻ 21 nov. 2026, 7 h 44 (choix de Grégoire) : plus de « PAN-Standards »
+        expect(html).toContain('Hybride');   // ↻ 21 nov. 2026, 7 h 44 (choix de Grégoire) : plus de « PAN-Standards » ; ↻ 27 nov. 2026 : « Hybride »
         expect(html).not.toMatch(/\bPAN\b/);
         expect(html).toContain('meilleurs artefacts');
         expect(html).toContain('Un artefact devient');
         // Le terme des travaux évalués (#310), pas le nom de la famille : depuis le 21 nov., ce nom contient le mot.
-        expect(html.replaceAll('Par sélection de productions', '')).not.toContain('production');
+        expect(html).not.toContain('production');
     });
 
     it('pratique sommative : utilise « production(s) », aucun « artefact » figé', () => {
         chargerAvecPratique('sommative');
         const html = win.genererExplicationCalculIndices();
-        expect(html).toContain('Sommative');
+        expect(html).toContain('Cumulative');   // ↻ 27 nov. 2026
         expect(html).toContain('Un production devient'); // terme dynamique (accord = #309)
         expect(html).toContain('8 productions réalisés');
         expect(html).not.toContain('artefact');

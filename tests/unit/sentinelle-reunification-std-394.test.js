@@ -256,7 +256,7 @@ describe('#394 · règles 3 et 5 — avertissements de transparence + migration 
         const avert = win.validerProductionsStd(corpusL2().productions);
         const nonParticipante = avert.find(a => a.message.includes('Examen intra'));
         expect(nonParticipante).toBeTruthy();
-        expect(nonParticipante.message).toMatch(/n'entre pas dans le calcul SEL/);
+        expect(nonParticipante.message).toMatch(/n'entre pas dans le calcul HYB/);   // ↻ 27 nov. 2026
         expect(nonParticipante.productionId).toBeUndefined();
     });
 

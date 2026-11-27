@@ -375,7 +375,7 @@ function genererExplicationCalculIndices(complementHtml = '') {
 
     // Lot N1b (21 sept. 2026) : sans pratique assignée, l'aide ne nomme aucune pratique (avant : « PAN-Standards »,
     // le repli PRATIQUE_DEFAUT) et dit, pour P, la phrase du diagnostic du profil — aucun mot neuf.
-    let html = '<strong>Méthodes de calcul des indices' + (pratique ? ' (pratique active : ' + (isPAN ? 'Par sélection de productions' : 'Sommative') + ')' : '') + '</strong><br><br>';
+    let html = '<strong>Méthodes de calcul des indices' + (pratique ? ' (pratique active : ' + (isPAN ? 'Hybride' : 'Cumulative') + ')' : '') + '</strong><br><br>';
 
     // A - Assiduité (TOUJOURS DYNAMIQUE - comportement cumulatif)
     html += '<strong class="u-texte-bleu">A (Assiduité)</strong> : ';
@@ -405,11 +405,11 @@ function genererExplicationCalculIndices(complementHtml = '') {
         const diagnostic = (typeof window._diagnostiquerNoteNonCalculable === 'function') ? window._diagnostiquerNoteNonCalculable() : '';
         if (diagnostic) html += '<br>→ ' + echapperHtml(diagnostic);
     } else if (isPAN) {
-        html += '<br>→ <strong>Par sélection de productions</strong> : Moyenne des <strong>' + nbArtefacts + ' meilleurs ' + termePlur + '</strong> selon l\'échelle IDME. ';
+        html += '<br>→ <strong>Hybride</strong> : Moyenne des <strong>' + nbArtefacts + ' meilleurs ' + termePlur + '</strong> selon l\'échelle IDME. ';
         html += '<br><em class="etud-texte-gris-petit">&nbsp;&nbsp;&nbsp;Les niveaux IDME (Incomplet, Développement, Maîtrise, Étendu) sont convertis en pourcentages.</em>';
         html += '<br><em class="etud-texte-gris-petit">&nbsp;&nbsp;&nbsp;Seuls les ' + nbArtefacts + ' meilleurs ' + termePlur + ' comptent dans le calcul de P</em>';
     } else {
-        html += '<br>→ <strong>Sommative</strong> : Moyenne pondérée de <strong>toutes les évaluations</strong>. ';
+        html += '<br>→ <strong>Cumulative</strong> : Moyenne pondérée de <strong>toutes les évaluations</strong>. ';
         html += '<br><em class="etud-texte-gris-petit">&nbsp;&nbsp;&nbsp;Formule : <code>P = Σ(note × pondération) / Σ(pondérations)</code></em>';
         html += '<br><em class="etud-texte-gris-petit">&nbsp;&nbsp;&nbsp;Toutes les évaluations comptent selon leur pondération</em>';
     }
@@ -417,7 +417,7 @@ function genererExplicationCalculIndices(complementHtml = '') {
     html += '<br><br>';
     html += '<strong class="u-texte-bleu">Résumé</strong> : ';
     html += '<strong>A et C</strong> mesurent le <strong>comportement cumulatif observable</strong> (contexte d\'apprentissage favorable ou non). ';
-    html += '<strong>P</strong> mesure la <strong>qualité de l\'apprentissage</strong> selon la pratique pédagogique choisie (Sommative, Par sélection de productions, ou autre).';
+    html += '<strong>P</strong> mesure la <strong>qualité de l\'apprentissage</strong> selon la pratique pédagogique choisie (Cumulative, Hybride, ou autre).';
 
     html += '<br><br>';
     html += '<em class="etud-texte-gris-moyen">💡 La pratique de notation et ses paramètres peuvent être modifiés dans <strong>Conception → Pratiques de notation</strong></em>';

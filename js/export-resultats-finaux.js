@@ -153,8 +153,8 @@ function _collecterContexteActif() {
             groupe: infoCours.groupe || infoCours.numeroGroupe || infoCours.numGroupe || '',
             trimestre: trimestre,
             pratiqueId: pratiqueId,
-            // 21 nov. 2026 (« le sigle suit le nom ») : la colonne « Pratique (code) » montre le SIGLE affiché (SEL pour
-            // « Par sélection de productions »), pas le code interne. Aucun lecteur ne relit ce fichier.
+            // 21 nov. 2026 (« le sigle suit le nom ») : la colonne « Pratique (code) » montre le SIGLE affiché (HYB depuis le 27 nov. pour
+            // « Hybride », l’ancienne « Par sélection de productions »), pas le code interne. Aucun lecteur ne relit ce fichier.
             pratiqueCode: (pratique && pratique.obtenirCode) ? ((typeof sigleDuCode === 'function') ? sigleDuCode(pratique.obtenirCode()) : pratique.obtenirCode()) : '',
             pratiqueNom: (pratique && pratique.obtenirNom) ? pratique.obtenirNom() : '',
             notesFinales: _notesFinaliseesDe(pratiqueId)

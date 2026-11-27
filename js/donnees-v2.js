@@ -1240,9 +1240,9 @@
      */
     function formaterTypePratique(type) {
         const types = {
-            'pan-standards': 'Par sélection de productions',
+            'pan-standards': 'Hybride',
             'pan-specifications': 'PAN-Spécifications',
-            'sommative': 'Sommative',
+            'sommative': 'Cumulative',
             'configurable': 'Configurable'
         };
         return types[type] || type || 'Autre';

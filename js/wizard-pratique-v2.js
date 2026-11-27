@@ -52,11 +52,13 @@ function grillesDuWizard() {
 // (genererRecapitulatif) ET par l'écran « Partir d'un modèle » (#319 Lot 2 a7,
 // badge famille). Un seul endroit à éditer, pas de microcopy dupliqué.
 const TYPE_BADGES = {
-    'sommative': { code: 'SOM', classe: 'som', label: 'Sommative', description: 'Ta note finale est calculée par une moyenne pondérée des évaluations. C\'est la méthode traditionnelle, largement utilisée.' },
+    'sommative': { code: 'CUM', classe: 'som', label: 'Cumulative', description: 'Ta note finale est le cumul pondéré de tes évaluations. C\'est la méthode traditionnelle, souvent appelée sommative.' },
     // 21 nov. 2026 (« le sigle suit le nom », décision de Grégoire) : `code` est ici le SIGLE AFFICHÉ (badge du
     // récapitulatif, ligne de « Partir d'un modèle ») ; le code interne vit au registre. `classe` porte la couleur de la
-    // famille au récapitulatif : sarcelle pour « Par sélection de productions », bleu pour « Par standards ».
-    'standards': { code: 'SEL', classe: 'sel', label: 'Par sélection de productions', description: 'Tu évalues chaque production par niveaux (ex. : I-D-M-E). La note se construit à partir des productions que ta règle retient, pas de la moyenne de toutes.' },
+    // famille au récapitulatif : sarcelle pour « Hybride », bleu pour « Par standards ».
+    // 27 nov. 2026 (trois familles, décision de Grégoire) : « Sommative » → « Cumulative » (CUM), « Par sélection de
+    // productions » → « Hybride » (HYB). `classe` ne bouge pas : la couleur reste celle de la famille.
+    'standards': { code: 'HYB', classe: 'sel', label: 'Hybride', description: 'Tu évalues chaque production par niveaux (ex. : I-D-M-E). La note se construit à partir des productions que ta règle retient ; d\'autres peuvent compter d\'office.' },
     'specifications': { code: 'SPE', classe: 'spe', label: 'PAN – Spécifications', description: 'Chaque travail est jugé acceptable ou non. La note finale dépend du nombre de spécifications réussies (forfaits).' },
     // #319 Lot 5 (#318) : DEN reconnue à l'édition (code/couleur du registre canonique,
     // --den-violet). Elle se crée aussi : la carte « Note finale posée, pas calculée » de
@@ -227,8 +229,8 @@ const ETAPES_WIZARD = {
                 type: 'radio-cards',
                 required: true,
                 options: [
-                    { value: 'moyenne', label: 'Sommative (SOM)', description: 'Note finale par moyenne pondérée des évaluations.' },
-                    { value: 'niveaux', label: 'Par sélection de productions', description: 'Des niveaux (ex. I-D-M-E) ; la note retient certaines productions.' },
+                    { value: 'moyenne', label: 'Cumulative (CUM)', description: 'Note finale par cumul pondéré des évaluations.' },
+                    { value: 'niveaux', label: 'Hybride (HYB)', description: 'Des niveaux (ex. I-D-M-E) ; la note retient certaines productions.' },
                     { value: 'acceptable', label: 'PAN – Spécifications (SPE)', description: 'Travaux acceptables ou non ; note selon les forfaits réussis.' },
                     { value: 'jugement', label: 'PAN – Dénotation (DEN)', description: 'Note finale certificative posée (non calculée) selon l\'atteinte de cibles d\'apprentissage explicites ; abandonne la fonction de tri.' },
                     // Lot 1 de la pratique « Par standards » (21 nov. 2026).
@@ -464,7 +466,7 @@ const ETAPES_WIZARD = {
                 ]
             },
             // Voie rapide (a2) : sortie expert, carte de même poids que les autres options.
-            { id: 'voie-rapide-lien', type: 'lien-action', texte: 'Je sais déjà ce que je veux', description: 'Choisis directement ta famille de pratique (SOM, STD, SEL, SPE ou DEN) et passe à sa configuration.', action: 'wizardV2VoieRapide' }
+            { id: 'voie-rapide-lien', type: 'lien-action', texte: 'Je sais déjà ce que je veux', description: 'Choisis directement ta famille de pratique (CUM, HYB ou PAN : STD, SPE, DEN) et passe à sa configuration.', action: 'wizardV2VoieRapide' }
         ],
         suivant: (reponses) => {
             if (reponses.calcNoteFinale === 'moyenne') return 'regles-sommative';
@@ -712,11 +714,11 @@ const ETAPES_WIZARD = {
                     { value: 'n_meilleurs', get label() { return window.motsPoolStd().modeMeilleurs; } },
                     { value: 'tous', get label() { return window.motsPoolStd().modeTous; } },
                     { value: 'derniers', get label() { return window.motsPoolStd().modeDerniers; } },
-                    { value: 'hybride', label: 'Hybride (N meilleures + Obligatoires)' }
+                    { value: 'hybride', label: 'Deux blocs (N meilleures + Obligatoires)' }
                 ],
                 default: 'n_meilleurs',
                 required: true,
-                aide: 'Hybride : combine les N meilleures productions et les productions obligatoires (par exemple, un examen final). Une fois la pratique créée, tu choisis lesquelles sont obligatoires dans Conception › Pratiques de notation.'
+                aide: 'Deux blocs : combine les N meilleures productions et les productions obligatoires (par exemple, un examen final). Une fois la pratique créée, tu choisis lesquelles sont obligatoires dans Conception › Pratiques de notation.'
             },
             {
                 id: 'nbArtefactsRetenus',
@@ -2343,7 +2345,7 @@ function genererSectionConfiguration(r) {
     // sommative — rang et moyenne du groupe — part avec son étape.)
     if (r.typePratique === 'standards') {
         html += '<div class="wizard-v2-recap-section">';
-        html += '<h4>Configuration – Par sélection de productions</h4>';
+        html += '<h4>Configuration – Hybride</h4>';
         // #443 : le libellé « Par objectifs » part avec la carte. Le repli
         // `|| r.approcheEvaluation` reste : une pratique stockée qui porte encore
         // l'ancienne valeur s'affiche telle quelle plutôt que « undefined ».
@@ -2362,7 +2364,7 @@ function genererSectionConfiguration(r) {
                 'n_meilleurs': mots.modeMeilleurs,
                 'tous': mots.modeTous,
                 'derniers': mots.modeDerniers,
-                'hybride': 'Hybride (N meilleures + Obligatoires)'
+                'hybride': 'Deux blocs (N meilleures + Obligatoires)'
             };
             const modeSelection = r.modeSelectionPortfolio || 'n_meilleurs';
             html += `<p><strong>Construction de la note\u00a0:</strong> ${e(modeSelectionLabels[modeSelection] || modeSelection)}</p>`;
@@ -3079,7 +3081,7 @@ async function creerPratiqueV2() {
  */
 function _motifRefusAvantCreation(typeFinal, r) {
     if (typeFinal === 'standards' && !r.echelleId) {
-        return 'Choisis une échelle de performance (IDME) avant de créer cette pratique par sélection de productions. Reviens à l\'étape « Échelle de performance ».';
+        return 'Choisis une échelle de performance (IDME) avant de créer cette pratique hybride. Reviens à l\'étape « Échelle de performance ».';
     }
     if (typeFinal !== 'cibles') return null;
     const motifs = window.EnsemblesCibles.motifsRefus({ cibles: r.ciblesStandards, echelle: echelleDuWizard(r.echelleId), niveauSansDonnee: r.niveauSansDonnee });

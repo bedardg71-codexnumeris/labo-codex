@@ -21,7 +21,7 @@ describe('#128 · diagnostic du « non calculable »', () => {
     it('distingue les 4 causes (aucune assignation / introuvable / famille non branchée / config incomplète)', () => {
         expect(actions).toMatch(/Aucune pratique de notation .* assignée/);
         expect(actions).toMatch(/introuvable dans la bibliothèque/);
-        expect(actions).toMatch(/type Sommative/);
+        expect(actions).toMatch(/type Cumulative/);   // ↻ 27 nov. 2026 : trois familles
         expect(actions).toMatch(/type Spécifications/);
         expect(actions).toMatch(/configuration de portfolio.*absente ou incomplète/);
     });

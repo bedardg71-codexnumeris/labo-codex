@@ -35,7 +35,7 @@ describe('Session C Lot 4 · fold pan-objectifs ⊂ standards', () => {
 
     it('la représentation reste STD / PAN (affichage inchangé)', () => {
         expect(win.obtenirCodePratique('pan-objectifs')).toBe('STD');
-        expect(win.obtenirLabelFamillePratique('pan-objectifs')).toBe('PAN');
+        expect(win.obtenirLabelFamillePratique('pan-objectifs')).toBe('Hybride');   // ↻ 27 nov. 2026 : la famille de `standards`
         expect(win.obtenirRepresentationPratiqueStricte('pan-objectifs').code).toBe('STD');
     });
 

@@ -248,7 +248,7 @@ const AIDE_CONTEXTUELLE = {
                 type: 'liste',
                 titre: 'Les quatre pratiques',
                 items: [
-                    '<strong>Sommative (SOM)</strong> — calcule une moyenne pondérée traditionnelle.',
+                    '<strong>Cumulative (CUM)</strong> — calcule une moyenne pondérée traditionnelle.',
                     '<strong>PAN par standards (STD)</strong> — retient les meilleures démonstrations de compétence\u00a0; l’étudiant·e progresse en montrant sa maîtrise, pas en accumulant des points.',
                     '<strong>PAN par spécifications (SPE)</strong> — fonctionne par contrat\u00a0: chaque production est réussie ou non selon des critères prédéfinis\u00a0; c’est l’ensemble des cibles atteintes qui détermine la note.',
                     '<strong>Dénotation (DEN)</strong> — retire la note chiffrée des travaux au profit d’une rétroaction qualitative sur des cibles et critères explicites ; la note certificative (RREC) est posée par jugement à la fin.',
@@ -256,7 +256,7 @@ const AIDE_CONTEXTUELLE = {
             },
             {
                 type: 'conseil',
-                contenu: 'En cas de doute, commence par SOM (la plus familière) et fais évoluer ta pratique au fil des sessions.'
+                contenu: 'En cas de doute, commence par CUM (la plus familière) et fais évoluer ta pratique au fil des sessions.'
             },
         ],
         voirAussi: ['conception-productions', 'construction-echelles']

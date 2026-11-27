@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url';
 import { tranche } from './_helpers/tranche.js';
 import { sectionDeLaConsigne } from './_helpers/fin-des-parcours-2026-11-20.js';
 import { retoucherLignes22 } from './_helpers/parcours-apres-par-standards-2026-11-22.js';
+import { retoucherLignes27 } from './_helpers/familles-cum-hyb-2026-11-27.js';
 
 // =======================================================================
 // SENTINELLE DU LOT « JE REGARDE » D'« ÉVALUER UNE PREMIÈRE PRODUCTION » (18 NOVEMBRE 2026)
@@ -199,7 +200,10 @@ describe('2. les textes des dix bulles : ceux de la section D, mot pour mot', ()
         // 22 nov., A1 à A4) : lues dans cette consigne, chacune doit trouver sa ligne.
         const r22 = retoucherLignes22(retouchees20, ['A1.', 'A2.', 'A3.', 'A4.'], aPlat);
         expect(r22.servies, 'chaque retouche du 22 nov. trouve sa ligne dans la consigne du 18').toEqual(['A1.', 'A2.', 'A3.', 'A4.']);
-        const toutes = r22.lignes;
+        // Puis les mots des trois familles (27 nov. 2026, textes 26 à 28) : chacun doit trouver sa ligne.
+        const r27 = retoucherLignes27(r22.lignes, aPlat, ['T26a', 'T26b', 'T27', 'T28a', 'T28b']);
+        expect(r27.servies, 'chaque retouche du 27 nov. trouve sa ligne dans la consigne du 18').toEqual(['T26a', 'T26b', 'T27', 'T28a', 'T28b']);
+        const toutes = r27.lignes;
         // (C2 ajoute une ligne à la bulle 6 : on redécoupe d'après ce compte.)
         let i = 0;
         bulles.forEach((b, k) => { const n = marques[k] + (k === 5 ? 1 : 0); b.lignes = toutes.slice(i, i + n); i += n; });

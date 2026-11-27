@@ -42,7 +42,7 @@ class PratiqueSommative {
     // ========================================================================
 
     obtenirNom() {
-        return "Sommative traditionnelle";
+        return "Cumulative traditionnelle";
     }
 
     obtenirId() {

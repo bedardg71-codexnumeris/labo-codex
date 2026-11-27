@@ -66,7 +66,7 @@
     // affiche alors 0. Ce n'est pas nécessairement une erreur : c'est un état attendu
     // d'un outil encore en construction.
     var NOTE_DEV_TITRE = 'Outil en développement';
-    var NOTE_DEV_TEXTE = 'L’Exploration des pratiques est en construction. Pour certaines pratiques — surtout « Par sélection de productions » — une note peut s’afficher à 0 : le plus souvent, cela veut dire que la note ne peut pas être construite à partir des paramètres choisis et des résultats réels disponibles, pas qu’il y a forcément une erreur. Lis les résultats avec prudence.';
+    var NOTE_DEV_TEXTE = 'L’Exploration des pratiques est en construction. Pour certaines pratiques — surtout « Hybride » — une note peut s’afficher à 0 : le plus souvent, cela veut dire que la note ne peut pas être construite à partir des paramètres choisis et des résultats réels disponibles, pas qu’il y a forcément une erreur. Lis les résultats avec prudence.';
 
     /* ── Source de données du banc (#326 R4) ───────────────────
        'fictif' (défaut) = profils-types GÉNÉRÉS depuis l'échelle de l'utilisateur
@@ -234,8 +234,8 @@
     // est un jugement posé, pas un calcul sur les données (SPEC §7, SKILL §8 DEN-E).
     function _estDEN(id) { return _codePratique(id) === 'DEN'; }
 
-    // Le SIGLE affiché d'un code interne (registre) : « Par standards » (code CIB) se lit STD, « Par sélection de
-    // productions » (code STD) se lit SEL. Décision de Grégoire, 21 nov. 2026, 6 h 56 : « CIB » ne s'affiche nulle part.
+    // Le SIGLE affiché d'un code interne (registre) : « Par standards » (code CIB) se lit STD, « Hybride » (27 nov. ; avant : « Par sélection de
+    // productions », SEL) (code STD) se lit HYB. Décision de Grégoire, 21 nov. 2026, 6 h 56 : « CIB » ne s'affiche nulle part.
     function _sigle(code) {
         return (code && typeof sigleDuCode === 'function') ? sigleDuCode(code) : (code || '');
     }

@@ -21,6 +21,7 @@ import { fileURLToPath } from 'node:url';
 import { tranche } from './_helpers/tranche.js';
 import { CONSIGNE_20_NOV, suiteFactice } from './_helpers/fin-des-parcours-2026-11-20.js';
 import { RETOUCHES_22_NOV } from './_helpers/parcours-apres-par-standards-2026-11-22.js';
+import { retoucherLignes27 } from './_helpers/familles-cum-hyb-2026-11-27.js';
 
 const racine = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 const lire = (f) => readFileSync(path.join(racine, f), 'utf8');
@@ -95,6 +96,10 @@ function blocDeLaBulle(k) {
     return tranche(D, `\nBulle ${k}, `, fin);
 }
 
+// ↻ 27 nov. 2026 (trois familles, textes 26 et 27) : les explications de la consigne sont lues retouchées ; chaque retouche
+// attendue ici doit trouver sa ligne (vérifié plus bas).
+const SERVIES_27 = new Set();
+const retouche27 = (liste) => { const r = retoucherLignes27(liste, aPlat, ['T26a', 'T26c', 'T27']); r.servies.forEach((s) => SERVIES_27.add(s)); return r.lignes; };
 const BULLES = Array.from({ length: 10 }, (x, i) => {
     const bloc = blocDeLaBulle(i + 1);
     const formes = formesDe(bloc);
@@ -104,7 +109,7 @@ const BULLES = Array.from({ length: 10 }, (x, i) => {
         bloc,
         confirmations: [...new Set(tous.filter((x) => x.genre === 'C').map((x) => x.texte))],
         lieux: [...new Set(tous.filter((x) => x.genre === 'L').map((x) => x.texte))],
-        explications: [...new Set(tous.filter((x) => x.genre === 'E').map((x) => x.texte))],
+        explications: retouche27([...new Set(tous.filter((x) => x.genre === 'E').map((x) => x.texte))]),
         consignes: consignes.map((x) => x.texte),
         gestes: tous.filter((x) => x.genre === 'G' && consignes.indexOf(x) === -1),
         nombreDeFormes: formes.length
@@ -207,6 +212,10 @@ describe('« Nous faisons » : chaque ligne de la consigne est dans le code, dan
         expect(c.suitesDuLieu.map(aPlat).sort()).toEqual(duMenu.map((l) => aPlat(l.replace(/^Tu es dans « [^»]+ », à l'onglet « [^»]+ » /, ''))).sort());
         // Les autres (bulles 3 et 8 : la page ne change pas d'onglet) sont écrites entières, en explication.
         b.lieux.filter((l) => duMenu.indexOf(l) === -1).forEach((l) => expect(c.notes.map(aPlat)).toContain(aPlat(l)));
+    });
+
+    it('les retouches du 27 nov. trouvent chacune leur ligne dans la consigne du 20', () => {
+        expect([...SERVIES_27].sort()).toEqual(['T26a', 'T26c', 'T27']);
     });
 
     it.each(cas)('bulle %i : les explications (sans marque)', (k, b, c) => {

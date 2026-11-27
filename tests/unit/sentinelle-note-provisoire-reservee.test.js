@@ -242,8 +242,9 @@ describe('#1207 — en sommative, « Note actuelle du cours » ; en pratique alt
             expect(html).not.toContain('(au lieu de « Note provisoire »)');
         });
         it('le glossaire, mot pour mot, et le reste inchangé', () => {
+            // ↻ 27 nov. 2026 (trois familles) : le mode à deux blocs s'appelle « Deux blocs » au menu ; le glossaire le cite ainsi.
             const terme = lire('js/accompagnement-contenu-terme.js');
-            expect(terme).toContain('Une case de la pratique de notation, à cocher quand les notes sont arrêtées. Les PDF de rétroaction titrent alors « Note finale », à la place de « Note actuelle du cours » (pratique sommative) ou de « Note provisoire » (pratique alternative), et ne listent plus les « Artefacts à venir ». En mode « Hybride », une production obligatoire non remise compte alors pour zéro');
+            expect(terme).toContain('Une case de la pratique de notation, à cocher quand les notes sont arrêtées. Les PDF de rétroaction titrent alors « Note finale », à la place de « Note actuelle du cours » (pratique sommative) ou de « Note provisoire » (pratique alternative), et ne listent plus les « Artefacts à venir ». En mode « Deux blocs », une production obligatoire non remise compte alors pour zéro');
             expect(terme).not.toContain('« Note finale » au lieu de « Note provisoire »');
         });
     });

@@ -16,6 +16,11 @@
  *      productions, la carte « Note » de la Conception, deux bulles).
  *
  * Hors de ce banc, et dit au rapport : le glossaire, la fenêtre d'aide et le guide pédagogique (sortis du périmètre).
+ *
+ * ↻ 27 nov. 2026 (trois familles, décisions de Grégoire, 14 h 07 à 14 h 21) : « Par sélection de productions » s'appelle
+ * « Hybride » et s'affiche HYB ; « Sommative » s'appelle « Cumulative » et s'affiche CUM. Ce banc garde ce qu'il verrouille
+ * (le code ne bouge pas, le sigle suit le nom, « CIB » ne s'affiche nulle part) ; les sigles attendus sont ceux du 27 nov.
+ * Le reste : sentinelle-familles-cum-hyb-2026-11-27.test.js.
  * BREAK-TESTS : journal en fin de fichier.
  */
 import { describe, it, expect } from 'vitest';
@@ -37,13 +42,13 @@ describe('A · le registre : le code reste, le sigle s\'affiche', () => {
     });
     it('les sigles AFFICHÉS suivent le nom : SEL pour « Par sélection de productions », STD pour « Par standards »', () => {
         expect(['sommative', 'standards', 'specifications', 'denotation', 'cibles'].map(REG.obtenirSiglePratique))
-            .toEqual(['SOM', 'SEL', 'SPE', 'DEN', 'STD']);
-        expect(['SOM', 'STD', 'SPE', 'DEN', 'CIB', 'PAN'].map(REG.sigleDuCode)).toEqual(['SOM', 'SEL', 'SPE', 'DEN', 'STD', 'PAN']);
+            .toEqual(['CUM', 'HYB', 'SPE', 'DEN', 'STD']);   // ↻ 27 nov. 2026
+        expect(['SOM', 'STD', 'SPE', 'DEN', 'CIB', 'PAN'].map(REG.sigleDuCode)).toEqual(['CUM', 'HYB', 'SPE', 'DEN', 'STD', 'PAN']);
     });
     it('le badge du registre montre le sigle ; sa classe garde le code', () => {
-        expect(REG.genererBadgePratiqueHTML('standards')).toBe('<span class="badge-type-pratique badge-type-std">SEL</span>');
+        expect(REG.genererBadgePratiqueHTML('standards')).toBe('<span class="badge-type-pratique badge-type-std">HYB</span>');   // ↻ 27 nov. 2026
         expect(texteDuBadge(REG.genererBadgePratiqueHTML('cibles'))).toBe('STD');
-        expect(texteDuBadge(REG.genererBadgePratiqueHTML('pan-standards'))).toBe('SEL');   // un id ancien, normalisé
+        expect(texteDuBadge(REG.genererBadgePratiqueHTML('pan-standards'))).toBe('HYB');   // un id ancien, normalisé
     });
     it('les couleurs : la sarcelle à « Par sélection de productions », le bleu de STD à « Par standards »', () => {
         expect(REG.obtenirCouleurPratique('standards')).toBe('var(--sel-sarcelle)');
@@ -66,12 +71,12 @@ describe('B · les autres producteurs de badges affichent le sigle', () => {
         }, win, ['genererBadgeTypePratique']);
         const badge = win.__audit['pratiques-gestion.js'].genererBadgeTypePratique;
         const ancien = badge({ pratiques: ['STD'] });
-        expect(texteDuBadge(ancien)).toBe('SEL');
-        expect(ancien).toContain('title="Par sélection de productions : ');   // ↻ G1, 21 nov., 7 h 44 : plus de « PAN » pour SEL
+        expect(texteDuBadge(ancien)).toBe('HYB');   // ↻ 27 nov. 2026
+        expect(ancien).toContain('title="Hybride : ');   // ↻ G1, 21 nov., 7 h 44 : plus de « PAN » ; ↻ 27 nov. : « Hybride »
         const neuf = badge({ pratiques: ['CIB'] });
         expect(texteDuBadge(neuf)).toBe('STD');
         expect(neuf).toContain('title="Par standards : un niveau par cible d\'apprentissage du cours ; la note vient du meilleur niveau démontré pour chaque cible."');
-        expect(texteDuBadge(badge({ type: 'standards' }))).toBe('SEL');
+        expect(texteDuBadge(badge({ type: 'standards' }))).toBe('HYB');
         expect(texteDuBadge(badge({ type: 'cibles' }))).toBe('STD');
         expect(neuf + ancien).not.toMatch(/—/);   // F3 : sans tiret cadratin
     });
@@ -79,10 +84,10 @@ describe('B · les autres producteurs de badges affichent le sigle', () => {
     it('l\'assistant : le badge du récapitulatif et la ligne de « Partir d\'un modèle »', () => {
         const win = { addEventListener() {}, removeEventListener() {}, echapperHtml };
         chargerScript('js/wizard-pratique-v2.js', { db, cle: (k) => k, echapperHtml, normaliserIdPratique: (t) => t }, win);
-        expect(win.TYPE_BADGES.standards).toMatchObject({ code: 'SEL', classe: 'sel' });
+        expect(win.TYPE_BADGES.standards).toMatchObject({ code: 'HYB', classe: 'sel' });   // ↻ 27 nov. 2026 : la classe (la couleur) reste
         expect(win.TYPE_BADGES.cibles).toMatchObject({ code: 'STD', classe: 'std', label: 'Par standards' });
         const lien = win.ETAPES_WIZARD['calcul-note-finale'].champs.find(c => c.id === 'voie-rapide-lien');
-        expect(lien.description).toBe('Choisis directement ta famille de pratique (SOM, STD, SEL, SPE ou DEN) et passe à sa configuration.');
+        expect(lien.description).toBe('Choisis directement ta famille de pratique (CUM, HYB ou PAN : STD, SPE, DEN) et passe à sa configuration.');   // ↻ 27 nov. 2026 (texte 6)
         const carte = win.ETAPES_WIZARD['calcul-note-finale'].champs[0].options.find(o => o.value === 'cibles');
         expect(carte.description).toBe('Tu inscris, pour chaque cible du cours, le niveau que l\'étudiant·e a démontré. La note vient des niveaux de chaque cible.');
     });
@@ -138,18 +143,19 @@ describe('C · « CIB » n\'est écrit qu\'aux places internes', () => {
 /* ---------------------------------------------------------------- D. Les textes qui nommaient l'ancienne famille « STD » */
 describe('D · les textes qui disaient « STD » pour l\'ancienne famille disent « SEL »', () => {
     it('l\'état vide, l\'avertissement des productions, la carte « Note », deux bulles', () => {
-        expect(lire('js/etats-vides.js')).toContain('type de notation (SOM, STD, SEL, SPE ou DEN)');
-        expect(lire('js/productions.js')).toContain("mais n'entre pas dans le calcul SEL : ");
+        // ↻ 27 nov. 2026 : CUM et HYB (textes 10, 19, 21, 22).
+        expect(lire('js/etats-vides.js')).toContain('type de notation (CUM, HYB, STD, SPE ou DEN)');
+        expect(lire('js/productions.js')).toContain("mais n'entre pas dans le calcul HYB : ");
         expect(lire('js/productions.js')).not.toContain('calcul STD :');
         const html = lire('index.html');
-        expect(html).toContain('<strong>SEL</strong> (Par sélection de productions) : ');
+        expect(html).toContain('<strong>HYB</strong> (Hybride) : ');
         expect(html).toContain('<strong>STD</strong> (Par standards) : ');
         expect(html).not.toContain('<strong>STD</strong> (Standards)');
         const bulles = lire('js/accompagnement-contenu-hover.js');
         // ↻ G5, 21 nov., 7 h 44 (choix de Grégoire) : « PAN » passe de SEL à STD.
-        expect(bulles).toContain('STD = PAN par standards (un niveau par cible d\\\'apprentissage), SEL = par sélection de productions');
+        expect(bulles).toContain('HYB = hybride (des niveaux ; la note retient certaines productions), STD = PAN par standards (un niveau par cible d\\\'apprentissage)');
         expect(bulles).not.toContain('STD = PAN basée sur des standards');
-        expect(bulles).toContain('(SOM, STD, SEL, SPE, DEN)');
+        expect(bulles).toContain('(CUM, HYB, STD, SPE, DEN)');
     });
 });
 
