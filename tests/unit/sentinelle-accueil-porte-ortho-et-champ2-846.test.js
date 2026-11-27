@@ -190,7 +190,7 @@ function rendreAccueil(options) {
     const appels = [];
     const doc = fauxDocument(elements);
     const win = chargerScript('js/accueil.js', {
-        document: doc, obtenirPreference: () => false, definirPreference() {}, estEnModeDemo: () => !!opts.demo,
+        document: doc, obtenirPreference: () => ('preference' in opts ? opts.preference : false), definirPreference() {}, estEnModeDemo: () => !!opts.demo,
         afficherSection: (s) => appels.push(['section', s]), afficherSousSection: (s) => appels.push(['sous-section', s]),
         activerModeDemo: () => appels.push(['activerModeDemo']), desactiverModeDemo: () => appels.push(['desactiverModeDemo']),
         setTimeout: (f) => f(),
@@ -201,6 +201,7 @@ function rendreAccueil(options) {
         Assistance: { parcours: () => [{ id: 'decouvrir', lancer: () => appels.push(['parcours', 'decouvrir']) },
             { id: 'classe', lancer: () => appels.push(['parcours', 'classe']) }] },
         importEmpecheLaBascule: opts.importEmpeche ? () => true : undefined,
+        obtenirTrimestres: () => opts.trimestres || [],
     });
     win.afficherAccueil();
     return { html: elements['accueil-contenu'].innerHTML, win, appels, doc };
@@ -433,3 +434,22 @@ describe('B5 · trois portes d\'entrée (28 oct. 2026), de vrais boutons (7 nov.
 //   F1 accueil.js — « Labo Codex est une application » redevient « C’est une application »                  → 2 rouges
 //   F2 accueil.js — « Explorer » n'appelle plus activerModeDemo                                              → 3 rouges (avec T7)
 //   Empreinte sha256 de accueil.js identique après restauration (41c2eb5d18ab).
+
+describe('« À propos » repliée par défaut une fois qu\'on a un trimestre (Grégoire, 27 nov. 2026)', () => {
+    const repliee = (opts) => /id="banniere-bienvenue"/.test(rendreAccueil(opts).html)
+        && /banniere-bienvenue carte est-replie/.test(rendreAccueil(opts).html);
+    const AVEC = [{ id: 'a2026' }];
+    it('avec un trimestre et sans choix enregistré : repliée', () => {
+        expect(repliee({ trimestres: AVEC, preference: undefined })).toBe(true);
+    });
+    it('avec un trimestre, ouverte par la personne (false enregistré) : elle reste ouverte', () => {
+        expect(repliee({ trimestres: AVEC, preference: false })).toBe(false);
+    });
+    it('avec un trimestre, repliée par la personne : repliée', () => {
+        expect(repliee({ trimestres: AVEC, preference: true })).toBe(true);
+    });
+    it('sans trimestre (le nouveau venu), ou avec la démo seule : ouverte, quel que soit le choix', () => {
+        expect(repliee({ trimestres: [], preference: true })).toBe(false);
+        expect(repliee({ trimestres: [{ id: 'demo' }], preference: undefined })).toBe(false);
+    });
+});

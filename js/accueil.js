@@ -81,14 +81,18 @@ const QUESTION_ORTHOPEDAGOGUE = 'Tu es orthopédagogue ?';
 
 /**
  * « L'accueil épuré » (consigne du 7 nov. 2026, esquisse 64) : « À propos » s'ouvre tant
- * qu'aucun trimestre n'existe ; ensuite, il garde le choix de la personne (préférence
- * `banniereAccueilRepliee`, ouverte par défaut). Le trimestre de la démo ne compte pas.
+ * qu'aucun trimestre n'existe : il porte « Par où commencer ? », dont le nouveau venu a besoin.
+ * Ensuite, il garde le choix de la personne (préférence `banniereAccueilRepliee`). Le trimestre
+ * de la démo ne compte pas.
+ * Décision de Grégoire, 27 nov. 2026 (15 h 29) : avec un trimestre, la carte est REPLIÉE tant que
+ * la personne ne l'a pas ouverte elle-même (elle prend beaucoup de place et s'imposait). Seul un
+ * `false` enregistré, écrit quand on l'ouvre, la garde ouverte ; aucune préférence n'est réécrite.
  */
 function aproposReplie() {
     const trimestres = typeof window.obtenirTrimestres === 'function' ? window.obtenirTrimestres() : [];
     const aUnTrimestre = trimestres.some((t) => t && t.id !== 'demo');
     if (!aUnTrimestre) return false;
-    return (typeof obtenirPreference === 'function') && obtenirPreference('banniereAccueilRepliee') === true;
+    return !((typeof obtenirPreference === 'function') && obtenirPreference('banniereAccueilRepliee') === false);
 }
 
 function genererBanniereBienvenue() {
