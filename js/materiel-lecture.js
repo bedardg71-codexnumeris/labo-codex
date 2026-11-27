@@ -67,11 +67,19 @@
 
     /**
      * Le presse-papiers `text/html` (Word, Pages, un tableur) → { rangees, avant, apres }, ou
-     * null s'il n'y a pas de tableau d'au moins deux rangées. Première <table> seulement.
+     * null s'il n'y a pas de tableau d'au moins deux rangées.
      * Une rangée = [{ t: texte, span: colSpan, rspan: rowSpan }].
      *
+     * #1097 (27 nov. 2026, décision de Grégoire) — PLUSIEURS TABLEAUX DANS UN COLLAGE (une grille en
+     * encadrés, une partie par tableau). Avant, seule la 1re <table> était lue ; le texte des suivantes
+     * arrivait en miettes, hors tableau, à la fin. Désormais tous les tableaux sont lus à la suite, dans
+     * l'ordre du collage (`lireTableaux`) ; le texte entre deux tableaux (un titre de partie, une consigne)
+     * garde sa place, dans `entre`. Un tableau pris dans la case d'un autre reste le texte de cette case,
+     * comme avant. Un collage d'UN seul tableau suit le chemin d'avant, inchangé.
+     *
      * @param {string} html
-     * @returns {{rangees: Array, avant: string[], apres: string[]}|null}
+     * @returns {{rangees: Array, avant: string[], apres: string[], entre?: Object<number, string[]>}|null}
+     *          `entre` (plusieurs tableaux seulement) : { rang de rangée : textes lus juste avant elle }
      */
     L.lireHtml = function (html) {
         if (!html || typeof DOMParser !== 'function') return null;
@@ -82,6 +90,10 @@
         Array.prototype.forEach.call(doc.querySelectorAll(ELEMENTS_IGNORES), function (n) {
             if (n.parentNode) n.parentNode.removeChild(n);
         });
+        var tableaux = Array.prototype.filter.call(doc.body.querySelectorAll('table'), function (t) {
+            return !(t.parentNode && t.parentNode.closest && t.parentNode.closest('table'));
+        });
+        if (tableaux.length > 1) return lireTableaux(doc, tableaux);
         var table = doc.body.querySelector('table');
         if (!table) return null;
         var hors = textesHorsTableau(doc, table);
@@ -89,6 +101,66 @@
         if (rangees.filter(aDuTexte).length < 2) return null;
         return { rangees: rangees, avant: hors.avant, apres: hors.apres };
     };
+
+    /**
+     * #1097 — plusieurs tableaux, lus à la suite. Leurs rangées se suivent dans `rangees` ; une case
+     * fusionnée ne déborde jamais sur le tableau suivant (son `rspan` est borné à SON tableau). Le texte
+     * hors des tableaux va, par bloc, à sa place : avant le 1er (`avant`), après le dernier (`apres`), ou
+     * entre deux (`entre`, au rang de la 1re rangée du tableau qui suit). La légende d'un tableau passe en
+     * tête du texte qui le précède, comme celle du tableau seul passe en tête de `avant`.
+     */
+    function lireTableaux(doc, tableaux) {
+        var tranches = tableaux.map(function () { return []; });   // tranches[k] : le texte lu avant le tableau k
+        var apres = [];
+        tableaux.forEach(function (table, k) {
+            var legende = table.caption ? propre(table.caption.textContent) : '';
+            if (legende) tranches[k].push(legende);
+        });
+        blocsHorsTableaux(doc, tableaux).forEach(function (g) {
+            (g.tranche < tableaux.length ? tranches[g.tranche] : apres).push(g.t);
+        });
+        var rangees = [];
+        var entre = {};
+        tableaux.forEach(function (table, k) {
+            if (k > 0 && tranches[k].length) entre[rangees.length] = (entre[rangees.length] || []).concat(tranches[k]);
+            var propres = rangeesDe(table);
+            propres.forEach(function (row, r) {
+                row.forEach(function (c) { c.rspan = Math.max(1, Math.min(c.rspan, propres.length - r)); });
+            });
+            rangees = rangees.concat(propres);
+        });
+        if (rangees.filter(aDuTexte).length < 2) return null;
+        // Un dernier tableau sans rangée : ce qui le précédait vient après tout le reste, dans l'ordre.
+        var fin = entre[rangees.length] || [];
+        delete entre[rangees.length];
+        return { rangees: rangees, avant: tranches[0], apres: fin.concat(apres), entre: entre };
+    }
+
+    /**
+     * #1097 — le texte hors de TOUS les tableaux, par bloc (même règle que `textesHorsTableau`), avec sa
+     * tranche : le nombre de tableaux qui le précèdent.
+     * @returns {Array<{t: string, tranche: number}>}
+     */
+    function blocsHorsTableaux(doc, tableaux) {
+        var groupes = [];
+        var parBloc = new Map();
+        var marcheur = doc.createTreeWalker(doc.body, 4 /* NodeFilter.SHOW_TEXT */);
+        var n;
+        while ((n = marcheur.nextNode())) {
+            if (tableaux.some(function (t) { return t.contains(n); }) || !propre(n.nodeValue)) continue;
+            var bloc = blocDe(doc, n);
+            if (!parBloc.has(bloc)) {
+                // DOCUMENT_POSITION_PRECEDING (2) : le tableau est avant le texte.
+                var tranche = tableaux.filter(function (t) { return !!(n.compareDocumentPosition(t) & 2); }).length;
+                var g = { morceaux: [], tranche: tranche };
+                parBloc.set(bloc, g);
+                groupes.push(g);
+            }
+            parBloc.get(bloc).morceaux.push(n.nodeValue);
+        }
+        return groupes.map(function (g) { return { t: propre(g.morceaux.join(' ')), tranche: g.tranche }; })
+            .filter(function (g) { return g.t; });
+    }
 
     function aDuTexte(row) { return row.some(function (c) { return c.t; }); }
 
