@@ -233,7 +233,9 @@ describe('#1152 lot 2c bis · ce que les entrées affirment, lu dans le code', (
     it('le seuil de défi, la fenêtre et la progression sont les défauts du code et de l\'écran', () => {
         const defi = pct(null, 'defiSpecifique');
         for (const id of ['profil-etudiant', 'patterns', 'suivi-apprentissage']) {
-            expect(texteDe(id), id).toContain(`« Seuil de défi spécifique » (${defi} % par défaut`);
+            // ↻ 27 nov. 2026 (fiche 7 du lot « Suivi ») : le seuil de défi part du seuil de maîtrise de l'échelle.
+            expect(texteDe(id), id).toContain('« Seuil de défi spécifique » (au départ, le seuil de maîtrise de ton échelle');
+            expect(texteDe(id), id).not.toContain(`(${defi} % par défaut`);
         }
         // 30 oct. 2026 : les champs n'ont plus de `value` en dur ; `preferences-v2.js` les remplit depuis la source.
         const fenetre = pct(null, 'nombreProductionsAnalyse') / 100;
@@ -250,7 +252,9 @@ describe('#1152 lot 2c bis · ce que les entrées affirment, lu dans le code', (
         expect(helpers).toMatch(/function criteresSuiviFondations\(grille\) \{\s*const surveilles = criteresSurveillesParDepistage\(grille\);\s*if \(!etiquettesSOLOLuesParDepistage\(\)\) return surveilles;\s*return surveilles\.filter\(c => \(c\.niveauSOLO \|\| 'multistructurel'\) === 'multistructurel'\);/);
         const t = texteDe('suivi-apprentissage');
         expect(t).toContain('il ne lit que les critères multistructurels de cette grille (un critère sans étiquette compte comme tel, « Aucun » l\'écarte) ; décochée, il lit tous les critères.');
-        expect(t).not.toMatch(/organiser, être rigoureux|seuil de maîtrise|prof de chimie/);
+        // ↻ 27 nov. 2026 (fiche 7 du lot « Suivi », texte de Grégoire) : la parenthèse du seuil de défi nomme le seuil de
+        // maîtrise de l'échelle, son point de départ ; elle seule est admise, l'ancien sens reste refusé.
+        expect(t.split('(au départ, le seuil de maîtrise de ton échelle)').join('')).not.toMatch(/organiser, être rigoureux|seuil de maîtrise|prof de chimie/);
     });
 
     it('profil : les paliers du badge et le rappel « Mobilisation » lisent les trois champs (décision du 30 oct. 2026)', () => {

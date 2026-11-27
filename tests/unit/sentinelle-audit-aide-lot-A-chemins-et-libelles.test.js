@@ -222,7 +222,11 @@ describe('Aide — les chiffres qu\'elle cite sont ceux du code', () => {
         const m = cfgInterp.match(/defiSpecifique:\s*([0-9.]+)/);
         expect(m).toBeTruthy();
         const pct = Math.round(parseFloat(m[1]) * 100);
-        expect(AIDE_DECODEE).toContain(`(${pct} % par défaut)`);   // #1137 : « 70&nbsp;% » dans index.html ; AIDE_TXT ramène &nbsp; à une espace
+        // ↻ 27 nov. 2026 (fiches 2 et 7 du lot « Suivi ») : le seuil de défi part du seuil de maîtrise de l'échelle ; 70 % n'est
+        // plus que le repli sans seuil de maîtrise, et l'aide ne l'annonce plus.
+        expect(pct).toBe(70);
+        expect(AIDE_DECODEE).toContain('(au départ, le seuil de maîtrise de ton échelle)');
+        expect(AIDE_DECODEE).not.toContain(`(${pct} % par défaut)`);
     });
 });
 
