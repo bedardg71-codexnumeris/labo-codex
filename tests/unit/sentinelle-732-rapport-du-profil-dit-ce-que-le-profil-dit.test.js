@@ -82,6 +82,6 @@ describe('#732 · le rapport du profil', () => {
     it('une note non constructible se dit, elle ne s\'écrit pas 0', () => {
         const rapport = monterRapport({ A: 100, C: 0, P: 0, noteConstructible: false }).genererRapportAPI(DA);
         expect(rapport).toContain('Performance : non constructible');
-        expect(rapport).not.toMatch(/Performance : 0%/);
+        expect(rapport).not.toMatch(/Performance : 0\s*%/);   // #1141
     });
 });

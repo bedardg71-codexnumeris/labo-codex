@@ -236,7 +236,7 @@ describe('#553 · le stock : une intervention d\'avant le correctif garde son bi
         for (const nom of ['Français oral', 'Français écrit']) {
             const ligne = ligneBilan(html, nom);
             expect(ligne, nom).not.toBeNull();
-            expect(ligne[0], nom + ' : aucune valeur d\'avant').not.toMatch(/\d+%/);
+            expect(ligne[0], nom + ' : aucune valeur d\'avant').not.toMatch(/\d+\s*%/);   // #1141 : « 93 % » s'écrit avec une espace depuis #1137
             expect(ligne[2], nom + ' : aucune évolution calculée').toBe('—');
         }
     });

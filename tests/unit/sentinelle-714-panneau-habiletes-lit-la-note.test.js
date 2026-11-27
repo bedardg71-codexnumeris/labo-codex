@@ -291,7 +291,7 @@ describe('#714 — le panneau « Développement des habiletés » lit la note de
         expect(r.calculP).toBeNull();
         const methodo = tranche(r.html, 'Méthodologie de calcul', '</div>');
         expect(methodo).toContain('1. Artefact 5 → <span class="badge-note-differee">Note différée</span>');
-        expect(methodo).not.toMatch(/\d+\.\d\/100|\d+\.\d%/);
+        expect(methodo).not.toMatch(/\d+\.\d\/100|\d+\.\d\s*%/);   // #1141
     });
 
     it('un titre de production porteur de HTML sort échappé dans la liste des retenues', () => {

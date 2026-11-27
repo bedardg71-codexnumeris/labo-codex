@@ -423,7 +423,7 @@ describe('lot 3 · D — ce que l\'élève lit d\'un critère analytique : le ch
         const cases = (page.match(/flex: 1; height: 18px;[^>]*>[IDME]<\/div>/g) || []).length;
         expect(cases, 'quatre cases pour Contenu, aucune pour Langue').toBe(4);
         // Sous le nom de Langue, pas de « 30% » : le maximum EST le poids, déjà dit par « / 30 ».
-        expect(page).not.toContain('30%');
+        expect(page).not.toMatch(/30\s*%/);   // #1141 : avec ou sans l'espace de la norme française
         expect(page).toContain('70\u00A0%');
         expect(page).toContain('Ta langue est maîtrisée.');
     });
