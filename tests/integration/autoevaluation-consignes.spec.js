@@ -60,7 +60,19 @@ async function ouvrirApp(page) {
     await page.reload();
     await attendreApp(page);
     // L'échelle de départ, telle que l'application la sème : SANS repères (↻ 20 nov., retouche 2).
-    await page.evaluate(async () => { await assurerEchelleIdmeDeDepart(); await db.flush(); });
+    // ↻ 27 nov. 2026 (fiche 5 du lot « Suivi ») : semée maintenant, elle porte ses deux seuils (D et M). Le banc la ramène à
+    // une échelle de départ semée AVANT ce jour, restée sans repères : l'élève n'en reçoit pas la page, et l'aperçu le dit.
+    await page.evaluate(async () => {
+        await assurerEchelleIdmeDeDepart();
+        await db.modifier(cle('echellesTemplates'), (lues) => (lues || []).map((e) => {   // security-ok: banc, échelle de départ d'un contexte neuf
+            if (!e || e.id !== 'ECHELLE_IDME_DEPART') return e;
+            const ancienne = Object.assign({}, e);
+            delete ancienne.seuilSuffisance;
+            delete ancienne.seuilMaitrise;
+            return ancienne;
+        }), []);
+        await db.flush();
+    });
 }
 
 /** Les deux repères de l'échelle de départ, par le geste de l'éditeur d'échelles. */
