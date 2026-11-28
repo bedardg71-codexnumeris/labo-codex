@@ -560,6 +560,22 @@
             window.FichierSortant.telecharger(new Blob([JSON.stringify(contenu, null, 2)], { type: 'application/json' }),
                 'devis-ministeriels-' + new Date().toISOString().slice(0, 10) + '.json');
         },
+        /** La réserve de devis telle qu'elle est maintenant (celle de la démonstration quand on y est), lue sans attendre. */
+        reserveCourante: function () { return L() ? L().reserveSure(db.getSync(cleReserve(), [])) : []; },
+        /**
+         * Depuis la fiche d'un cours (js/cours-devis.js) : ouvrir « Apporter mon matériel » sur le devis de ce code. Un
+         * étiquetage en brouillon se ferme sans rien perdre, comme par son propre bouton.
+         */
+        rouvrirParCode: async function (code) {
+            if (typeof window.afficherSection === 'function') window.afficherSection('conception');
+            if (typeof window.afficherSousSection === 'function') window.afficherSousSection('conception-materiel');
+            await chargerReserve();
+            var d = reserve.find(function (x) { return x.code === String(code); });
+            if (!d) return;
+            if (window.materielDissection && window.materielDissection.estOuverte()) window.materielDissection.fermer();
+            var bouton = { dataset: { paramId: d.id } };
+            await materielDevis.rouvrir(bouton);
+        },
         estOuvert: function () { return etat.ecran !== 'ferme'; },
         /** L'accueil vient de s'afficher : la liste des devis rangés suit la réserve. */
         rafraichirAccueil: chargerReserve,

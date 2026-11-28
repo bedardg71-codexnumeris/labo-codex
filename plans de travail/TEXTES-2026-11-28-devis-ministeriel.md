@@ -1,6 +1,6 @@
 # Textes à relire – numériser un devis ministériel dans « Apporter mon matériel »
 
-> Écrit par Claude Code le 28 novembre 2026, refait à 9 h 00 (Toronto) après le correctif de 8 h 08 (« numériser ne touche aucun cours »), mis à jour à 10 h 20 après le second amendement de 10 h 03.
+> Écrit par Claude Code le 28 novembre 2026, refait à 9 h 00 (Toronto) après le correctif de 8 h 08 (« numériser ne touche aucun cours »), mis à jour à 10 h 20 après le second amendement de 10 h 03, puis à 10 h 40 pour le lot « créer un cours à partir d'un devis rangé » (textes 51 à 70, neufs, à relire).
 > **État** : les textes 1 à 39 sont acceptés par Grégoire tels quels, sauf 14, 17, 19 et 28, retouchés par lui (posés ci-dessous, mot pour mot). Les textes 40 à 50 sont neufs, à relire. Règle à tenir : l'application parle d'elle à la troisième personne, et un texte ne laisse pas entendre que l'erreur vient de l'enseignant·e.
 > Ce sont des MOTS DE TRAVAIL : ils sont sur la branche `claude/devis-ministeriel-8vylul`, pas en ligne. Corrige-les d'un bloc ; chaque texte porte un numéro pour que tu puisses répondre « 7 : … ».
 > Vocabulaire du devis gardé tel quel : « compétence », « éléments de la compétence », « critères de performance », « contexte de réalisation », « activités d'apprentissage ».
@@ -79,3 +79,28 @@
 48. **Sous la section** : « Un devis importé se range parmi tes devis. Aucun cours n’est touché. »
 49. **Dans le message de fin de l'import** (la ligne s'ajoute aux autres) : « 1 devis ministériel(s) » (la forme « (s) » est celle des autres lignes de ce message, que je n'ai pas touchées)
 50. **Le nom du fichier exporté** : `devis-ministeriels-2026-11-28.json`
+
+## I. Créer un cours à partir d'un devis rangé (lot du 28 nov., 10 h 05) : mots de travail neufs
+
+Tous dans la table `T`, en tête de `js/cours-devis.js`. Ils paraissent dans Cadre › « Cours et services », sur la fiche d'un cours.
+
+51. **Le nom de la liste des devis** : « Devis ministériel »
+52. **Son option par défaut** : « Aucun (tout remplir à la main) »
+53. **Une option de la liste** : « 4EF0 – Analyser des textes littéraires. »
+54. **Sous la liste** : « Choisis un devis rangé : l’application proposera ses valeurs, que tu confirmeras une à une. »
+55. **Quand aucun devis n'est rangé** (à la place de la liste) : « Aucun devis ministériel n’est rangé. Si tu en numérises un dans Conception › Mon matériel, l’application proposera ici ses valeurs. »
+56. **Titre des propositions** : « Ce que le devis propose »
+57. **Leur consigne** : « Rien n’est écrit dans le cours tant que tu n’as pas confirmé. « Autre » te laisse le champ pour reformuler ou écrire ta propre valeur. »
+58. **Les noms des propositions** : « N° de la compétence », « Compétence », « Pondération », « Heures d’enseignement », « Éléments de compétence » (les mêmes que les libellés de la fiche)
+59. **Les deux gestes d'une proposition** : « Confirmer » · « Autre »
+60. **L'état d'une proposition** : « À confirmer » · « Confirmé » · « Autre : à écrire dans le champ »
+61. **Titre des repères** : « Repères du devis »
+62. **Le repère de la discipline** : « Discipline, d’après le devis : **Français, langue d’enseignement et littérature** Choisis la discipline dans le menu. »
+63. **Le repère des heures** (quand le devis ne donne pas un nombre seul) : « Heures ou périodes, d’après le devis : **…** »
+64. **Le repère de la pondération** (quand le devis n'écrit aucune pondération « n-n-n ») : « Pondération, d’après le devis : **…** »
+65. **Les gestes sur un élément** : « Garder » · « Reformuler » · « Retirer »
+66. **L'état d'un élément** : « À confirmer » · « Gardé » · « Reformulé » · « Retiré » · « Ajouté »
+67. **Ajouter** : le bouton « Ajouter un élément » ; le champ vide dit « Nouvel élément »
+68. **Le bilan, sous les propositions** : « 3 propositions sont restées sans réponse : elles ne seront pas écrites dans le cours. » · « 1 proposition est restée sans réponse : elle ne sera pas écrite dans le cours. » · « Toutes les propositions ont reçu une réponse. »
+69. **Sur la fiche d'un cours créé à partir d'un devis** : « Ce cours a été créé à partir du devis 4EF0. » suivi du lien « Voir le devis 4EF0 dans « Apporter mon matériel » »
+70. **Quand ce devis n'est plus rangé sur l'appareil** : « Ce cours a été créé à partir du devis 4EF0, qui n’est pas rangé sur cet appareil. »
