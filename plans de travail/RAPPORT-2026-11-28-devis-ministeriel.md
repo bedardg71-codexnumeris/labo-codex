@@ -54,6 +54,18 @@ Limite : la fenêtre d'import est une vieille fenêtre, ses messages de fin pass
 
 Les textes 14, 17, 19 et 28 sont posés mot pour mot. Les textes neufs sont au fichier TEXTES, numéros 40 à 50. « Composer le devis à la main » est gardé.
 
+### Les gestes neufs joués sur l'aperçu Netlify
+
+Aperçu : https://deploy-preview-67--codexnumeris-051225.netlify.app (commit `d8e845c`), joué par moi sous Chromium, la base lue à chaque étape.
+
+| Geste | Mesuré | Captures (`captures-2026-11-28-devis-ministeriel/amendement-2-…`) |
+|---|---|---|
+| La démonstration | réserve réelle `01FB` avant ; dans la démo, la liste est vide puis porte `4EF0`, la réserve réelle est identique ; après la sortie, réserve réelle identique à celle d'avant | `A1-demo-accueil-sans-les-devis-reels`, `A2-demo-un-devis-range-dans-la-demo`, `A3-apres-la-demo-les-devis-reels` |
+| Le bouton depuis un étiquetage en brouillon | brouillon identique sur l'écran des devis et au retour ; la sortie dit « Revenir à mon étiquetage » ; la grille revient avec ses 8 rangées | `B1-etiquetage-en-brouillon-le-bouton`, `B2-les-devis-depuis-l-etiquetage`, `B3-retour-a-l-etiquetage` |
+| L'import par cases | fichier : `01FB` identique, `000Z` différent, `01FL` neuf. Importé tel que proposé : `01FL` entre seul. Case de `000Z` cochée ensuite : remplacé, sous l'`id` d'ici | `C1-import-par-cases-neuf-identique-different`, `C2-import-l-ancien-et-le-nouveau` |
+
+Une précision sur ce jeu : mon script comparait `000Z` avant et après le premier import par son texte JSON, et l'a trouvé différent. Le contenu est le même ; c'est l'ordre des champs qui change quand la réserve est réécrite. L'essai du banc, lui, compare le contenu (`toEqual`) et passe.
+
 ### Ce qui a changé dans ce rapport
 
 Les sections plus bas datent de 9 h 15. Deux de leurs affirmations sont périmées par cet amendement : l'import par cases EST maintenant branché, et la démonstration n'écrit plus dans les vraies données. Les quatre questions sont répondues.
