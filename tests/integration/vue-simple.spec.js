@@ -1684,10 +1684,10 @@ test.describe('Vue simple · quelqu\'un qui a déjà des données', () => {
         await basculer(page, 'simple');
         await allerA(page, 'resultats');
         await expect(ecran(page, 'resultats').locator('.vs-select option')).toHaveText(['Cours fictif A · groupe 01', 'Cours fictif B · groupe 02 (autre pratique)']);
-        await expect(ecran(page, 'resultats').locator('.vs-note')).toHaveText('Un groupe dont la pratique n’est ni par standards, ni par spécifications, ni hybride se suit en vue étendue.');
+        await expect(ecran(page, 'resultats').locator('.vs-note')).toHaveText('Un groupe dont la pratique n’est ni par standards, ni par spécifications, ni par niveaux (cumulative ou hybride) se suit en vue étendue.');
         await expect(page.locator('#vs-tableau-hote .tn-production-titre')).toHaveText(['Production fictive']);
         await ecran(page, 'resultats').locator('.vs-select').selectOption('GC_SOM');
-        await expect(page.locator('#vs-tableau-hote .tn-etat-vide')).toHaveText('Le tableau sert aux pratiques par standards, par spécifications et hybrides. La pratique de ce groupe se suit en vue étendue.');
+        await expect(page.locator('#vs-tableau-hote .tn-etat-vide')).toHaveText('Le tableau sert aux pratiques par standards, par spécifications et par niveaux (cumulatives ou hybrides). La pratique de ce groupe se suit en vue étendue.');
         await allerA(page, 'note');
         await expect(ecran(page, 'note').locator('.vs-select')).toHaveValue('GC_SOM');
         await ecran(page, 'note').locator('.vs-select').selectOption('GC_STD');

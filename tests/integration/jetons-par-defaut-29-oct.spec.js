@@ -105,6 +105,11 @@ test('une cumulative sans réglage : enregistrer sans toucher aux jetons n\'écr
     const badge = page.locator('#mat-badge-pratique .badge-type-pratique');
     await expect(page.locator('#mat-jetons-actif')).not.toBeChecked();
     await expect(badge).toHaveText('CUM');
+    // ↻ 10 h 15 (décision de Grégoire, 10 h 10) : la phrase « … ta pratique est hybride … » suit les champs. Jugée à l'état
+    // que la fiche lui pose (`u-hide`) : la carte des jetons est un accordéon, sa visibilité à l'écran dépend du pli.
+    const phrase = page.locator('#mat-jetons-famille-hybride');
+    await expect(phrase).toHaveText('Avec des jetons de reprise, ta pratique est hybride : une note peut être révisée.');
+    await expect(phrase).toHaveClass(/u-hide/);
 
     // Un champ voisin change (l'affichage de la note) : la fiche s'enregistre, sans bloc de jetons.
     await page.evaluate(async () => {
@@ -128,6 +133,17 @@ test('une cumulative sans réglage : enregistrer sans toucher aux jetons n\'écr
     expect(rangee.jetons).toMatchObject({ actif: true, nombre: 2 });
     await expect(badge).toHaveText('HYB');
     await expect(badge).toHaveAttribute('title', 'Hybride : cette pratique offre des jetons de reprise.');
+    await expect(phrase).not.toHaveClass(/u-hide/);
+
+    // Décocher, par le vrai geste (la case et son écouteur) : la phrase se retire, le badge revient à CUM. Le nom ne bouge pas.
+    await page.evaluate(() => { const c = document.getElementById('mat-jetons-actif'); c.checked = false; c.dispatchEvent(new Event('change', { bubbles: true })); });
+    await expect(phrase).toHaveClass(/u-hide/);
+    await expect(badge).toHaveText('CUM');
+    // Recocher, par le même geste : elle revient avec le badge HYB.
+    await page.evaluate(() => { const c = document.getElementById('mat-jetons-actif'); c.checked = true; c.dispatchEvent(new Event('change', { bubbles: true })); });
+    await expect(phrase).not.toHaveClass(/u-hide/);
+    await expect(badge).toHaveText('HYB');
+    expect((await pratiqueRangee(page, 'PR_BANC_SANS_REGLAGE')).nom).toBe('Cumulative du banc');
     expect(erreurs).toEqual([]);
 });
 

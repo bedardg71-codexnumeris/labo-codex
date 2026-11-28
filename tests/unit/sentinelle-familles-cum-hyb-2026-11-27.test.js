@@ -99,7 +99,7 @@ describe('B · les libellés hors registre', () => {
         // les productions », jetons refusés : sa famille déduite est la cumulative).
         expect(src).toContain("titre: 'Cumulative par niveaux', texte: 'Chaque production reçoit un niveau.");
         expect(src).toContain('Choisis un modèle : par standards, par spécifications ou cumulative par niveaux. Tu règles ensuite ce qui construit la note.');
-        expect(src).toContain('Le tableau sert aux pratiques par standards, par spécifications et hybrides.');
+        expect(src).toContain('Le tableau sert aux pratiques par standards, par spécifications et par niveaux (cumulatives ou hybrides).');
     });
 });
 

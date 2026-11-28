@@ -302,6 +302,52 @@ describe('C · les lecteurs passent par la famille déduite', () => {
     });
 });
 
+/* ================================================================ C bis. LA PHRASE DE LA FICHE (28 nov. 2026, 10 h 10) */
+describe('C bis · la fiche dit quand les jetons de reprise rendent la pratique hybride', () => {
+    const condition = (() => {
+        const win = {};
+        const db = { getSync: (k, d) => (d !== undefined ? d : null), setSync() {} };
+        chargerAvecInterne('js/pratiques-gestion.js', { db, cle: (k) => k, echapperHtml, BibliothequeUI: { formaterInspireDe: () => '' },
+            document: { getElementById: () => null, querySelector: () => null, querySelectorAll: () => [], addEventListener() {} } }, win, ['jetonsRendentHybrideMat']);
+        return win.__audit['pratiques-gestion.js'].jetonsRendentHybrideMat;
+    })();
+    const dit = (pratique) => condition(famille(pratique));
+    const plat = (actif) => ({ actif, nombre: 2, delaiDuree: 2, repriseOriginale: 'archiver', cibleeActif: false });
+
+    it('elle paraît pour des jetons de reprise réellement offerts, dans les deux types qui cumulent', () => {
+        expect(dit({ type: 'sommative', jetons: plat(true) })).toBe(true);            // la case de la fiche, cochée
+        expect(dit({ type: 'sommative', jetons: J.uneReprise })).toBe(true);
+        expect(dit({ type: 'sommative', jetons: J.cibleeSeule })).toBe(true);         // la reprise ciblée compte
+        expect(dit(Object.assign(std(TOUT), { jetons: plat(true) }))).toBe(true);
+        // Déjà hybride par un bloc retenu : la phrase reste, elle est vraie.
+        expect(dit(Object.assign(std({ methodeSelection: 'meilleurs' }), { jetons: plat(true) }))).toBe(true);
+    });
+    it('elle ne paraît pas sans reprise offerte : aucun réglage, jetons éteints, délais seuls, hybride par le seul bloc retenu', () => {
+        expect(dit({ type: 'sommative' })).toBe(false);
+        expect(dit({ type: 'sommative', jetons: plat(false) })).toBe(false);
+        expect(dit({ type: 'sommative', jetons: J.delaiSeul })).toBe(false);
+        expect(dit({ type: 'sommative', jetons: J.eteintsAvecNombre })).toBe(false);
+        expect(dit(std({ methodeSelection: 'meilleurs' }))).toBe(false);
+        expect(condition(null)).toBe(false);
+    });
+    it('elle ne paraît jamais dans une PAN, même avec des reprises : la famille n\'y change pas', () => {
+        for (const type of ['cibles', 'specifications', 'denotation']) expect(dit({ type, jetons: J.uneReprise }), type).toBe(false);
+    });
+    it('aucune seconde règle : la condition ne lit que le motif de la famille déduite ; la fiche la rafraîchit à l\'ouverture, à la case et après chaque enregistrement', () => {
+        const src = lire('js/pratiques-gestion.js');
+        expect(src).toMatch(/function jetonsRendentHybrideMat\(famille\) \{\s*\n\s*return !!\(famille && famille\.hybrideParReprises\);/);
+        expect(famille({ type: 'sommative', jetons: J.uneReprise }).hybrideParReprises).toBe(true);
+        expect(famille({ type: 'specifications', jetons: J.uneReprise }).hybrideParReprises).toBe(false);
+        expect(src).toMatch(/familleDeduiteDeLaPratique\(pratique\) : null;\s*\n\s*phrase\.classList\.toggle\('u-hide', !jetonsRendentHybrideMat\(famille\)\);/);
+        expect(src.split('rafraichirPhraseJetonsHybrideMat();').length - 1).toBe(3);   // l'ouverture, la case, après l'écriture (avec le badge)
+        // Le texte est posé dans index.html, tel quel : aucun `innerHTML`, aucun handler, des classes du design system.
+        const html = lire('index.html');
+        expect(html).toContain('<p id="mat-jetons-famille-hybride" class="u-hide text-muted u-mb-15 u-texte-09">Avec des jetons de reprise, ta pratique est hybride : une note peut être révisée.</p>');
+        expect(html.indexOf('id="mat-jetons-famille-hybride"')).toBeGreaterThan(html.indexOf('id="mat-jetons-actif"'));
+        expect(html.indexOf('id="mat-jetons-famille-hybride"')).toBeLessThan(html.indexOf('id="mat-contenu-jetons"'));
+    });
+});
+
 /* ================================================================ D. AUCUN SECOND LECTEUR PAR TYPE */
 describe('D · aucun second lecteur de la famille par type', () => {
     const fichiers = [...new Set(lire('index.html').match(/js\/[\w./-]+\.js/g))];
@@ -364,7 +410,7 @@ describe('E · les quatorze textes de Grégoire, chacun à sa source', () => {
     const source = (f) => lire(f).replace(/\\'/g, '\'');
 
     it('le fichier validé porte R1 à R14 (seize textes : R9 en a trois), plus A1, C1, V1 et V3 pour les bancs du renommage', () => {
-        expect(sections.map(s => s.repere)).toEqual(['R1', 'R2', 'R3', 'R4', 'R5', 'R6', 'R7', 'R8', 'R9', 'R10', 'R11', 'R12', 'R13', 'R14', 'C1', 'A1', 'V1', 'V3']);
+        expect(sections.map(s => s.repere)).toEqual(['R1', 'R2', 'R3', 'R4', 'R5', 'R6', 'R7', 'R8', 'R9', 'R10', 'R11', 'R12', 'R13', 'R14', 'C1', 'A1', 'V1', 'V3', 'V2', 'V5', 'V6', 'V7', 'F1']);
         expect(sections.filter(s => /^R/.test(s.repere)).flatMap(s => s.textes)).toHaveLength(16);
     });
     it('chaque texte se lit à sa source, mot pour mot', () => {

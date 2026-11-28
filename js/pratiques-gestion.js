@@ -1482,6 +1482,7 @@ function remplirFormulairePratique(pratique) {
     document.querySelectorAll('input[name="mat-reprise-originale"]').forEach(r => { r.disabled = jetonsAilleurs; });
     // Ce que la fiche montre des jetons à l'ouverture : le témoin de « l'enseignant·e n'y a pas touché » (28 nov. 2026).
     instantaneJetonsMat = JSON.stringify(lireBlocJetonsMat());
+    rafraichirPhraseJetonsHybrideMat();   // 28 nov. 2026, 10 h 10 : la phrase suit les champs dès l'ouverture
 
     // 🆕 Beta 95.4 : Afficher le panneau métadonnées CC
     const panneauMeta = document.getElementById('panneauMetadonneesPratique');
@@ -1934,6 +1935,45 @@ function rafraichirBadgeFamilleMat() {
     const pratique = _pratiqueEnregistreeMat();
     // security-ok : `genererBadgeTypePratique` ne rend que des sigles et des phrases du registre.
     if (badge && pratique) badge.innerHTML = genererBadgeTypePratique(pratique);
+    rafraichirPhraseJetonsHybrideMat();
+}
+
+/**
+ * Décision de Grégoire (28 nov. 2026, 10 h 10) — LES JETONS DE REPRISE RENDENT-ILS CETTE PRATIQUE HYBRIDE ? Vrai quand sa
+ * famille déduite (`familleDeduiteDeLaPratique`, registre : la seule règle) le dit (`hybrideParReprises`), seules ou à côté
+ * d'un bloc retenu (la phrase reste vraie). Faux pour des jetons de délai seuls, pour des jetons éteints, et pour une PAN,
+ * dont la famille ne change pas (aucun motif). Pure.
+ * @param {?object} famille - le retour de `familleDeduiteDeLaPratique`
+ */
+function jetonsRendentHybrideMat(famille) {
+    return !!(famille && famille.hybrideParReprises);
+}
+
+/**
+ * La pratique telle que la fiche la montre EN CE MOMENT, pour en déduire la famille : la pratique enregistrée, avec le type
+ * du menu et le bloc de jetons des champs. Jetons réglés ailleurs (assistant, import) : les champs sont inertes, la pratique
+ * enregistrée dit tout. Lecture seule.
+ */
+function pratiqueSelonLaFicheMat() {
+    const enregistree = _pratiqueEnregistreeMat();
+    if (!enregistree) return null;
+    if (jetonsReglesAilleurs(enregistree)) return enregistree;
+    const type = getValeurChamp('mat-pratique-type') || enregistree.type;
+    const typeCanon = (typeof normaliserIdPratique === 'function') ? normaliserIdPratique(type) : type;
+    return Object.assign({}, enregistree, { type: typeCanon, pratiques: pratiquesDuType(typeCanon), jetons: lireBlocJetonsMat() });
+}
+
+/**
+ * La phrase sous la case des jetons (« Avec des jetons de reprise, ta pratique est hybride : une note peut être révisée. »,
+ * texte de Grégoire, posé dans index.html) : montrée ou cachée selon l'état des champs, en direct. Le nom de la pratique ne
+ * change jamais : l'application ne renomme rien.
+ */
+function rafraichirPhraseJetonsHybrideMat() {
+    const phrase = document.getElementById('mat-jetons-famille-hybride');
+    if (!phrase) return;
+    const pratique = pratiqueSelonLaFicheMat();
+    const famille = (pratique && typeof familleDeduiteDeLaPratique === 'function') ? familleDeduiteDeLaPratique(pratique) : null;
+    phrase.classList.toggle('u-hide', !jetonsRendentHybrideMat(famille));
 }
 
 /**
@@ -2950,6 +2990,7 @@ function toggleSystemeJetonsMat() {
  */
 function onJetonsActifChangeMat() {
     toggleSystemeJetonsMat();
+    rafraichirPhraseJetonsHybrideMat();   // sans attendre l'enregistrement : la phrase suit la case
     sauvegarderConfigPratiqueMat();
 }
 
@@ -3488,6 +3529,7 @@ window.supprimerTypeTravailMat = supprimerTypeTravailMat;
 // PAN-Spécifications : Forfaits
 window.afficherForfaitsMat = afficherForfaitsMat;
 window.modeSelectionDuMenu = modeSelectionDuMenu;   // neuvième parcours (8 nov., nuit) : pour le banc
+window.jetonsRendentHybrideMat = jetonsRendentHybrideMat;   // 28 nov. 2026, 10 h 10 : la condition de la phrase, pour le banc
 window.blocJetonsAEcrireMat = blocJetonsAEcrireMat;   // sans déclaration, pas de jetons (28 nov. 2026) : pour le banc
 window.ajouterForfaitMat = ajouterForfaitMat;
 window.modifierForfaitMat = modifierForfaitMat;

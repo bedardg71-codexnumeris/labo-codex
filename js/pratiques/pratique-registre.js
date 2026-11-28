@@ -267,7 +267,8 @@ function _pratiqueOffreDesReprises(pratique) {
  *   - `type` : le type rangé (ce que le calcul suit) ; `cle` : la famille AFFICHÉE, clé des tables de mots
  *     (`sommative` = cumulative, `standards` = hybride, sinon le type de la PAN) ;
  *   - `code`, `sigle`, `famille`, `nom`, `couleurVar`, `classe` : la représentation de `cle` ;
- *   - `motif` : 'tout-compte', 'retenu', 'reprise', 'retenu-et-reprise', ou null pour une PAN ; `survol` : sa phrase.
+ *   - `motif` : 'tout-compte', 'retenu', 'reprise', 'retenu-et-reprise', ou null pour une PAN ; `survol` : sa phrase ;
+ *   - `hybrideParReprises` : vrai quand ses jetons de reprise la rendent hybride (faux pour une PAN).
  *   null quand aucun type connu ne se lit.
  */
 function familleDeduiteDeLaPratique(pratique) {
@@ -285,7 +286,10 @@ function familleDeduiteDeLaPratique(pratique) {
     return {
         type, cle: cleFamille, code: rep.code, sigle: rep.sigle, famille: rep.famille, nom: rep.nom, couleurVar: rep.couleurVar,
         classe: 'badge-type-' + rep.code.toLowerCase(),
-        motif, survol: motif ? SURVOLS_FAMILLE_DEDUITE[motif] : null
+        motif, survol: motif ? SURVOLS_FAMILLE_DEDUITE[motif] : null,
+        // 28 nov. 2026, 10 h 10 : la pratique est hybride À CAUSE de ses jetons de reprise (seuls, ou à côté d'un bloc retenu).
+        // Toujours faux pour une PAN. Lu par la fiche, qui n'a pas à comparer un motif.
+        hybrideParReprises: motif === 'reprise' || motif === 'retenu-et-reprise'
     };
 }
 

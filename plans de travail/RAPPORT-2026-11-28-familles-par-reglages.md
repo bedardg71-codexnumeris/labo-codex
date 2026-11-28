@@ -212,6 +212,48 @@ Une retouche de banc à signaler : cet ancien banc jugeait la note « réglés �
 
 **Non joués** : les autres bancs de navigateur (la suite entière ne tient pas sous Chromium), et tout WebKit. Un banc qui accorderait un jeton dans la démo sans passer par les onze fichiers repérés rougira au verdict du Mac : il lui faudra la même déclaration (`tests/integration/harness/declarer-jetons.js`).
 
+## 0 quater. Quatrième amendement du 28 nov., 10 h 15
+
+Reçu de Cowork : la relecture du troisième envoi est conforme ; le fichier de coordination vit dans le Projet de Cowork (rien à y écrire) ; « coche ou règle » accepté tel quel ; la version du pack ne monte pas (décision de Grégoire, 10 h 06) ; la pondération 0 dans le calcul de type standards est inscrite côté Cowork.
+
+### A. La phrase de la fiche (décision de Grégoire, 10 h 10) : FAIT
+
+« Avec des jetons de reprise, ta pratique est hybride : une note peut être révisée. »
+
+- Elle est posée dans `index.html`, sous la case « Activer le système de jetons » et au-dessus du contenu masquable, en texte, avec des classes existantes (`text-muted u-mb-15 u-texte-09`). Aucun `innerHTML`, aucun handler.
+- La condition vit au registre : `familleDeduiteDeLaPratique` rend maintenant `hybrideParReprises`, vrai quand le motif est « reprise » ou « retient et reprise ». La fiche lit ce seul champ (`jetonsRendentHybrideMat`) : aucune seconde règle, et la sentinelle qui interdit de comparer un motif hors du registre l'a refusé à ma première écriture.
+- Elle suit les champs en direct : la fiche compose la pratique telle qu'elle la montre (la pratique enregistrée, le type du menu, le bloc de jetons des champs) et en déduit la famille. Rafraîchie à l'ouverture, au geste sur la case, et après chaque enregistrement.
+- Déjà hybride par un bloc retenu : j'ai tranché, la phrase reste, elle est vraie.
+- Jamais dans une PAN : la règle n'y donne aucun motif. Jamais pour des jetons de délai seuls.
+- Le nom de la pratique ne change pas (un essai le fige).
+
+Une limite, due à la fiche et non à la phrase : son bloc de jetons n'a qu'un nombre, partagé par les délais et les reprises. Dans la fiche, la phrase paraît donc dès que la case est cochée. « Des délais seuls » ne s'y règle pas ; ce cas n'existe que pour une pratique réglée dans l'assistant, et la condition le respecte (essai).
+
+### B. Cinq textes de la vue simple : FAIT (proposés à Grégoire à 10 h 06, posés tels quels)
+
+**Vérification préalable : ton hypothèse tient.** La vue simple reconnaît trois familles par le TYPE rangé (`familleDeLaPratique`, `js/vue-simple-donnees.js`) : `cibles`, tout type qui contient « standard », tout type qui contient « spécification ». Tout le reste est « autre », y compris une pratique de type sommative devenue hybride par ses jetons : elle se suit en vue étendue. « Par niveaux (cumulative ou hybride) » décrit donc exactement le type standards.
+
+| N° | Où | Texte posé |
+|---|---|---|
+| 1 | la carte du modèle | « Chaque production reçoit un niveau. La note est le cumul de tous ces niveaux ; tu peux ensuite ne retenir que les meilleurs ou les plus récents. » |
+| 2 | la carte « Ta pratique » de l'accueil | inchangée |
+| 3 | `groupeMotAutres` | « Un groupe dont la pratique n’est ni par standards, ni par spécifications, ni par niveaux (cumulative ou hybride) se suit en vue étendue. » |
+| 4 | `pratiqueAutre` | « La pratique de ce groupe n’est ni par standards, ni par spécifications, ni par niveaux (cumulative ou hybride) : elle se règle en vue étendue. » |
+| 5 | `tableau.autreFamille` | « Le tableau sert aux pratiques par standards, par spécifications et par niveaux (cumulatives ou hybrides). La pratique de ce groupe se suit en vue étendue. » |
+
+Deux remarques :
+- les textes 3 et 4 gardent l'apostrophe typographique du fichier (« n’est »), comme tous les textes de la vue simple ;
+- un texte voisin, hors de la liste, dit encore « hybrides » pour le même type : le tableau de notation de la vue étendue (`js/tableau-notation.js`, repère T1), « Le tableau de notation sert aux pratiques hybrides et par spécifications. Pour la pratique de ce groupe-cours, la Liste reste la vue de tes évaluations. » Non touché ; à relire avec les autres.
+
+Source ou stock : source seulement, des mots d'écran. Fichier de textes validés mis à jour (repères V2, V5, V6, V7, F1).
+
+### Bancs du quatrième amendement
+
+- **Vitest, suite complète : 986 fichiers, 12 773 essais, tous verts.** Quatre essais neufs sur la phrase (elle paraît ; elle ne paraît pas ; jamais dans une PAN ; aucune seconde règle, et où elle est posée). Trois break-tests, tous rouges : la phrase pour un bloc retenu seul (1), la phrase sans condition (3), la phrase dans une PAN (2).
+- **Navigateur, sous Chromium** : `jetons-par-defaut-29-oct` 3 verts, dont l'essai demandé (la phrase est cachée à l'ouverture ; cocher la fait paraître et passe le badge à HYB ; décocher par le vrai geste la retire et rend CUM ; recocher la ramène) ; `vue-simple` 61 verts sur 61. Écrans épinglés : deux fragments de la référence WebKit repris à la main (la description de la carte) ; mesuré sous Chromium, ce sont les seuls écarts dus à l'amendement.
+- Comme pour la note « réglés à la création », la phrase se juge à l'état que la fiche lui pose, pas à sa visibilité : la carte des jetons est un accordéon.
+- **Rien sous WebKit** : le verdict se prendra sur le Mac à l'assemblage.
+
 ## 1. Les mesures demandées avant d'écrire la règle
 
 ### a. Une pratique SANS réglage de jetons
@@ -467,6 +509,7 @@ Aucune porte terrain n'est due (règles de tête du skill `portes-terrain`) : le
 4. Dans cette fiche, coche « Activer le système de jetons ». Le badge passe à HYB sans recharger ; sa bulle dit « Hybride : cette pratique offre des jetons de reprise. » Décoche : il revient à CUM.
 5. Ouvre une pratique de type « Hybride », mets « Mode de sélection » sur « Toutes les productions » (ou « Tous les artefacts »), jetons décochés : le badge passe à CUM.
 6 bis. Ouvre la fiche d'une pratique ancienne, qui n'a jamais eu de jetons réglés : « Activer le système de jetons » est décochée. Change sa description, quitte le champ : le badge reste CUM. Coche la case : il passe à HYB.
+6 quater. Dans cette même fiche, sous la case : la phrase « Avec des jetons de reprise, ta pratique est hybride : une note peut être révisée. » paraît quand tu coches, disparaît quand tu décoches. Si la carte « Système de jetons » est repliée, déplie-la d'abord.
 6 ter. Dans la démo de cette branche, l'écran d'évaluation dit « Système de jetons désactivé » : c'est attendu jusqu'à la release.
 6. Sur iPad, il n'y a pas de survol : la bulle ne s'y lit pas. Le badge, lui, doit changer de la même façon.
 7. Dans l'assistant, choisis la famille hybride puis, à « Construction de la note », « Toutes les productions » : le récapitulatif doit dire « Cumulative », en orange.

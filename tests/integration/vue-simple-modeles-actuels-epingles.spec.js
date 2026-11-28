@@ -160,4 +160,8 @@ for (const m of MODELES) {
  * main, pour le nom du modèle, « Cumulative par niveaux » (décision de Grégoire, 8 h 40) : son titre (deux écrans),
  * « Modèle Cumulative par niveaux », le nom au tableau, l'état de l'accueil, la carte « … ou cumulative par niveaux. »
  * (deux écrans). Verdict : celui du Mac.
+ *
+ * REPRISE VOULUE (28 nov. 2026, quatrième amendement, sans WebKit) : deux fragments reportés à la main, la description de la
+ * carte « Cumulative par niveaux » à l'écran du choix (texte 1 de 10 h 15, proposé à Grégoire). Mesuré sous Chromium : ce
+ * sont les seuls écarts dus à l'amendement. Verdict : celui du Mac.
  */
