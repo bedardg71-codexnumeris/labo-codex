@@ -234,21 +234,23 @@
     // est un jugement posé, pas un calcul sur les données (SPEC §7, SKILL §8 DEN-E).
     function _estDEN(id) { return _codePratique(id) === 'DEN'; }
 
-    // Le SIGLE affiché d'un code interne (registre) : « Par standards » (code CIB) se lit STD, « Hybride » (27 nov. ; avant : « Par sélection de
-    // productions », SEL) (code STD) se lit HYB. Décision de Grégoire, 21 nov. 2026, 6 h 56 : « CIB » ne s'affiche nulle part.
-    function _sigle(code) {
-        return (code && typeof sigleDuCode === 'function') ? sigleDuCode(code) : (code || '');
+    // Familles par réglages (28 nov. 2026) : ce que l'écran DIT d'une pratique (sigle, nom de famille, survol) vient de sa
+    // famille DÉDUITE des réglages (`familleDeduiteParId`, registre, lecteur unique). `_codePratique` reste le code du
+    // TYPE : il route le calcul (`_estDEN`, les comparables), il ne s'affiche pas.
+    function _famille(id) {
+        return (typeof familleDeduiteParId === 'function') ? familleDeduiteParId(id) : null;
     }
 
-    // Badge construit depuis le CODE réel (genererBadgePratiqueHTML retombe sur STD
-    // par défaut pour un id configurable non mappé — à ne pas réutiliser ici).
+    // Le SIGLE affiché d'une pratique (CUM, HYB, STD, SPE, DEN) ; « CIB » ne s'affiche nulle part (21 nov. 2026).
+    function _sigle(id) {
+        var f = _famille(id);
+        return f ? f.sigle : '';
+    }
+
+    // Le badge de la famille déduite, avec son survol.
     function _badge(id) {
-        var code = _codePratique(id);
-        if (!code) return '';
-        var c = code.toLowerCase();
-        // 21 nov. 2026 : le texte est le sigle affiché (registre) ; la classe reste le code interne.
-        var sigle = (typeof sigleDuCode === 'function') ? sigleDuCode(code) : code;
-        return '<span class="badge-type-pratique badge-type-' + c + '">' + sigle + '</span>';
+        var f = _famille(id);
+        return (f && typeof genererBadgeFamilleDeduiteHTML === 'function') ? genererBadgeFamilleDeduiteHTML(f) : '';
     }
 
     function _configsPratiques() {
@@ -261,11 +263,8 @@
         if (cfg && cfg.nom) return cfg.nom;
         var inst = (typeof obtenirPratiqueParId === 'function') ? obtenirPratiqueParId(id) : null;
         if (inst && inst.nom) return inst.nom;
-        if (typeof obtenirRepresentationPratique === 'function') {
-            var r = obtenirRepresentationPratique(id);
-            if (r && r.famille) return r.famille;
-        }
-        return id;
+        var f = _famille(id);   // une pratique sans nom : le nom de sa famille déduite
+        return (f && f.famille) ? f.famille : id;
     }
 
     // Pratique active du groupe-cours — sert de 1ʳᵉ colonne par défaut (#326 R4b :
@@ -761,7 +760,7 @@
         return dispo.map(function(p) {
             var sel = (p.id === selId) ? ' selected' : '';
             return '<option value="' + _esc(p.id) + '"' + sel + '>'
-                + _esc(_sigle(p.code) + ' · ' + p.nom) + '</option>';   // le sigle, jamais le code (21 nov., 13 h 30)
+                + _esc(_sigle(p.id) + ' · ' + p.nom) + '</option>';   // le sigle, jamais le code (21 nov., 13 h 30)
         }).join('');
     }
 
@@ -1180,7 +1179,7 @@
         var cols = _colonnes();
         var entetes = ['Profil', 'DA', 'Niveau atteint', 'Tendance'];
         cols.forEach(function(c) {
-            entetes.push(_nomPratique(c.id) + ' (' + _sigle(_codePratique(c.id)) + ')');   // le sigle, jamais le code
+            entetes.push(_nomPratique(c.id) + ' (' + _sigle(c.id) + ')');   // le sigle, jamais le code
         });
         var lignes = [entetes.map(_csvCell).join(',')];
         _profilsActifs().forEach(function(prof) {

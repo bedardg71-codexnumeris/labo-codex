@@ -463,7 +463,7 @@ const GLOSSAIRE = {
         terme: 'CUM — Cumulative',
         categorie: 'Pratiques de notation',
         etape: 'transversal',
-        definition: 'Pratique de notation habituelle, souvent appelée sommative ou traditionnelle : la note est le cumul pondéré des résultats. Chaque production contribue à la note finale selon sa pondération.',
+        definition: 'Pratique de notation habituelle, souvent appelée sommative ou traditionnelle : la note est le cumul pondéré des résultats. Toutes les productions comptent, celles du début autant que celles de la fin, chacune selon sa pondération, et aucune note n\'est révisée. Dès qu\'une reprise est offerte, la pratique devient hybride.',
         voir: 'Conception › Pratiques'
     },
 
@@ -472,7 +472,7 @@ const GLOSSAIRE = {
         terme: 'HYB — Hybride',
         categorie: 'Pratiques de notation',
         etape: 'transversal',
-        definition: 'Pratique de notation qui donne des niveaux aux productions (ex. I-D-M-E) et compose la note à partir de certaines d\'entre elles, selon sa configuration : les meilleures, les plus récentes, ou deux blocs dont l\'un compte en entier. Un niveau n\'est pas définitif : il peut être révisé en cours d\'apprentissage.',
+        definition: 'Pratique de notation où la note se construit encore par cumul, en points ou en niveaux de performance, mais où une note peut être révisée en cours d\'apprentissage. Retenir les meilleures productions ou les plus récentes, ou offrir des jetons de reprise : un seul de ces moyens suffit. D\'autres productions peuvent rester obligatoires et compter toutes.',
         voir: 'Conception › Pratiques'
     },
 
@@ -508,7 +508,7 @@ const GLOSSAIRE = {
         terme: 'PAN — Pratique Alternative de Notation',
         categorie: 'Pratiques de notation',
         etape: 'transversal',
-        definition: 'Terme qui désigne les pratiques Standards (STD) et Spécifications (SPE). La Dénotation (DEN) est une PRÉN ; l\'application lui donne aussi le badge « PAN » par commodité. Dans le contexte PAN, les productions sont d\'abord des occasions d\'apprentissage et de mise en pratique, pas des épreuves évaluatives.',
+        definition: 'Terme qui désigne les pratiques Standards (STD) et Spécifications (SPE). La Dénotation (DEN) est une PRÉN ; l\'application lui donne aussi le badge « PAN » par commodité. Dans le contexte PAN, les productions sont d\'abord des occasions d\'apprentissage et de mise en pratique, pas des épreuves évaluatives. Dans une PAN, on fixe des cibles d\'apprentissage et on juge le degré de maîtrise de chacune à partir des niveaux de performance observés : la compétence ne s\'établit jamais par un cumul de points. Les jetons de reprise y sont possibles aussi.',
         voir: 'Conception › Pratiques'
     },
 

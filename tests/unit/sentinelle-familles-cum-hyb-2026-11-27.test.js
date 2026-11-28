@@ -54,9 +54,9 @@ describe('B · les libellés hors registre', () => {
         const win = { addEventListener() {}, removeEventListener() {}, echapperHtml };
         chargerScript('js/wizard-pratique-v2.js', { db, cle: (k) => k, echapperHtml, normaliserIdPratique: (t) => t }, win);
         expect(win.TYPE_BADGES.sommative).toMatchObject({ code: 'CUM', classe: 'som', label: 'Cumulative',
-            description: 'Ta note finale est le cumul pondéré de tes évaluations. C\'est la méthode habituelle, souvent appelée sommative.' });   // ↻ 28 nov. 2026
+            description: 'Ta note finale est le cumul pondéré de toutes tes évaluations, sans reprise. C\'est la méthode habituelle, souvent appelée sommative.' });   // ↻ 28 nov. 2026 (familles par réglages, texte 10)
         expect(win.TYPE_BADGES.standards).toMatchObject({ code: 'HYB', classe: 'sel', label: 'Hybride',
-            description: 'Tu évalues chaque production par niveaux (ex.\u00a0: I-D-M-E). La note se construit à partir des productions que ta règle retient ; d\'autres peuvent compter d\'office.' });
+            description: 'Ta note se construit par cumul, mais une note peut être révisée : ta règle retient certaines productions, ou tes élèves ont des jetons de reprise. D\'autres productions peuvent compter d\'office.' });   // ↻ 28 nov. 2026 (texte 11)
         const cartes = win.ETAPES_WIZARD['voie-rapide'].champs[0].options;   // les lignes 230 et 231 du mandat
         expect(cartes.find(o => o.value === 'moyenne')).toMatchObject({ label: 'Cumulative (CUM)', description: 'Note finale par cumul pondéré des évaluations.' });
         expect(cartes.find(o => o.value === 'niveaux')).toMatchObject({ label: 'Hybride (HYB)', description: 'Des niveaux (ex. I-D-M-E) ; la note retient certaines productions.' });
@@ -76,18 +76,22 @@ describe('B · les libellés hors registre', () => {
         const html = lire('index.html');
         expect(html).toMatch(/<option value="sommative">Cumulative<\/option>/);
         expect(html).toMatch(/<option value="standards">Hybride<\/option>/);
-        expect(html).toContain('<strong>CUM</strong> (Cumulative) utilise une moyenne pondérée habituelle.');   // ↻ 28 nov. 2026 (second lot du renommage)
-        expect(html).toContain('<strong>HYB</strong> (Hybride) : des niveaux (ex. I-D-M-E) ; la note retient certaines productions.');
+        // ↻ 28 nov. 2026 (familles par réglages, textes 4 et 5 de Grégoire).
+        expect(html).toContain('<strong>CUM</strong> (Cumulative) : toutes les productions comptent, chacune à sa pondération, sans reprise.');
+        expect(html).toContain('<strong>HYB</strong> (Hybride) : un cumul où une note peut être révisée, en retenant certaines productions ou en offrant des reprises.');
         expect(html).toContain('<strong>Hybride</strong>&nbsp;: la note retient les résultats');
         expect(html).toMatch(/<option value="hybride"[^>]*>Deux blocs \(N meilleures \+ Obligatoires\)<\/option>/);
         expect(html).not.toContain('Hybride (N meilleures + Obligatoires)');
     });
     it('la bibliothèque : noms, résumés et bulles', () => {
         const src = lire('js/pratiques-gestion.js');
-        expect(src).toContain("'sommative': { nom: 'Cumulative', anglais: 'Traditional Grading', resume: 'Cumul pondéré des évaluations' }");
-        expect(src).toContain("'standards': { nom: 'Hybride', resume: 'Des niveaux (ex. I-D-M-E) ; la note retient certaines productions' }");
-        expect(src).toContain("SOM: 'Cumulative — note finale par cumul pondéré des évaluations.',");
-        expect(src).toContain("STD: 'Hybride : des niveaux (ex. I-D-M-E) ; la note retient certaines productions.',");
+        // ↻ 28 nov. 2026 (familles par réglages, textes 6 à 9 de Grégoire) : les résumés ; les bulles CUM et HYB disent le
+        // motif et vivent au registre (banc sentinelle-familles-par-reglages-2026-11-28).
+        expect(src).toContain("'sommative': { nom: 'Cumulative', anglais: 'Traditional Grading', resume: 'Cumul pondéré de toutes les évaluations, sans reprise' }");
+        expect(src).toContain("'standards': { nom: 'Hybride', resume: 'Un cumul où une note peut être révisée' }");
+        const registre = lire('js/pratiques/pratique-registre.js');
+        expect(registre).toContain("'tout-compte': 'Cumulative : toutes les productions comptent, sans reprise.',");
+        expect(registre).toContain("'retenu': 'Hybride : cette pratique retient certaines productions.',");
     });
     it('la vue simple : le modèle « Hybride » et ses messages', () => {
         const src = lire('js/vue-simple.js');

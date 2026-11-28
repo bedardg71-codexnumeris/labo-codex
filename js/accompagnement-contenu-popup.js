@@ -248,8 +248,8 @@ const AIDE_CONTEXTUELLE = {
                 type: 'liste',
                 titre: 'Les cinq pratiques',
                 items: [
-                    '<strong>Cumulative (CUM)</strong> — calcule une moyenne pondérée habituelle.',
-                    '<strong>Hybride (HYB)</strong> — donne des niveaux (ex. I-D-M-E)\u00a0; la note retient certaines productions.',
+                    '<strong>Cumulative (CUM)</strong> — calcule une moyenne pondérée de toutes les productions, sans reprise.',
+                    '<strong>Hybride (HYB)</strong> — cumule encore, mais une note peut être révisée : la pratique retient certaines productions ou offre des reprises.',
                     '<strong>PAN par standards (STD)</strong> — donne un niveau par cible d’apprentissage du cours\u00a0; la note vient du meilleur niveau démontré pour chaque cible.',
                     '<strong>PAN par spécifications (SPE)</strong> — fonctionne par contrat\u00a0: chaque production est réussie ou non selon des critères prédéfinis\u00a0; c’est l’ensemble des cibles atteintes qui détermine la note.',
                     '<strong>Dénotation (DEN)</strong> — retire la note chiffrée des travaux au profit d’une rétroaction qualitative sur des cibles et critères explicites ; la note certificative (RREC) est posée par jugement à la fin.',

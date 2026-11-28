@@ -33,7 +33,12 @@ const REMPLACES_22 = ['V1', 'V2', 'V5', 'V6'];
 // pour les repères qu'il porte et que liste REMPLACES_27, les citations des trois fichiers précédents, qui restent intacts.
 const FAMILLES_27 = sectionsDe(lire('plans de travail/TEXTES-2026-11-27-familles-cum-hyb.md'));
 const REMPLACES_27 = ['V1', 'V2', 'V3', 'V5', 'V6', 'T1', 'A1', 'A2', 'A3', 'A6', 'M1', 'F3', 'F4', 'F10', 'P1', 'P2', 'M5'];
-const section = (repere) => (REMPLACES_27.includes(repere) && FAMILLES_27.find((s) => s.repere === repere))
+// ↻ 28 nov. 2026 (familles par réglages, texte 11 accepté par Grégoire à 7 h 18) : le fichier du 28 nov. REMPLACE, pour A1
+// seulement, la citation du 27 nov., qui reste intacte.
+const REGLAGES_28 = sectionsDe(lire('plans de travail/TEXTES-2026-11-28-familles-par-reglages.md'));
+const REMPLACES_28 = ['A1'];
+const section = (repere) => (REMPLACES_28.includes(repere) && REGLAGES_28.find((s) => s.repere === repere))
+    || (REMPLACES_27.includes(repere) && FAMILLES_27.find((s) => s.repere === repere))
     || (REMPLACES_22.includes(repere) && PORTE_STD.find((s) => s.repere === repere))
     || (REMPLACES.includes(repere) && SANS_PAN.find((s) => s.repere === repere)) || SECTIONS.find((s) => s.repere === repere);
 const source = (repere) => net(lire(section(repere).fichier));

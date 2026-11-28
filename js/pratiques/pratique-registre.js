@@ -85,8 +85,8 @@ function normaliserIdPratique(id) {
 //   les ids et les couleurs ne changent pas. Un seul lecteur affiche `famille` : le repli de `_nomPratique` du Comparateur
 //   (une pratique sans nom), mesuré le 27 nov.
 // `nom` (second lot du renommage, 28 nov. 2026) : le nom de la pratique, tel que l'écran de l'enseignant·e le dit quand
-//   il nomme la pratique active (carte « Méthodologie de calcul » du profil). Lu par `obtenirNomTypePratique`, hors de
-//   `obtenirRepresentationPratique` (dont un banc fige le retour).
+//   il nomme la pratique active (carte « Méthodologie de calcul » du profil). Lu par `familleDeduiteDeLaPratique`
+//   (28 nov. 2026, familles par réglages), hors de `obtenirRepresentationPratique` (dont un banc fige le retour).
 const REPRESENTATIONS_PRATIQUES = {
     sommative:      { code: 'SOM', sigle: 'CUM', couleurVar: '--som-orange', famille: 'Cumulative', nom: 'Cumulative' },
     standards:      { code: 'STD', sigle: 'HYB', couleurVar: '--sel-sarcelle', famille: 'Hybride', nom: 'Hybride' },  // « Hybride » (27 nov. 2026)
@@ -162,17 +162,6 @@ function obtenirLabelFamillePratique(id) {
 }
 
 /**
- * Nom de la pratique (« Cumulative », « Hybride », « PAN par standards », « PAN par spécifications », « Dénotation »),
- * 28 nov. 2026. STRICT : un type inconnu, ou aucun, rend null — jamais le nom du défaut, qui nommerait une pratique
- * qui n'est pas la sienne. @param {?string} id @returns {?string}
- */
-function obtenirNomTypePratique(id) {
-    if (!id) return null;
-    const idNorm = normaliserIdPratique(id);
-    return Object.prototype.hasOwnProperty.call(REPRESENTATIONS_PRATIQUES, idNorm) ? REPRESENTATIONS_PRATIQUES[idNorm].nom : null;
-}
-
-/**
  * Génère le badge HTML court d'une pratique — GÉNÉRATEUR UNIQUE.
  * Sortie 100 % contrôlée (codes du registre, jamais de donnée utilisateur) → pas
  * d'échappement requis, zéro handler inline (conforme CSP script-src 'self').
@@ -183,6 +172,163 @@ function obtenirNomTypePratique(id) {
 function genererBadgePratiqueHTML(id) {
     const rep = obtenirRepresentationPratique(id);
     return '<span class="badge-type-pratique ' + rep.classe + '">' + rep.sigle + '</span>';
+}
+
+// ============================================================================
+// LA FAMILLE SE DÉDUIT DES RÉGLAGES (28 nov. 2026)
+// ============================================================================
+// Définition rapportée par Grégoire de la communauté de pratique sur les PAN (rencontre du 27 nov. ; arrêtée le 28 nov.,
+// 7 h 01 à 7 h 12) :
+//   - la note ne se construit pas par cumul : pratique alternative de notation (STD, SPE, DEN), inchangée ;
+//   - la note se construit par cumul et aucune note n'est révisée : CUMULATIVE ;
+//   - la note se construit par cumul et une note peut être révisée en cours d'apprentissage : HYBRIDE.
+// Deux types cumulent, quels que soient leurs noms internes : `sommative` et `standards`. Rendent une pratique hybride,
+// un seul suffit : (1) un bloc RETENU (la sélection garde les N meilleures, les N plus récentes ou les plus récentes
+// parmi les meilleures, seule ou à côté d'un bloc où tout compte) ; (2) des jetons de REPRISE réellement offerts.
+// Ne rendent pas hybride : les jetons de délai seuls, le verrou, les anciennes clés « remplacement », « plafonnement »,
+// « portfolio » qu'aucun calcul n'applique (elles ne sont pas lues ici).
+//
+// ⚠ L'ÉCRAN SEULEMENT. Le CALCUL suit toujours le TYPE (`obtenirCodePratique`, `obtenirCode()`, `METHODE_PAR_FAMILLE`) :
+//   aucune note ne bouge, aucune donnée n'est réécrite. Tout écran qui DIT la famille d'une pratique (sigle, nom,
+//   couleur, survol) passe par `familleDeduiteDeLaPratique` ; une sentinelle interdit un second lecteur par type.
+
+/** Les types dont la note se construit par cumul. */
+const TYPES_QUI_CUMULENT = Object.freeze(['sommative', 'standards']);
+
+/** Le type que porte chaque code interne (`pratiques[0]`). */
+const TYPE_PAR_CODE = Object.freeze(Object.keys(REPRESENTATIONS_PRATIQUES).reduce((t, id) => {
+    t[REPRESENTATIONS_PRATIQUES[id].code] = id;
+    return t;
+}, {}));
+
+/** Survols du badge, par motif (textes de Grégoire, 28 nov. 2026, 7 h 18 et 7 h 19 : ne pas reformuler). */
+const SURVOLS_FAMILLE_DEDUITE = Object.freeze({
+    'tout-compte': 'Cumulative : toutes les productions comptent, sans reprise.',
+    'retenu': 'Hybride : cette pratique retient certaines productions.',
+    'reprise': 'Hybride : cette pratique offre des jetons de reprise.',
+    'retenu-et-reprise': 'Hybride : cette pratique retient certaines productions et offre des jetons de reprise.'
+});
+
+/**
+ * Le type canonique d'une pratique, pour DIRE sa famille : `pratiques[0]` (le code de la fiche), puis `type`,
+ * `configuration.type`, `config.type` (les pratiques de la démo n'ont que `configuration.type`). null si rien de connu.
+ */
+function _typeDeLaPratiquePourLaFamille(pratique) {
+    const p = pratique || {};
+    const sources = [
+        Array.isArray(p.pratiques) ? p.pratiques[0] : null,
+        p.type, p.configuration && p.configuration.type, p.config && p.config.type
+    ];
+    for (const source of sources) {
+        if (!source || typeof source !== 'string') continue;
+        if (Object.prototype.hasOwnProperty.call(TYPE_PAR_CODE, source)) return TYPE_PAR_CODE[source];
+        const type = normaliserIdPratique(source);
+        if (Object.prototype.hasOwnProperty.call(REPRESENTATIONS_PRATIQUES, type)) return type;
+    }
+    return null;
+}
+
+/**
+ * Un bloc RETENU : la sélection ne garde pas tout. Seul le type `standards` sélectionne (`configuration.portfolio`, ou
+ * `config.portfolio`). Lu comme le moteur le lit : sans méthode, « meilleurs » (`_lireConfiguration`,
+ * pratique-pan-standards.js) ; `categories.actif` (les deux blocs : une Sélection retenue et des Obligatoires qui
+ * comptent toutes) passe avant la méthode (`selectionnerArtefactsSelonModalite`, portfolio.js). Seul « tous » ne retient rien.
+ */
+function _pratiqueRetientDesProductions(pratique, type) {
+    if (type !== 'standards') return false;
+    const config = (pratique && (pratique.configuration || pratique.config)) || {};
+    if (config.categories && config.categories.actif) return true;
+    const methode = (config.portfolio && config.portfolio.methodeSelection) || 'meilleurs';
+    return methode !== 'tous';
+}
+
+/**
+ * Des jetons de REPRISE réellement offerts : le bloc de jetons que la pratique DÉCLARE (`configJetonsDeclareeDeLaPratique`,
+ * evaluation-jetons.js : la lecture de `jetonsDeclares`, D5 du 24 sept. 2026) est actif et offre au moins un jeton de
+ * reprise, ou la reprise ciblée avec un nombre non nul. Sans réglage : aucun (décision du 28 nov. 2026, 8 h 00 : le
+ * défaut du moteur n'est pas une déclaration). Les jetons de délai ne comptent pas.
+ */
+function _pratiqueOffreDesReprises(pratique) {
+    const jetons = (typeof window !== 'undefined' && typeof window.configJetonsDeclareeDeLaPratique === 'function')
+        ? window.configJetonsDeclareeDeLaPratique(pratique) : null;
+    if (!jetons || !jetons.actif) return false;
+    if (jetons.reprise && Number(jetons.reprise.nombre) > 0) return true;
+    const ciblee = jetons.repriseCiblee;
+    // La forme plate ne porte pas de nombre pour la reprise ciblée : active, elle est offerte.
+    return !!(ciblee && ciblee.actif && (ciblee.nombre === undefined || ciblee.nombre === null || Number(ciblee.nombre) > 0));
+}
+
+/**
+ * LA FAMILLE D'UNE PRATIQUE, DÉDUITE DE SES RÉGLAGES — lecteur UNIQUE de ce que l'écran dit d'une pratique.
+ * Pure (hors la lecture des jetons déclarés, pure elle aussi) : rien n'est lu en base, rien n'est écrit.
+ * @param {object} pratique - une pratique (bibliothèque, modèle, aperçu de l'assistant) ; `{ type }` suffit
+ * @returns {?{type:string, cle:string, code:string, sigle:string, famille:string, nom:string, couleurVar:string,
+ *            classe:string, motif:?string, survol:?string}}
+ *   - `type` : le type rangé (ce que le calcul suit) ; `cle` : la famille AFFICHÉE, clé des tables de mots
+ *     (`sommative` = cumulative, `standards` = hybride, sinon le type de la PAN) ;
+ *   - `code`, `sigle`, `famille`, `nom`, `couleurVar`, `classe` : la représentation de `cle` ;
+ *   - `motif` : 'tout-compte', 'retenu', 'reprise', 'retenu-et-reprise', ou null pour une PAN ; `survol` : sa phrase.
+ *   null quand aucun type connu ne se lit.
+ */
+function familleDeduiteDeLaPratique(pratique) {
+    const type = _typeDeLaPratiquePourLaFamille(pratique);
+    if (!type) return null;
+    let cleFamille = type;
+    let motif = null;
+    if (TYPES_QUI_CUMULENT.indexOf(type) >= 0) {
+        const retenu = _pratiqueRetientDesProductions(pratique, type);
+        const reprise = _pratiqueOffreDesReprises(pratique);
+        motif = retenu ? (reprise ? 'retenu-et-reprise' : 'retenu') : (reprise ? 'reprise' : 'tout-compte');
+        cleFamille = motif === 'tout-compte' ? 'sommative' : 'standards';
+    }
+    const rep = REPRESENTATIONS_PRATIQUES[cleFamille];
+    return {
+        type, cle: cleFamille, code: rep.code, sigle: rep.sigle, famille: rep.famille, nom: rep.nom, couleurVar: rep.couleurVar,
+        classe: 'badge-type-' + rep.code.toLowerCase(),
+        motif, survol: motif ? SURVOLS_FAMILLE_DEDUITE[motif] : null
+    };
+}
+
+/**
+ * La famille déduite d'une pratique connue par son IDENTIFIANT : son entrée de bibliothèque, sinon la configuration de
+ * son instance enregistrée, sinon l'identifiant lu comme un type (les pratiques codées : `sommative`, `standards`…).
+ * @param {string} id @returns {?object} voir `familleDeduiteDeLaPratique`
+ */
+function familleDeduiteParId(id) {
+    if (!id) return null;
+    let donnees = null;
+    try { donnees = trouverPratiqueEnBibliotheque(id); } catch (e) { donnees = null; }
+    if (!donnees) {
+        const instance = pratiquesEnregistrees.get(id);
+        donnees = (instance && instance.config) || { type: id };
+    }
+    return familleDeduiteDeLaPratique(donnees);
+}
+
+/** La famille déduite de la pratique ACTIVE du groupe-cours, ou null sans pratique résolue. */
+function familleDeduiteDeLaPratiqueActive() {
+    try {
+        const designation = designerPratiqueActive();
+        if (designation.etat !== 'ok') return null;
+        return familleDeduiteDeLaPratique(designation.donnees || { type: designation.famille });
+    } catch (e) {
+        console.warn('[Registre] Famille de la pratique active illisible :', e.message || e);
+        return null;
+    }
+}
+
+/**
+ * Le badge court de la famille DÉDUITE, avec son survol — générateur unique des badges CUM et HYB. Sortie contrôlée
+ * (sigles et phrases du registre, jamais une donnée utilisateur ; apostrophes absentes des survols).
+ * @param {?object} famille - le retour de `familleDeduiteDeLaPratique`
+ * @param {string} [survolSansMotif] - le survol d'une PAN (texte statique de l'appelant)
+ * @returns {string} HTML, ou '' sans famille
+ */
+function genererBadgeFamilleDeduiteHTML(famille, survolSansMotif) {
+    if (!famille) return '';
+    const survol = famille.survol || survolSansMotif || '';
+    return '<span class="badge-type-pratique ' + famille.classe + '"' + (survol ? ' title="' + survol + '"' : '') + '>'
+        + famille.sigle + '</span>';
 }
 
 // ============================================================================
@@ -1488,8 +1634,12 @@ window.obtenirSiglePratique = obtenirSiglePratique;   // 21 nov. 2026 : le sigle
 window.sigleDuCode = sigleDuCode;
 window.obtenirCouleurPratique = obtenirCouleurPratique;
 window.obtenirLabelFamillePratique = obtenirLabelFamillePratique;
-window.obtenirNomTypePratique = obtenirNomTypePratique;   // 28 nov. 2026 : le nom de la pratique active (profil)
 window.genererBadgePratiqueHTML = genererBadgePratiqueHTML;
+// Familles par réglages (28 nov. 2026) : le lecteur unique de ce que l'écran dit d'une pratique.
+window.familleDeduiteDeLaPratique = familleDeduiteDeLaPratique;
+window.familleDeduiteParId = familleDeduiteParId;
+window.familleDeduiteDeLaPratiqueActive = familleDeduiteDeLaPratiqueActive;
+window.genererBadgeFamilleDeduiteHTML = genererBadgeFamilleDeduiteHTML;
 window.listerPratiquesDisponibles = listerPratiquesDisponibles;
 window.pratiqueEstDisponible = pratiqueEstDisponible;
 window.obtenirPratiqueParId = obtenirPratiqueParId;

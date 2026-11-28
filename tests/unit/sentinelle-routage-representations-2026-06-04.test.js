@@ -17,7 +17,9 @@ describe('Session B Lot 2 · routage des représentations', () => {
     const gestion = lire('js/pratiques-gestion.js');
 
     it('donnees-v2 · badge des familles routé vers genererBadgePratiqueHTML', () => {
-        expect(donneesV2).toMatch(/genererBadgePratiqueHTML/);
+        // ↻ 28 nov. 2026 (familles par réglages) : le badge vient de la famille DÉDUITE des réglages, au registre.
+        expect(donneesV2).toMatch(/familleDeduiteDeLaPratique\(pratique\)/);
+        expect(donneesV2).toMatch(/genererBadgeFamilleDeduiteHTML\(famille\)/);
         // L'ancienne table locale {pan-standards: "<span…std…", …} a disparu.
         expect(donneesV2).not.toMatch(/'pan-standards':\s*'<span class="badge-type-pratique badge-type-std">/);
         expect(donneesV2).not.toMatch(/'denominateur':/); // clé boguée retirée

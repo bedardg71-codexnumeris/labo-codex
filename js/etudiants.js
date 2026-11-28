@@ -342,6 +342,15 @@ function obtenirCouleurPerformance(performance, reperes) {
 // calculerCorrelationPearson → déplacé dans indices.js (#206)
 
 /**
+ * Familles par réglages (28 nov. 2026) — le nom que l'aide donne à la pratique active : celui de sa famille DÉDUITE des
+ * réglages (registre, lecteur unique). Sans registre : l'ancien repli par type. Texte sûr (noms du registre).
+ */
+function _nomFamillePratiqueActive(isPAN) {
+    const famille = (typeof familleDeduiteDeLaPratiqueActive === 'function') ? familleDeduiteDeLaPratiqueActive() : null;
+    return (famille && famille.nom) || (isPAN ? 'Hybride' : 'Cumulative');
+}
+
+/**
  * Génère le contenu de la carte explicative sur le calcul des indices A-C-P.
  * Source UNIQUE partagée par les deux pages qui exposent cette note (#310) :
  * - Liste des étudiant·es (#note-calcul-indices-liste, ce module)
@@ -375,7 +384,7 @@ function genererExplicationCalculIndices(complementHtml = '') {
 
     // Lot N1b (21 sept. 2026) : sans pratique assignée, l'aide ne nomme aucune pratique (avant : « PAN-Standards »,
     // le repli PRATIQUE_DEFAUT) et dit, pour P, la phrase du diagnostic du profil — aucun mot neuf.
-    let html = '<strong>Méthodes de calcul des indices' + (pratique ? ' (pratique active : ' + (isPAN ? 'Hybride' : 'Cumulative') + ')' : '') + '</strong><br><br>';
+    let html = '<strong>Méthodes de calcul des indices' + (pratique ? ' (pratique active : ' + _nomFamillePratiqueActive(isPAN) + ')' : '') + '</strong><br><br>';
 
     // A - Assiduité (TOUJOURS DYNAMIQUE - comportement cumulatif)
     html += '<strong class="u-texte-bleu">A (Assiduité)</strong> : ';

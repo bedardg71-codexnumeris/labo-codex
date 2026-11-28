@@ -29,14 +29,23 @@ describe('#343-T3 — infobulle des tags de famille (bibliothèque)', () => {
     const src = readFileSync(path.join(racineProjet, 'js/pratiques-gestion.js'), 'utf8');
 
     it('le badge de famille émet un attribut title (infobulle)', () => {
-        expect(src).toMatch(/<span class="badge-type-pratique[^"]*"[^>]*title="\$\{infobulle\}"/);
+        // ↻ 28 nov. 2026 (familles par réglages) : le badge et son `title` sont rendus au registre
+        // (`genererBadgeFamilleDeduiteHTML`), qui reçoit de la fiche la bulle des PAN.
+        expect(src).toMatch(/return genererBadgeFamilleDeduiteHTML\(famille, TOOLTIPS_PAN\[famille\.code\] \|\| ''\);/);
+        const registre = readFileSync(path.join(racineProjet, 'js/pratiques/pratique-registre.js'), 'utf8');
+        expect(registre).toMatch(/<span class="badge-type-pratique ' \+ famille\.classe \+ '"' \+ \(survol \? ' title="' \+ survol \+ '"' : ''\)/);
     });
 
     it('les quatre familles + PAN ont un texte d\'infobulle', () => {
-        ['SOM:', 'STD:', 'SPE:', 'DEN:', 'PAN:'].forEach((cle) => {
+        // ↻ 28 nov. 2026 : les bulles CUM et HYB disent le MOTIF et vivent au registre (`SURVOLS_FAMILLE_DEDUITE`) ; la fiche
+        // garde celles des PAN, et le badge « PAN » d'une forme ancienne garde la sienne.
+        ['SPE:', 'DEN:', 'CIB:'].forEach((cle) => {
             expect(src).toContain(cle);
         });
-        expect(src).toMatch(/TOOLTIPS_FAMILLE/);
+        expect(src).toMatch(/TOOLTIPS_PAN/);
+        expect(src).toContain('title="Pratique alternative de notation.">PAN</span>');
+        const registre = readFileSync(path.join(racineProjet, 'js/pratiques/pratique-registre.js'), 'utf8');
+        ["'tout-compte':", "'retenu':", "'reprise':", "'retenu-et-reprise':"].forEach((cle) => expect(registre).toContain(cle));
         expect(src).toMatch(/DEN: 'PAN – Dénotation/);
     });
 });

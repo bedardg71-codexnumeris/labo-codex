@@ -138,8 +138,20 @@ function _jetonsBrutsDeLaPratique(pratique) {
  * @param {object} pratique - une entrée de `pratiquesConfigurables`
  * @returns {object} configuration canonique
  */
+/**
+ * Familles par réglages (28 nov. 2026) — LES JETONS QUE CETTE PRATIQUE DÉCLARE, ou `null` sans réglage reconnu : le bloc
+ * qu'elle PORTE, normalisé, sans le défaut du moteur. C'est la lecture de `obtenirConfigJetonsPratique` (et donc de
+ * `jetonsDeclares`, D5 du 24 sept. 2026), sur une pratique donnée plutôt que sur un identifiant : la famille déduite
+ * (`familleDeduiteDeLaPratique`, registre) la lit, pour dire si des jetons de reprise sont réellement offerts. Pure.
+ * @param {object} pratique - une pratique (bibliothèque, modèle, aperçu de l'assistant)
+ * @returns {object|null} configuration canonique, ou null
+ */
+function configJetonsDeclareeDeLaPratique(pratique) {
+    return _normaliserConfigJetons(_jetonsBrutsDeLaPratique(pratique));
+}
+
 function configJetonsResolueDeLaPratique(pratique) {
-    return _normaliserConfigJetons(_jetonsBrutsDeLaPratique(pratique)) || jetonsParDefaut();
+    return configJetonsDeclareeDeLaPratique(pratique) || jetonsParDefaut();
 }
 
 /**
@@ -176,7 +188,7 @@ function obtenirConfigJetonsPratique(pratiqueIdDemande = null) {
     const pratique = pratiques.find(p => p && p.id === pratiqueId);
     if (!pratique) return null;
 
-    return _normaliserConfigJetons(_jetonsBrutsDeLaPratique(pratique));
+    return configJetonsDeclareeDeLaPratique(pratique);
 }
 
 /**
@@ -1095,6 +1107,7 @@ function retirerJetonPersonnalise(da, jetonId) {
 window.obtenirConfigJetons = obtenirConfigJetons;
 window.jetonsDeclares = jetonsDeclares;   // #941 lot S3 (D5)
 window.obtenirConfigJetonsPratique = obtenirConfigJetonsPratique;
+window.configJetonsDeclareeDeLaPratique = configJetonsDeclareeDeLaPratique;   // familles par réglages (28 nov. 2026)
 window.configJetonsResolueDeLaPratique = configJetonsResolueDeLaPratique;   // jetons par défaut (29 oct. 2026) : le formulaire
 window.poserJetonsRefusesSiAucunReglage = poserJetonsRefusesSiAucunReglage;   // jetons par défaut (29 oct. 2026) : l'assistant  // #328 L2-c (réutilisé par les lecteurs migrés)
 window.compterJetonsUtilises = compterJetonsUtilises;

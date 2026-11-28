@@ -147,6 +147,32 @@ export function completerJetonsResolusParDefaut(fauxWindow, cheminRelatifProjet)
     // Le formulaire lit la résolution ; l'assistant pose le refus d'une pratique neuve.
     fauxWindow.configJetonsResolueDeLaPratique = jetonsResolusDuMoteur.configJetonsResolueDeLaPratique;
     fauxWindow.poserJetonsRefusesSiAucunReglage = jetonsResolusDuMoteur.poserJetonsRefusesSiAucunReglage;
+    // Familles par réglages (28 nov. 2026) : le registre lit les jetons DÉCLARÉS par window.… pour déduire la famille.
+    fauxWindow.configJetonsDeclareeDeLaPratique = jetonsResolusDuMoteur.configJetonsDeclareeDeLaPratique;
+}
+
+/**
+ * Familles par réglages (28 nov. 2026) — `familleDeduiteDeLaPratique` et `genererBadgeFamilleDeduiteHTML`
+ * (pratique-registre.js) sont LE lecteur de ce que l'écran dit d'une pratique : la fiche, la bibliothèque, l'assistant, la
+ * liste des ressources les appellent en global. Comme le pool : le VRAI registre (bac jetable, une fois par fichier, avec
+ * le vrai lecteur des jetons déclarés), fourni quand le harnais ne les donne pas. Les deux lecteurs par identifiant
+ * (`familleDeduiteParId`, `familleDeduiteDeLaPratiqueActive`) lisent la base : un banc qui en a besoin charge le registre
+ * avec SON `db` et les passe.
+ */
+let familleDuRegistre = null;
+export function completerFamilleDeduiteParDefaut(globaux, cheminRelatifProjet) {
+    if (chargementAuxiliaire || cheminRelatifProjet.endsWith('pratique-registre.js')
+        || typeof globaux.familleDeduiteDeLaPratique === 'function') return globaux;
+    if (!familleDuRegistre) {
+        const jetons = chargerAuxiliaire('js/evaluation-jetons.js');
+        const registre = chargerAuxiliaire('js/pratiques/pratique-registre.js');
+        registre.configJetonsDeclareeDeLaPratique = jetons.configJetonsDeclareeDeLaPratique;
+        familleDuRegistre = {
+            familleDeduiteDeLaPratique: registre.familleDeduiteDeLaPratique,
+            genererBadgeFamilleDeduiteHTML: registre.genererBadgeFamilleDeduiteHTML
+        };
+    }
+    return Object.assign({}, familleDuRegistre, globaux);
 }
 
 /**
@@ -294,6 +320,7 @@ export function chargerScript(cheminRelatifProjet, globaux = {}, fauxWindowExist
     // Lot E1 de l'enregistrement (27 sept. 2026) : voir `completerEcrivainsParDefaut`.
     globaux = completerEcrivainsParDefaut(globaux, fauxWindow);
     globaux = completerNoteParDefaut(globaux);   // 21 oct. 2026
+    globaux = completerFamilleDeduiteParDefaut(globaux, cheminRelatifProjet);   // familles par réglages (28 nov. 2026)
 
     // Consigne du 12 sept. 2026 (les étiquettes) — `motsNature` / `motNature` (js/mots-nature.js) est
     // LE point unique du mot de chaque nature de cours ; le formulaire du Cadre, les cartes de

@@ -51,14 +51,16 @@ function grillesDuWizard() {
 // SSOT du vocabulaire de famille dans l'assistant : consommé par le récapitulatif
 // (genererRecapitulatif) ET par l'écran « Partir d'un modèle » (#319 Lot 2 a7,
 // badge famille). Un seul endroit à éditer, pas de microcopy dupliqué.
+// 28 nov. 2026 (familles par réglages) : les entrées `sommative` (cumulative) et `standards` (hybride) se lisent par la
+// famille DÉDUITE des réglages (`familleDeduiteDeLaPratique(...).cle`, registre), plus par le type. Descriptions de Grégoire.
 const TYPE_BADGES = {
-    'sommative': { code: 'CUM', classe: 'som', label: 'Cumulative', description: 'Ta note finale est le cumul pondéré de tes évaluations. C\'est la méthode habituelle, souvent appelée sommative.' },
+    'sommative': { code: 'CUM', classe: 'som', label: 'Cumulative', description: 'Ta note finale est le cumul pondéré de toutes tes évaluations, sans reprise. C\'est la méthode habituelle, souvent appelée sommative.' },
     // 21 nov. 2026 (« le sigle suit le nom », décision de Grégoire) : `code` est ici le SIGLE AFFICHÉ (badge du
     // récapitulatif, ligne de « Partir d'un modèle ») ; le code interne vit au registre. `classe` porte la couleur de la
     // famille au récapitulatif : sarcelle pour « Hybride », bleu pour « Par standards ».
     // 27 nov. 2026 (trois familles, décision de Grégoire) : « Sommative » → « Cumulative » (CUM), « Par sélection de
     // productions » → « Hybride » (HYB). `classe` ne bouge pas : la couleur reste celle de la famille.
-    'standards': { code: 'HYB', classe: 'sel', label: 'Hybride', description: 'Tu évalues chaque production par niveaux (ex. : I-D-M-E). La note se construit à partir des productions que ta règle retient ; d\'autres peuvent compter d\'office.' },
+    'standards': { code: 'HYB', classe: 'sel', label: 'Hybride', description: 'Ta note se construit par cumul, mais une note peut être révisée : ta règle retient certaines productions, ou tes élèves ont des jetons de reprise. D\'autres productions peuvent compter d\'office.' },
     'specifications': { code: 'SPE', classe: 'spe', label: 'PAN – Spécifications', description: 'Chaque travail est jugé acceptable ou non. La note finale dépend du nombre de spécifications réussies (forfaits).' },
     // #319 Lot 5 (#318) : DEN reconnue à l'édition (code/couleur du registre canonique,
     // --den-violet). Elle se crée aussi : la carte « Note finale posée, pas calculée » de
@@ -962,8 +964,9 @@ const ETAPES_WIZARD = {
  * @returns {string} - Code court ('SOM' / 'STD' / 'SPE') ou ''
  */
 function libelleFamilleModele(p) {
-    const type = (typeof normaliserIdPratique === 'function' ? normaliserIdPratique(p.type) : p.type);
-    return (TYPE_BADGES[type] && TYPE_BADGES[type].code) || '';
+    // 28 nov. 2026 : la famille déduite des réglages du modèle (registre, lecteur unique).
+    const famille = (typeof familleDeduiteDeLaPratique === 'function') ? familleDeduiteDeLaPratique(p) : null;
+    return (famille && TYPE_BADGES[famille.cle] && TYPE_BADGES[famille.cle].code) || '';
 }
 
 /**
@@ -2185,7 +2188,9 @@ function genererRecapitulatif() {
 
     // ─── Section 1 : Diagnostic du type de notation (proéminent) ───
     // Familles : SSOT module TYPE_BADGES (partagé avec l'écran « Partir d'un modèle »).
-    const badge = TYPE_BADGES[classification.type] || { code: '?', classe: 'indetermine', label: 'Indéterminé', description: '' };
+    // 28 nov. 2026 (familles par réglages) : la famille montrée est celle que les RÉPONSES donnent (sélection, jetons de
+    // reprise), déduite au registre sur l'aperçu de la pratique que « Créer » écrirait ; plus le type seul.
+    const badge = badgeDuRecapitulatif(r, classification);
 
     html += `
         <div class="wizard-v2-recap-diagnostic wizard-v2-recap-diagnostic--${badge.classe}">
@@ -2960,51 +2965,7 @@ async function creerPratiqueV2() {
         // (#900, lot N6 : le bloc `portfolio` d'une sommative n'est plus écrit — ni `utiliser`, ni
         //  `nbArtefacts`, ni `qualitatif` n'ont de lecteur ; la règle vit dans `reglesSpeciales`.)
     } else if (typeFinal === 'standards') {
-        const modeSelection = r.modeSelectionPortfolio || 'n_meilleurs';
-        const estHybride = modeSelection === 'hybride';
-
-        // #900 (lot N6) : `varianteCalcul` n'est plus écrit — aucun lecteur depuis #435 (le moteur
-        // ne route plus « par-objectifs »). Le mode de sélection est la seule commande.
-        pratique.configuration = {
-            approcheEvaluation: r.approcheEvaluation,
-            echelleId: r.echelleId || null,
-            grilleId: r.grilleId || null
-        };
-
-        if (r.approcheEvaluation === 'par-artefacts') {
-            // #133 : le wizard prime — retenus/min viennent des réponses
-            // saisies, plus du SSOT global modalitesEvaluation (Primo n'écrase plus
-            // ce que l'utilisateur tape). modalites reste lu ci-dessous pour les
-            // catégories hybrides détaillées (la fiche de la pratique), non collectées ici.
-            const modalites = db.getSync(cle('modalitesEvaluation'), null) || {};
-            const nbRetenus = parseInt(r.nbArtefactsRetenus) || 7;
-            const minFormatif = parseInt(r.minAvantCalculFormatif) || 3;
-
-            // Lot 5 des standards sans portfolio : ni `utiliser` ni `nombreTotal`, sans lecteur ; une pratique
-            // qui les porte les garde (`conserverReglagesSansLecteur`).
-            pratique.configuration.portfolio = {
-                // Noms standardisés (cohérents avec pratiques-gestion.js)
-                nombreARetenir: nbRetenus,
-                methodeSelection: estHybride ? 'meilleurs' : (modeSelection === 'n_meilleurs' ? 'meilleurs' : modeSelection),
-                minimumCompletion: minFormatif
-            };
-            // 🆕 #24 : Activer catégories automatiquement si hybride. #900 (lot N6) : le drapeau
-            // `portfolio.hybride` n'est plus écrit — `categories.actif` est ce que le moteur lit
-            // (`obtenirConfigCategories`, portfolio.js), et la relecture le lit aussi.
-            if (estHybride || modalites.utiliserCategories === 'oui' || modalites.categories?.actif) {
-                pratique.configuration.categories = {
-                    actif: true,
-                    selection: {
-                        nombreARetenir: _nombreRetenuDeLaSelection(estHybride, nbRetenus, modalites),
-                        ponderation: parseInt(modalites.categories?.selection?.ponderation) || 65
-                    },
-                    obligatoires: {
-                        nombre: parseInt(modalites.categories?.obligatoires?.nombre) || 2,
-                        ponderation: parseInt(modalites.categories?.obligatoires?.ponderation) || 35
-                    }
-                };
-            }
-        }
+        pratique.configuration = _configurationStandardsDesReponses(r);
     } else if (typeFinal === 'specifications') {
         pratique.configuration = {
             // #935 (lot N6) : UN nom, celui que le moteur lit — `seuilAcceptable`. La réponse de
@@ -3068,6 +3029,91 @@ async function creerPratiqueV2() {
 
     // Finaliser (sauvegarde + fermeture + notification + rafraîchissements).
     await finaliserCreationPratique(pratique);
+}
+
+/** Les deux blocs (Sélection, Obligatoires) d'une pratique de type `standards` : extrait tel quel de `creerPratiqueV2`. */
+function _categoriesStandardsDesReponses(estHybride, nbRetenus, modalites) {
+    return {
+        actif: true,
+        selection: {
+            nombreARetenir: _nombreRetenuDeLaSelection(estHybride, nbRetenus, modalites),
+            ponderation: parseInt(modalites.categories?.selection?.ponderation) || 65
+        },
+        obligatoires: {
+            nombre: parseInt(modalites.categories?.obligatoires?.nombre) || 2,
+            ponderation: parseInt(modalites.categories?.obligatoires?.ponderation) || 35
+        }
+    };
+}
+
+/**
+ * La configuration d'une pratique de type `standards`, telle que les RÉPONSES de l'assistant la donnent. Extraite de
+ * `creerPratiqueV2` le 28 nov. 2026 (familles par réglages), mot pour mot : le récapitulatif en déduit la famille
+ * (`pratiqueApercuDuRecapitulatif`) sur la même configuration que « Créer » écrit, sans seconde lecture des réponses.
+ */
+function _configurationStandardsDesReponses(r) {
+    const modeSelection = r.modeSelectionPortfolio || 'n_meilleurs';
+    const estHybride = modeSelection === 'hybride';
+
+    // #900 (lot N6) : `varianteCalcul` n'est plus écrit — aucun lecteur depuis #435 (le moteur
+    // ne route plus « par-objectifs »). Le mode de sélection est la seule commande.
+    const configuration = {
+        approcheEvaluation: r.approcheEvaluation,
+        echelleId: r.echelleId || null,
+        grilleId: r.grilleId || null
+    };
+
+    if (r.approcheEvaluation === 'par-artefacts') {
+        // #133 : le wizard prime — retenus/min viennent des réponses
+        // saisies, plus du SSOT global modalitesEvaluation (Primo n'écrase plus
+        // ce que l'utilisateur tape). modalites reste lu ci-dessous pour les
+        // catégories hybrides détaillées (la fiche de la pratique), non collectées ici.
+        const modalites = db.getSync(cle('modalitesEvaluation'), null) || {};
+        const nbRetenus = parseInt(r.nbArtefactsRetenus) || 7;
+        const minFormatif = parseInt(r.minAvantCalculFormatif) || 3;
+
+        // Lot 5 des standards sans portfolio : ni `utiliser` ni `nombreTotal`, sans lecteur ; une pratique
+        // qui les porte les garde (`conserverReglagesSansLecteur`).
+        configuration.portfolio = {
+            // Noms standardisés (cohérents avec pratiques-gestion.js)
+            nombreARetenir: nbRetenus,
+            methodeSelection: estHybride ? 'meilleurs' : (modeSelection === 'n_meilleurs' ? 'meilleurs' : modeSelection),
+            minimumCompletion: minFormatif
+        };
+        // 🆕 #24 : Activer catégories automatiquement si hybride. #900 (lot N6) : le drapeau
+        // `portfolio.hybride` n'est plus écrit — `categories.actif` est ce que le moteur lit
+        // (`obtenirConfigCategories`, portfolio.js), et la relecture le lit aussi.
+        if (estHybride || modalites.utiliserCategories === 'oui' || modalites.categories?.actif) {
+            configuration.categories = _categoriesStandardsDesReponses(estHybride, nbRetenus, modalites);
+        }
+    }
+    return configuration;
+}
+
+/** Le badge du récapitulatif : l'entrée de `TYPE_BADGES` de la famille déduite de l'aperçu, ou « Indéterminé ». */
+function badgeDuRecapitulatif(r, classification) {
+    const familleDeduite = (typeof familleDeduiteDeLaPratique === 'function')
+        ? familleDeduiteDeLaPratique(pratiqueApercuDuRecapitulatif(r, classification)) : null;
+    return (familleDeduite && TYPE_BADGES[familleDeduite.cle])
+        || { code: '?', classe: 'indetermine', label: 'Indéterminé', description: '' };
+}
+
+/**
+ * Familles par réglages (28 nov. 2026) — L'APERÇU de la pratique que le récapitulatif s'apprête à créer, pour en déduire
+ * la famille (`familleDeduiteDeLaPratique`, registre) : son type, sa sélection, ses jetons. Un modèle adopté : le modèle
+ * lui-même (il est cloné tel quel). En création, les jetons sont refusés (`poserJetonsRefusesSiAucunReglage`) ; en
+ * modification, la pratique garde ceux qu'elle porte. Lecture seule, rien n'est écrit.
+ */
+function pratiqueApercuDuRecapitulatif(r, classification) {
+    if (r._modeleAdopte && r._gabaritSource) return r._gabaritSource;
+    const type = classification && classification.type;
+    const existante = (wizardState.modeEdition && wizardState.pratiqueId)
+        ? (db.getSync(cle('pratiquesConfigurables'), null) || []).find(p => p && p.id === wizardState.pratiqueId) : null;
+    const configuration = type === 'standards' ? _configurationStandardsDesReponses(r) : {};
+    if (!existante) return { type, configuration, jetons: { actif: false } };
+    const jetonsDeLaConfiguration = existante.configuration && existante.configuration.jetons;
+    if (jetonsDeLaConfiguration) configuration.jetons = jetonsDeLaConfiguration;
+    return { type, configuration, config: existante.config, jetons: existante.jetons };
 }
 
 /**
@@ -3856,6 +3902,7 @@ window.genererRecapitulatif = genererRecapitulatif;             // #319 Lot 4 a8
 window.genererContenuEtape = genererContenuEtape;
 // #691 l'exposait pour le sélecteur de modèles de pratiques-bibliotheque.js, retiré avec
 // lui (#469, 12 oct. 2026, cible absente) ; la pose reste pour les bancs (#577).
+window.libelleFamilleModele = libelleFamilleModele;   // familles par réglages (28 nov. 2026) : le sigle d'un modèle, pour le banc
 window.TYPE_BADGES = TYPE_BADGES;               // #577 (testabilité du rendu d'une étape)
 window.afficherEtapeWizardV2 = afficherEtapeWizardV2;           // #577 (spec WebKit : rendre une étape dans le vrai DOM)
 window.obtenirOptionsModeles = obtenirOptionsModeles;           // « Modèle par standards » (21 nov. 2026) : la liste de « Choisis un modèle », pour la sentinelle

@@ -3870,9 +3870,10 @@ function _ligneCalculIndicePPanneau(note, differee) {
  * @returns {string} texte sûr (noms du registre, jamais une donnée utilisateur)
  */
 function _nomPratiqueActivePanneau() {
-    const type = (typeof obtenirTypePratiqueActive === 'function') ? obtenirTypePratiqueActive() : null;
-    const nom = (typeof obtenirNomTypePratique === 'function') ? obtenirNomTypePratique(type) : null;
-    return nom || '—';
+    // 28 nov. 2026 (familles par réglages) : le nom suit la famille DÉDUITE des réglages de la pratique active (registre,
+    // lecteur unique) ; une pratique de type sommative qui offre des reprises se lit « Hybride ».
+    const famille = (typeof familleDeduiteDeLaPratiqueActive === 'function') ? familleDeduiteDeLaPratiqueActive() : null;
+    return (famille && famille.nom) || '—';
 }
 
 function _pratiqueActiveParStandards() {

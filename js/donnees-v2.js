@@ -313,7 +313,7 @@
         pratiques.forEach(p => {
             const dansSidebar = p.dansBibliotheque !== false;
             const usage = usages[p.id] || { coursCount: 0, cours: [] };
-            const badgeType = obtenirBadgeTypePratique(p.type);
+            const badgeType = obtenirBadgeTypePratique(p);
 
             html += `
                 <tr>
@@ -609,7 +609,7 @@
         pratiques.forEach(p => {
             const dansSidebar = p.dansBibliotheque !== false;
             const usage = usages[p.id] || { coursCount: 0 };
-            const badgeType = obtenirBadgeTypePratique(p.type);
+            const badgeType = obtenirBadgeTypePratique(p);
             html += `<tr><td><strong>${escapeHtml(p.nom)}</strong>${p.description ? `<br><small class="text-muted">${escapeHtml(p.description.substring(0, 50))}${p.description.length > 50 ? '...' : ''}</small>` : ''}</td><td>${badgeType}</td><td>${escapeHtml(p.auteur || 'Inconnu')}</td><td>${dansSidebar ? '<span class="badge-actif">Sidebar</span>' : '<span class="badge-archive">Masquée</span>'}</td><td>${usage.coursCount > 0 ? `<span class="badge-statut evalue">${usage.coursCount} cours</span>` : '<span class="badge-statut non-evalue">Non utilisée</span>'}</td><td class="actions-cell"><button class="btn btn-compact btn-secondaire" data-action="naviguerVersRessource" data-param="pratique" data-param2="${p.id}" title="Consulter">Voir</button> <button class="btn btn-compact" data-action="ouvrirModalSuppressionRessource" data-param="pratique" data-param2="${p.id}" title="Supprimer">Supprimer</button></td></tr>`;
         });
         html += '</tbody></table>';
@@ -1263,15 +1263,14 @@
     }
 
     /**
-     * Génère le badge HTML abrégé pour un type de pratique (SOM, STD, SPE, DEN)
+     * Le badge court d'une pratique. 28 nov. 2026 : la famille se DÉDUIT des réglages (`familleDeduiteDeLaPratique`,
+     * registre, lecteur unique), avec son survol.
      */
-    function obtenirBadgeTypePratique(type) {
-        // Session B : badge des 4 familles routé vers le registre (source unique).
-        const rep = (typeof obtenirRepresentationPratiqueStricte === 'function')
-            ? obtenirRepresentationPratiqueStricte(type) : null;
-        if (rep) return genererBadgePratiqueHTML(type);
+    function obtenirBadgeTypePratique(pratique) {
+        const famille = (typeof familleDeduiteDeLaPratique === 'function') ? familleDeduiteDeLaPratique(pratique) : null;
+        if (famille) return genererBadgeFamilleDeduiteHTML(famille);
         // États distincts (non famille) : pratique configurable multi / inconnu.
-        if (type === 'configurable') return '<span class="badge-type-pratique badge-type-multi">CFG</span>';
+        if (pratique && pratique.type === 'configurable') return '<span class="badge-type-pratique badge-type-multi">CFG</span>';
         return '<span class="badge-type-pratique badge-type-multi">—</span>';
     }
 

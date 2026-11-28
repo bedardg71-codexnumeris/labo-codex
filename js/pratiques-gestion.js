@@ -127,11 +127,13 @@ async function afficherListePratiquesMateriel() {
 const FAMILLES_TAXONOMIQUES = {
     // 27 nov. 2026 (trois familles, décision de Grégoire) : « Sommative » → « Cumulative », « Par sélection de productions »
     // → « Hybride ». Les clés (ids internes) ne changent pas.
-    'sommative': { nom: 'Cumulative', anglais: 'Traditional Grading', resume: 'Cumul pondéré des évaluations' },
+    // 28 nov. 2026 (familles par réglages) : ces deux entrées se lisent par la famille DÉDUITE (`familleDeLaPratique`), pas
+    // par le type. Résumés de Grégoire (7 h 18).
+    'sommative': { nom: 'Cumulative', anglais: 'Traditional Grading', resume: 'Cumul pondéré de toutes les évaluations, sans reprise' },
     // 21 nov. 2026 (choix de Grégoire, 7 h 44 ; les sources ne tranchent pas) : l'application n'affirme plus que cette
     // pratique est une PAN, ni qu'elle n'en est pas une. Le nom accepté le 20 nov., sans préfixe ni parenthèse anglaise ;
     // le résumé reprend les mots acceptés de la carte de la voie rapide (D5), à la place de « Maîtrise de standards/objectifs ».
-    'standards': { nom: 'Hybride', resume: 'Des niveaux (ex. I-D-M-E) ; la note retient certaines productions' },
+    'standards': { nom: 'Hybride', resume: 'Un cumul où une note peut être révisée' },
     'specifications': { nom: 'PAN-Spécifications', anglais: 'Specifications Grading', resume: 'Évaluation dichotomique par forfaits' },
     'denotation': { nom: 'PAN-Dénotation', resume: 'Note finale certificative posée (non calculée) selon l\'atteinte de cibles d\'apprentissage' },
     // Lot 1 de la pratique « Par standards » (21 nov. 2026). Mots PROPOSÉS.
@@ -153,10 +155,8 @@ function obtenirDescriptionCourtePratique(pratique) {
         return desc.length > 100 ? desc.substring(0, 97) + '...' : desc;
     }
 
-    // Normalisation à la lecture (A-2 4c) : la table est indexée en canonique,
-    // mais pratique.type peut encore être legacy tant que le select n'est pas migré.
-    const typeCanon = (typeof normaliserIdPratique === 'function' ? normaliserIdPratique(pratique.type) : pratique.type);
-    const f = FAMILLES_TAXONOMIQUES[typeCanon];
+    // 28 nov. 2026 : la famille DÉDUITE des réglages (`familleDeLaPratique`, lecteur unique au registre).
+    const f = familleDeLaPratique(pratique);
     return f ? `${f.nom}${f.anglais ? ` (${f.anglais})` : ''} - ${f.resume}` : (pratique.type || '');
 }
 
@@ -166,50 +166,25 @@ function obtenirDescriptionCourtePratique(pratique) {
  */
 function genererBadgeTypePratique(pratique) {
     if (!pratique) return '';
-
-    // 🆕 FIX (20 jan 2026) : Chercher le type dans plusieurs sources possibles
-    let type = null;
-
-    // Source 1 : pratique.pratiques[0] (format attendu)
-    if (pratique.pratiques && Array.isArray(pratique.pratiques) && pratique.pratiques[0]) {
-        type = pratique.pratiques[0];
+    // 28 nov. 2026 (familles par réglages) : le sigle, la classe et le survol viennent de la famille DÉDUITE des réglages
+    // (`familleDeduiteDeLaPratique`, registre, lecteur unique) ; plus aucune lecture du type ici. Un type inconnu : rien.
+    // Une fiche dont `pratiques[0]` dit « PAN » (forme ancienne) garde son badge « PAN » (point 4 du 21 nov. 2026).
+    if (Array.isArray(pratique.pratiques) && pratique.pratiques[0] === 'PAN') {
+        return '<span class="badge-type-pratique" title="Pratique alternative de notation.">PAN</span>';
     }
-    // Source 2 : pratique.type (format alternatif)
-    else if (pratique.type) {
-        // Session B : code des 4 familles routé vers le registre (source unique).
-        // pratique.type peut être legacy ; le registre normalise. Inconnu → repli
-        // 3 lettres majuscules (comportement historique préservé).
-        const rep = (typeof obtenirRepresentationPratiqueStricte === 'function')
-            ? obtenirRepresentationPratiqueStricte(pratique.type) : null;
-        type = rep ? rep.code : pratique.type.toUpperCase().substring(0, 3);
-    }
+    const famille = (typeof familleDeduiteDeLaPratique === 'function') ? familleDeduiteDeLaPratique(pratique) : null;
+    if (!famille) return '';
 
-    if (!type) return '';
-
-    const typesValides = ['SOM', 'STD', 'SPE', 'DEN', 'CIB', 'PAN'];
-    if (!typesValides.includes(type)) return '';
-
-    // #343-T3 — infobulle au survol du tag de famille (les explications existaient
-    // déjà dans le wizard ; on les rend découvrables ici aussi). Textes STATIQUES
-    // (pas de donnée utilisateur) repris des cartes « voie rapide » du wizard, donc
-    // pas d'échappement requis. Apostrophes seules → sûres dans un attribut "double".
-    // 21 nov. 2026 (« le sigle suit le nom ») : les bulles sont rangées par CODE interne (celui de `pratiques[0]`) ; le
-    // badge affiche le SIGLE (`sigleDuCode`). Code STD = « Hybride » (27 nov.), sigle HYB (avant : SEL, mots acceptés du
-    // renommage, A1 et D5) ; code CIB = « Par standards », sigle STD (F3, version de Grégoire). 21 nov., 7 h 44 (choix de
-    // Grégoire) : aucune bulle ne dit « PAN » de SEL (G1), et la bulle PAN ne liste plus de sigles (G2).
-    const TOOLTIPS_FAMILLE = {
-        SOM: 'Cumulative — note finale par cumul pondéré des évaluations.',
-        STD: 'Hybride : des niveaux (ex. I-D-M-E) ; la note retient certaines productions.',
+    // #343-T3 — infobulle au survol du tag de famille. Textes STATIQUES (pas de donnée utilisateur), donc pas
+    // d'échappement requis. Apostrophes seules → sûres dans un attribut "double". Les bulles des PAN sont rangées par
+    // CODE interne ; celles des deux familles qui cumulent disent le MOTIF et vivent au registre (textes 8 et 9).
+    // 21 nov., 7 h 44 (choix de Grégoire) : la bulle PAN ne liste plus de sigles (G2).
+    const TOOLTIPS_PAN = {
         SPE: 'PAN – Spécifications — travaux acceptables ou non ; note selon les forfaits réussis.',
         DEN: 'PAN – Dénotation — note finale certificative posée (non calculée) selon l\'atteinte de cibles d\'apprentissage explicites ; abandonne la fonction de tri.',
-        CIB: 'Par standards : un niveau par cible d\'apprentissage du cours ; la note vient du meilleur niveau démontré pour chaque cible.',
-        PAN: 'Pratique alternative de notation.'
+        CIB: 'Par standards : un niveau par cible d\'apprentissage du cours ; la note vient du meilleur niveau démontré pour chaque cible.'
     };
-    const infobulle = TOOLTIPS_FAMILLE[type] || '';
-
-    // Utilise la classe CSS .badge-type-pratique avec modificateur (le code interne) ; le texte est le SIGLE affiché.
-    const sigle = (typeof sigleDuCode === 'function') ? sigleDuCode(type) : type;
-    return `<span class="badge-type-pratique badge-type-${type.toLowerCase()}" title="${infobulle}">${sigle}</span>`;
+    return genererBadgeFamilleDeduiteHTML(famille, TOOLTIPS_PAN[famille.code] || '');
 }
 
 /**
@@ -241,15 +216,9 @@ function pratiquesDuType(typeCanon) {
  */
 function familleDeLaPratique(pratique) {
     if (!pratique) return null;
-    const PAR_CODE = { SOM: 'sommative', STD: 'standards', SPE: 'specifications', DEN: 'denotation', CIB: 'cibles' };
-    const source = (Array.isArray(pratique.pratiques) && pratique.pratiques[0]) || pratique.type ||
-        (pratique.configuration && pratique.configuration.type) || '';
-    let code = PAR_CODE[source] ? source : null;
-    if (!code && typeof obtenirRepresentationPratiqueStricte === 'function') {
-        const rep = obtenirRepresentationPratiqueStricte(source);
-        code = rep ? rep.code : null;
-    }
-    return code ? FAMILLES_TAXONOMIQUES[PAR_CODE[code]] || null : (FAMILLES_TAXONOMIQUES[source] || null);
+    // 28 nov. 2026 : la famille DÉDUITE des réglages (registre, lecteur unique). `cle` est la clé de la table de mots.
+    const famille = (typeof familleDeduiteDeLaPratique === 'function') ? familleDeduiteDeLaPratique(pratique) : null;
+    return famille ? (FAMILLES_TAXONOMIQUES[famille.cle] || null) : null;
 }
 
 /** #1156 — la ligne en clair : la famille, puis l'auteur quand ce n'est pas l'utilisateur actif. */
@@ -1758,8 +1727,10 @@ function changerTypePratiqueMat() {
     const badge = document.getElementById('mat-badge-pratique');
     if (badge) {
         const typeCanon = (typeof normaliserIdPratique === 'function' ? normaliserIdPratique(type) : type);
-        const pratiques = pratiquesDuType(typeCanon);
-        badge.innerHTML = genererBadgeTypePratique({ pratiques });
+        // 28 nov. 2026 : la famille se déduit des réglages ; le type choisi se pose sur la pratique enregistrée (ses
+        // jetons, sa sélection), et l'enregistrement qui suit redit le badge (`rafraichirBadgeFamilleMat`).
+        badge.innerHTML = genererBadgeTypePratique(Object.assign({}, _pratiqueEnregistreeMat() || {},
+            { pratiques: pratiquesDuType(typeCanon), type: typeCanon }));
     }
 
     // Mettre à jour la description (ligne 2)
@@ -1912,8 +1883,23 @@ async function sauvegarderConfigPratiqueMat() {
 
     await modifierEtAnnoncer(cle('pratiquesConfigurables'), appliquerFormulaireDansCollection, [], { geste: 'Modifier la pratique' });
     rendreChainePratique();   // #1149, lot 3b : l'échelle choisie, une conversion vers DEN
+    rafraichirBadgeFamilleMat();   // 28 nov. 2026 : un réglage changé (sélection, jetons de reprise) peut changer la famille
     reposerDoubleSeuilApresEcritureMat();   // lots 3 et 4 : une pratique par standards seulement
     return true;
+}
+
+/** La pratique ouverte dans la fiche, telle qu'elle est enregistrée, ou null. */
+function _pratiqueEnregistreeMat() {
+    if (!pratiqueEnEditionMateriel) return null;
+    return (db.getSync(cle('pratiquesConfigurables'), null) || []).find(p => p && p.id === pratiqueEnEditionMateriel) || null;
+}
+
+/** Familles par réglages (28 nov. 2026) — le badge de la fiche redit la famille déduite de la pratique enregistrée. */
+function rafraichirBadgeFamilleMat() {
+    const badge = document.getElementById('mat-badge-pratique');
+    const pratique = _pratiqueEnregistreeMat();
+    // security-ok : `genererBadgeTypePratique` ne rend que des sigles et des phrases du registre.
+    if (badge && pratique) badge.innerHTML = genererBadgeTypePratique(pratique);
 }
 
 /**

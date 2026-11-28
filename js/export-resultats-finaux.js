@@ -131,6 +131,12 @@ function genererCSVSynthese(etudiants, contexte, simuler) {
  * Collecte le contexte du groupe-cours actif (lecture seule).
  * @returns {{etudiants, contexte}|null}
  */
+/** Le sigle affiché de la pratique exportée : celui de sa famille déduite des réglages (registre), ou ''. */
+function _siglePratiqueExportee(pratiqueId) {
+    var famille = (pratiqueId && typeof familleDeduiteParId === 'function') ? familleDeduiteParId(pratiqueId) : null;
+    return famille ? famille.sigle : '';
+}
+
 function _collecterContexteActif() {
     var etudiants = (typeof obtenirEtudiantsCoursActif === 'function')
         ? obtenirEtudiantsCoursActif() : [];
@@ -155,7 +161,8 @@ function _collecterContexteActif() {
             pratiqueId: pratiqueId,
             // 21 nov. 2026 (« le sigle suit le nom ») : la colonne « Pratique (code) » montre le SIGLE affiché (HYB depuis le 27 nov. pour
             // « Hybride », l’ancienne « Par sélection de productions »), pas le code interne. Aucun lecteur ne relit ce fichier.
-            pratiqueCode: (pratique && pratique.obtenirCode) ? ((typeof sigleDuCode === 'function') ? sigleDuCode(pratique.obtenirCode()) : pratique.obtenirCode()) : '',
+            // 28 nov. 2026 : le sigle de la famille DÉDUITE des réglages (registre, lecteur unique).
+            pratiqueCode: _siglePratiqueExportee(pratiqueId),
             pratiqueNom: (pratique && pratique.obtenirNom) ? pratique.obtenirNom() : '',
             notesFinales: _notesFinaliseesDe(pratiqueId)
         }

@@ -80,7 +80,10 @@ describe('A · le nom de famille de SEL, là où il s\'affiche', () => {
 /* ================================================================ B. LES BULLES, L'ASSISTANT */
 describe('B · les bulles G1, G2 et l\'assistant (A1, A2, A3)', () => {
     it('G1 : la bulle du badge SEL ; G2 : la bulle du badge PAN, sans liste de sigles', () => {
-        expect(titreDe(G.genererBadgeTypePratique({ pratiques: ['STD'] }))).toBe(texte('G1')[0]);
+        // ↻ 28 nov. 2026 (familles par réglages, textes 8 et 9 de Grégoire) : la bulle du badge dit le MOTIF de la famille
+        // déduite des réglages, plus la phrase G1 du 27 nov. (qui reste citée au fichier, intacte). Sans réglage de
+        // sélection, une pratique de type standards retient les meilleures (le défaut du moteur).
+        expect(titreDe(G.genererBadgeTypePratique({ pratiques: ['STD'] }))).toBe('Hybride : cette pratique retient certaines productions.');
         expect(titreDe(G.genererBadgeTypePratique({ pratiques: ['PAN'] }))).toBe(texte('G2')[0]);
         expect(texte('G1')[0]).not.toMatch(INTERDIT);
         expect(texte('G2')[0]).not.toMatch(/\b(SOM|STD|SEL|SPE|DEN)\b/);
@@ -90,7 +93,10 @@ describe('B · les bulles G1, G2 et l\'assistant (A1, A2, A3)', () => {
         // ↻ 28 nov. 2026 (second lot du renommage, texte 13, relu et accepté par Grégoire) : le texte du 27 nov., retouché d'un mot.
         const AVANT_28 = '(moyenne pondérée traditionnelle, souvent dite sommative)';
         expect(texte('G5')[0]).toContain(AVANT_28);
-        const g5 = texte('G5')[0].replace(AVANT_28, '(moyenne pondérée habituelle, souvent dite sommative)');
+        // ↻ 28 nov. 2026 (familles par réglages, texte 12 de Grégoire) : le début de la bulle ; la suite (STD, SPE, DEN) ne change pas.
+        const DEBUT_27 = 'CUM = cumulative (moyenne pondérée traditionnelle, souvent dite sommative), HYB = hybride (des niveaux ; la note retient certaines productions), ';
+        expect(texte('G5')[0].startsWith(DEBUT_27)).toBe(true);
+        const g5 = texte('G5')[0].replace(DEBUT_27, 'CUM = cumulative (tout compte, sans reprise ; souvent dite sommative), HYB = hybride (un cumul où une note peut être révisée), ');
         expect(bulle).toContain(`'cn-pratique-type':\n        '${g5}'`);
         expect(/HYB = ([^(]*)\(/.exec(g5)[1]).not.toMatch(INTERDIT);   // ↻ 27 nov. 2026 : le sigle HYB
     });
@@ -148,7 +154,9 @@ describe('C · aux endroits corrigés, le nom affiché pour SEL ne contient ni �
 /* ================================================================ D. CE QUI NE CHANGE PAS */
 describe('D · ce qui ne change pas', () => {
     it('point 4 : la logique qui peut afficher un badge « PAN » (fiche, `pratiques[0]` à « PAN ») est intacte', () => {
-        expect(lire('js/pratiques-gestion.js')).toContain("const typesValides = ['SOM', 'STD', 'SPE', 'DEN', 'CIB', 'PAN'];");
+        // ↻ 28 nov. 2026 (familles par réglages) : la liste `typesValides` est partie avec la lecture du type ; la forme
+        // ancienne `pratiques[0]` à « PAN » garde son badge, lu avant la famille déduite.
+        expect(lire('js/pratiques-gestion.js')).toContain("if (Array.isArray(pratique.pratiques) && pratique.pratiques[0] === 'PAN') {");
         expect((/>([^<]*)<\/span>$/.exec(G.genererBadgeTypePratique({ pratiques: ['PAN'] })) || [])[1]).toBe('PAN');
         // ↻ 27 nov. 2026 : le libellé de famille du registre est « Hybride » (trois familles) ; un seul écran le lit, le repli
         // de `_nomPratique` du Comparateur (mesuré le 27 nov.).

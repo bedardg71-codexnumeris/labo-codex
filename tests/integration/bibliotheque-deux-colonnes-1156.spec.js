@@ -575,7 +575,9 @@ test('pratiques : l’aperçu dit la description, puis l’échelle et la grille
 
     const demo = rangee(page, 'pratiques', 'trimestre', 'Hybride (démo)');
     await demo.locator('.biblio2-rangee-nom').click();
-    await expect(demo.locator('.biblio2-apercu .biblio2-apercu-texte').first()).toHaveText('Hybride - Des niveaux (ex. I-D-M-E) ; la note retient certaines productions');
+    // ↻ 28 nov. 2026 (familles par réglages, texte 7 de Grégoire) : le résumé de la famille hybride ; la pratique de la démo
+    // retient 6 meilleures, elle reste hybride.
+    await expect(demo.locator('.biblio2-apercu .biblio2-apercu-texte').first()).toHaveText('Hybride - Un cumul où une note peut être révisée');
 
     // Retouche du lot 3 : l'éditeur recompose la même table ; une pratique DEN sans description y lisait
     // « denotation » brut (aucune entrée canonique), elle lit maintenant le nom de la famille.

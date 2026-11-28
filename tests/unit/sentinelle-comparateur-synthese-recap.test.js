@@ -32,7 +32,12 @@ const RETOUCHES_27_NOV = [
     ['Configuration – Par sélection de productions</h4>', 'Configuration – Hybride</h4>'],
     ['Hybride (N meilleures + Obligatoires)', 'Deux blocs (N meilleures + Obligatoires)'],
     // ↻ 28 nov. 2026 (second lot du renommage, texte 9) : la seule retouche du jour au récapitulatif.
-    ["C'est la méthode traditionnelle, souvent appelée sommative.", "C'est la méthode habituelle, souvent appelée sommative."]
+    ["C'est la méthode traditionnelle, souvent appelée sommative.", "C'est la méthode habituelle, souvent appelée sommative."],
+    // ↻ 28 nov. 2026 (familles par réglages, textes 10 et 11 de Grégoire) : les deux descriptions du diagnostic. Le badge
+    // suit la famille DÉDUITE : les cas du banc (création, jetons refusés) gardent le leur.
+    ['Ta note finale est le cumul pondéré de tes évaluations. ', 'Ta note finale est le cumul pondéré de toutes tes évaluations, sans reprise. '],
+    ["Tu évalues chaque production par niveaux (ex.\u00a0: I-D-M-E). La note se construit à partir des productions que ta règle retient ; d'autres peuvent compter d'office.",
+        "Ta note se construit par cumul, mais une note peut être révisée : ta règle retient certaines productions, ou tes élèves ont des jetons de reprise. D'autres productions peuvent compter d'office."]
 ];
 const AVANT = Object.fromEntries(Object.entries(JSON.parse(readFileSync(path.join(__dirname, 'fixtures', 'recap-familles-avant.json'), 'utf8')))
     .map(([nom, html]) => [nom, RETOUCHES_27_NOV.reduce((t, [avant, apres]) => t.split(avant).join(apres), html)]));

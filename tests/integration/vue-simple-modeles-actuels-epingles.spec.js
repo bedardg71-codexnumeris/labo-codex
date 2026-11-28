@@ -22,6 +22,12 @@ import { attendreApplication } from './harness/attendre-application.js';
 // classe de la grille qui dit leur nombre (`vs-etapes--deux`, `--trois`). Elles sont retirées avant la comparaison ; le
 // texte des deux cartes actuelles, lui, est comparé.
 //
+// ↻ 28 nov. 2026 (familles par réglages) — UN SEUL ÉLÉMENT de la référence a été repris, À LA MAIN (pas de WebKit dans le
+// conteneur de la session) : le badge du bandeau du tableau, pour le modèle « Hybride ». La pratique que la vue simple
+// installe est réglée sur « Toutes les productions », jetons refusés : sa famille DÉDUITE est la cumulative, son badge
+// dit CUM (avec son survol) à côté du nom « Hybride ». Mesuré sous Chromium : c'est la seule différence due au lot ; les
+// autres écarts de Chromium (largeurs en pixels, « Ctrl+Z » pour « ⌘Z ») tiennent à la plateforme. À rejouer sous WebKit.
+//
 // L'horloge est fixée (le trimestre créé en coulisse suit la date du jour) ; les identifiants générés sont neutralisés.
 // Break-test (21 nov. 2026) : journal en fin de fichier.
 

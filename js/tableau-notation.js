@@ -494,8 +494,9 @@
     }
 
     function _bandeauHTML(ctx) {
-        // Le badge de la FAMILLE : l'id d'une pratique configurable ne dit pas sa famille au registre des représentations.
-        const badge = typeof genererBadgePratiqueHTML === 'function' ? genererBadgePratiqueHTML(ctx.famille === 'SPE' ? 'specifications' : 'standards') : '';
+        // Le badge de la FAMILLE. 28 nov. 2026 : celle que les réglages de la pratique active donnent (registre, lecteur
+        // unique) ; `ctx.famille` reste le code du TYPE, qui route le tableau.
+        const badge = typeof familleDeduiteDeLaPratiqueActive === 'function' ? genererBadgeFamilleDeduiteHTML(familleDeduiteDeLaPratiqueActive()) : '';
         const regle = ctx.famille === 'STD'
             ? phraseRegleStd(ctx.config, !!ctx.terminalId)
             : ctx.types.map(t => `${t.nom || t.id} (${ctx.productions.filter(p => window.productionEstDuType(p, t)).length})`).join(' · ');
