@@ -7,6 +7,22 @@
 
 ---
 
+## 28 NOV. 2026, 1 H (Claude Code) : **1.260.0 SUR `main` ET EN LIGNE — « TROIS FAMILLES DE PRATIQUES, ET DES SEUILS QUI VIENNENT DE TON ÉCHELLE »** — verdict WebKit complet du Mac VERT sur ce commit ; verdict de GitHub pas encore rendu
+
+**Le travail le plus récent vit sur `main`. Aucun travail en avance pour ce lot.** Feu vert écrit par Grégoire dans la session (« feu vert »), dans la nuit du 27 au 28 nov. `main` avancé en avance rapide de `dceb679f7` à `e0f5a6da3` (aucun commit de fusion), poussé le 28 nov. vers 1 h depuis `../labo-codex-assemblage-1127` (`lot/assemblage-2026-11-27:main`) : c'est là que vit le jeton du verdict, et le crochet le lit dans l'arbre qui pousse. Le crochet a rejoué Vitest (vert) et affiché « verdict vert à jour pour ce commit ».
+
+- **Ce qui part** : l'assemblage du 27 nov. (huit lots : familles CUM et HYB, suivi, accueil, séances par groupe-cours, évaluation, conception, parcours, file sans Grégoire), ses trois recalages d'essais, et la release `d355426ab` (1.260.0, build `1127-1907`). La pratique de la démo s'appelle « Hybride (démo) » dans le pack. Nouvelles 1.260 : titre et cinq lignes de Grégoire, mot pour mot.
+- **Vitest**, sur `d355426ab` : 985 fichiers, 12 683 essais verts.
+- **Verdict WebKit complet du Mac**, sur `d355426ab`, le 27 nov. de 19 h 08 à 21 h 51 : 1 952 essais, 1 915 verts, 19 verts au second essai, 18 rouges tous connus de `scripts/playwright-baseline.json`, 0 neuf, 65 sautés, 0 non joué. Jeton vert, reporté sur `e0f5a6da3` (un rapport seul par-dessus) par `verdict-en-morceaux.mjs --reporter`.
+- **En ligne** : déploiement de production Netlify `6b0a6e037639c67a020b373a`, publié le 28 nov. à 1 h 00 min 55 s (06:00:55 UTC), `commit_ref` `e0f5a6da3`. Par son permalien : `version.json` et `version.js` disent 1.260.0, build `1127-1907` ; `index.html`, `js/changelog-data.js`, `js/pack-demo-10.js` et `js/interventions.js` identiques octet pour octet au commit. `app.codexnumeris.org` lui-même n'a pas été lu (Cloudflare Access).
+- ⚠ **Le stock de la démo reste à l'ancien nom (mesuré, assumé, pas réparé)** : une démo déjà installée garde « Par sélection de productions (démo) » ; au rechargement avec le pack neuf, aucune clé n'est écrite (la version du pack reste 21.3). « Remettre la démo à neuf » lui donne « Hybride (démo) ». Monter la version du pack réécrirait `demo_*` chez tout le monde : décision de Grégoire, pas prise.
+- ⚠ **GitHub, run `46114619636` sur `e0f5a6da3` : en cours à l'écriture de cette entrée, verdict non lu.** À lire à la prochaine ouverture (jobs `Vitest` et `Playwright — verdict`).
+- ⚠ **À FAIRE, dans un commit qui suit, et seulement après un job « Playwright — verdict » VERT sur GitHub pour ce push** : retirer de `scripts/playwright-baseline-linux.json` les deux entrées de `planif-menu-vue` (#1115 ; le banc est vert sous WebKit macOS dans les deux passes du 27 nov.). Si le verdict Linux est rouge, elles restent, et on le dit.
+- **Écarts** : les jetons anti-cache sont à `20261127b` (le crochet #826 a refusé `a` pour `js/interventions.js`, déjà posé par `3f4e8399` ; second passage du script en `--build-only`, rien à la main) ; quatre demi-morceaux du verdict joués en quarts (8b, 11a et 12b coupés à 8 min, 13a d'emblée).
+- **Complexité** (par rapport à la 1.259.0, chiffres d'avant repris de l'entrée du 26 nov., non remesurés) : au-dessus de 15 : 433 → 433 ; somme 10 936 → 10 927 (Δ − 9) ; au-dessus de 30 : 75 → 75 ; fichiers de plus de 1 000 lignes : 46 → 46 ; lignes 180 019 → 180 448.
+- **Rien de supprimé** : ni branche, ni arbre. Les regards à l'écran des huit lots (iPad, Safari) restent à faire : § 5 de `RAPPORT-2026-11-27-verdict-assemblage.md`.
+- Le détail : `plans de travail/RAPPORT-2026-11-27-release-1.260.0.md` et `RAPPORT-2026-11-27-verdict-assemblage.md`.
+
 ## 26 NOV. 2026, 8 H (Claude Code) : **1.259.0 SUR `main` ET EN LIGNE — « DES TAMPONS POUR OBSERVER »** — ⚠ verdict WebKit Linux de GitHub ROUGE (33 hors de sa base), sans verdict WebKit complet du Mac sur ce commit
 
 **Le travail le plus récent vit sur `main`.** Feu vert écrit par Grégoire dans la session, le 26 nov. vers 7 h 12. `main` avancé en avance rapide de `57f759ceb` à `65d974977` (aucun commit de fusion), depuis `../labo-codex-fusion`, poussé à 7 h 13 ; le crochet a rejoué Vitest (vert) et laissé passer faute de jeton WebKit sur ce commit. Cette entrée est un commit de relais à part, demandé par Grégoire (« relais »).
