@@ -16,6 +16,10 @@
 const etat = {
     noeuds: new Map(),
     liens: new Map(),
+    // Mémos (28 nov. 2026) : la TROISIÈME collection de la carte. Ils l'accompagnent sans en
+    // faire partie — ni blocs, ni liens, jamais lus hors du canevas. Tout site qui recopie la
+    // carte doit les emporter (ou les écarter À DESSEIN) : voir js/planification-memos.js.
+    memos: new Map(),
     compteur: 0,
     compteurLiens: 0,
     selection: null,
@@ -6070,7 +6074,9 @@ function clonerEtatPersistant() {
         }),
         liens: Array.from(etat.liens.values()).map(function(l) {
             return { id: l.id, source: l.source, cible: l.cible, type: l.type };
-        })
+        }),
+        // Mémos : créer, écrire, déplacer, agrandir et supprimer s'annulent comme le reste.
+        memos: window.planificationMemos.cloner(etat.memos)
     };
 }
 
@@ -6579,8 +6585,11 @@ function restaurerSnapshot(snapshot) {
         if (nV.enfants) nV.enfants = nV.enfants.filter(function(eid) { return etat.noeuds.has(eid); });
     }
     _reconstruireCloneIndex();
+    // Mémos : AVANT `sauvegarder()` plus bas, qui écrit la collection telle qu'elle est.
+    window.planificationMemos.chargerDans(etat.memos, snapshot.memos);
 
     reconstruireDOM();
+    window.planificationMemos.rendre();
     etat.selection = null;
     etat.multiSelection.clear();
     fermerPanneau();
@@ -6617,6 +6626,9 @@ function sauvegarder() {
         noeuds: Array.from(etat.noeuds.values()),
         liens: Array.from(etat.liens.values())
     };
+    // Mémos : la clé `memos` n'est posée que s'il y en a — une carte sans mémo s'enregistre
+    // comme avant ce lot, à l'identique.
+    window.planificationMemos.poserMemos(donnees, etat.memos);
     window.planificationDonnees.sauvegarderCarte(index.active, donnees, { machine: _ecritureMachine });
 
     mettreAJourTousLesBadges();
@@ -6629,6 +6641,8 @@ function viderCanvas() {
     if (coucheLiens) coucheLiens.innerHTML = '';
     etat.noeuds.clear();
     etat.liens.clear();
+    etat.memos.clear();
+    window.planificationMemos.rendre();
     _cloneIndex.clear();
     etat.compteur = 0;
     etat.compteurLiens = 0;
@@ -6646,6 +6660,13 @@ function chargerCarte(carteId) {
     viderCanvas();
     var donnees = window.planificationDonnees.chargerCarte(carteId);
     if (!donnees) { centrerVueSurContenu(); rendreChaineCarte(); return; }
+
+    // Mémos : chargés EN PREMIER. Plus bas, le chargement peut réenregistrer la carte
+    // (`if (liensModifies) sauvegarder()`, les migrations) : une collection encore vide à ce
+    // moment-là effacerait les mémos enregistrés. Une carte d'avant ce lot n'a pas la clé :
+    // la collection reste vide et rien n'est réécrit.
+    window.planificationMemos.chargerDans(etat.memos, donnees.memos);
+    window.planificationMemos.rendre();
 
     etat.compteur = donnees.compteur || 0;
     etat.compteurLiens = donnees.compteurLiens || 0;
@@ -8330,6 +8351,42 @@ function deposerDansCorbeille(e, id) {
     return true;
 }
 
+/* === MÉMOS DU CANEVAS (28 nov. 2026) ===
+   Le canevas prête au module des mémos (js/planification-memos.js) ce qu'il possède :
+   la collection `etat.memos`, l'annulation, l'enregistrement, la corbeille. Le module ne
+   touche ni aux blocs ni aux liens, et rien ici ne lit un mémo. */
+function brancherMemos() {
+    window.planificationMemos.brancher({
+        memos: etat.memos,
+        couche: document.getElementById('planif-couche-memos'),
+        zoom: function() { return etat.zoom; },
+        avantModification: enregistrerPourUndo,
+        enregistrer: sauvegarder,
+        placeNeuve: placePourMemoNeuf,
+        // Même règle que pour un bloc (#1070) : seul un geste qui a bougé jusqu'à la corbeille
+        // et l'a vue virer au rouge supprime.
+        surCorbeille: function(e) {
+            var dessus = gesteCorbeille.survolee && pointSurCorbeille(e.clientX, e.clientY);
+            majEtatCorbeille(false);
+            return dessus;
+        },
+        annoncer: afficherToastLien
+    });
+}
+
+/** Au centre de ce qu'on voit du canevas ; décalé tant qu'un autre mémo occupe déjà ce coin. */
+function placePourMemoNeuf(l, h) {
+    var vue = partieVisibleDuCanevas();
+    var place = { x: Math.round(vue.x + (vue.l - l) / 2), y: Math.round(vue.y + (vue.h - h) / 2) };
+    var occupee = function() {
+        return Array.from(etat.memos.values()).some(function(m) {
+            return Math.abs(m.x - place.x) < 12 && Math.abs(m.y - place.y) < 12;
+        });
+    };
+    while (occupee()) { place.x += 28; place.y += 28; }
+    return place;
+}
+
 /** Armée pendant un drag, « ouverte » quand le doigt la survole. */
 function majEtatCorbeille(survolee) {
     var el = elementCorbeille();
@@ -8848,6 +8905,8 @@ function exporterCarte() {
     var index = window.planificationDonnees.getIndex();
     if (!index) return;
     var carte = index.cartes.find(function(c) { return c.id === index.active; });
+    // ⚠ SANS LES MÉMOS, à dessein (28 nov. 2026) : ce fichier est fait pour être remis à
+    // quelqu'un, et les mémos ne sortent dans aucun export partagé. Ne pas « réparer ».
     var donnees = {
         nom: carte ? carte.nom : 'Sans titre',
         dateExport: new Date().toISOString(),
@@ -8889,6 +8948,8 @@ function dupliquerCarte(carteId) {
         noeuds: source.noeuds || [],
         liens: source.liens || []
     }));
+    // Mémos : la copie est la carte de l'enseignant, ils la suivent.
+    window.planificationMemos.poserMemos(contenu, source.memos);
     window.planificationDonnees.sauvegarderCarte(id, contenu);
     index.active = id;
     window.planificationDonnees.sauvegarderIndex(index);
@@ -8929,6 +8990,7 @@ function initialiser() {
         return;
     }
 
+    brancherMemos();
     appliquerZoom();
 
     // Zoom molette
@@ -11688,6 +11750,10 @@ function _construireCopieLoupe() {
 
     var copie = espace.cloneNode(true);
     copie.removeAttribute('id');
+    // Mémos : la longue-vue lit la CARTE. (Et un `<textarea>` cloné perd le texte saisi :
+    // la copie montrerait des mémos vides.)
+    var coucheMemosCopie = copie.querySelector('#planif-couche-memos');
+    if (coucheMemosCopie) coucheMemosCopie.remove();
     var couche = copie.querySelector('#planif-couche-noeuds');
     if (couche) {
         var avecId = couche.querySelectorAll('[id]');
@@ -12601,6 +12667,15 @@ window.planificationCarte = {
     deplacerSequenceVersSemaine: deplacerSequenceVersSemaine,
     annuler: annuler,
     retablir: retablir,
+    // Bancs des mémos (28 nov. 2026) : l'instantané et le fichier remis, lus sans passer par l'écran.
+    enregistrerPourUndo: enregistrerPourUndo,
+    clonerEtatPersistant: clonerEtatPersistant,
+    restaurerSnapshot: restaurerSnapshot,
+    sauvegarder: sauvegarder,
+    exporterCarte: exporterCarte,
+    // Mémos : la palette en pose un, la barre d'outils les masque ou les montre (data-action).
+    creerMemo: function() { return window.planificationMemos.creer(); },
+    basculerMemos: function() { window.planificationMemos.basculerVisibilite(); },
     zoomerAuNiveau: zoomerAuNiveau,
     // Pour la Bibliothèque (lot 3) : elle porte désormais la gestion des cartes.
     dupliquerCarte: dupliquerCarte,
