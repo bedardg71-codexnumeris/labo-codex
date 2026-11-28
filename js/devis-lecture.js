@@ -14,7 +14,12 @@
  * une puce se range sous le dernier élément lu, même quand le copier-coller a mélangé les colonnes (devis 000Z).
  *
  * Le modèle rendu, et que les gestes de correction transforment :
- *   { numero, enonce, contexte: [texte], elements: [{ texte, criteres: [texte] }], ecartees: [texte] }
+ *   { numero, enonce, contexte: [texte], elements: [{ texte, criteres: [texte] }],
+ *     activites: { discipline, ponderation, unites, heures, precisions }, ecartees: [texte] }
+ *
+ * Correctif du 28 nov., 8 h 08 (Grégoire : « numériser ne touche aucun cours et c'est la création du cours qui vient
+ * puiser dans le devis numérisé ») : un devis accepté se range dans une RÉSERVE de devis (§ 4), jamais dans une fiche
+ * de cours. `activites` garde ce que le bloc « Activités d'apprentissage » porte, pour la création d'un cours.
  *
  * CHARGÉ AVANT materiel-devis.js.
  */
@@ -63,8 +68,20 @@
         return /[A-Za-zÀ-ÿ]-$/.test(debut) ? debut + suite : debut + ' ' + suite;
     }
 
+    var CHAMPS_ACTIVITES = ['discipline', 'ponderation', 'unites', 'heures', 'precisions'];
+    function activitesVides() { return { discipline: '', ponderation: '', unites: '', heures: '', precisions: '' }; }
+
+    /** Les libellés du bloc « Activités d'apprentissage », comparés par `cle` (sans accents ni casse). */
+    var LIBELLES_ACTIVITES = [
+        [/^discipline$/, 'discipline'],
+        [/^ponderation$/, 'ponderation'],
+        [/^(nombre d')?unites$/, 'unites'],
+        [/^(periodes d'enseignement|(nombre d')?heures-contact|nombre d'heures|heures d'enseignement)$/, 'heures'],
+        [/^precisions?$/, 'precisions']
+    ];
+
     function modeleVide() {
-        return { numero: '', enonce: '', contexte: [], elements: [], ecartees: [] };
+        return { numero: '', enonce: '', contexte: [], elements: [], activites: activitesVides(), ecartees: [] };
     }
     D.modeleVide = modeleVide;
 
@@ -99,6 +116,7 @@
             attendCode: false,       // « Code : » seul sur sa ligne : le code suit
             numeroEnAttente: null,   // « 3. » seul sur sa ligne : le texte de l'élément suit
             puceEnAttente: false,    // « • » seul sur sa ligne : le texte suit
+            champActivite: null,     // le champ des activités d'apprentissage que la ligne suivante prolonge
             numeros: {}, courant: null, videAvant: true
         };
     }
@@ -126,6 +144,7 @@
     /** Une ligne vide : elle ferme l'énoncé quand le contexte attend à côté. */
     function surVide(x) {
         if (x.etat === 'enonce' && x.puisContexte && x.m.enonce) { changerEtat(x, 'contexte'); x.puisContexte = false; }
+        x.champActivite = null;
         x.videAvant = true;
     }
 
@@ -166,9 +185,34 @@
         return true;
     }
 
-    /** Ce qui n'est pas la compétence : une ligne qui se répète d'une page à l'autre, un numéro de page, l'avant, les activités. */
+    /** Le champ que nomme un libellé des activités d'apprentissage (« Pondération »), ou null. */
+    function champActivite(libelle) {
+        var k = cle(libelle), trouve = null;
+        LIBELLES_ACTIVITES.forEach(function (paire) { if (!trouve && paire[0].test(k)) trouve = paire[1]; });
+        return trouve;
+    }
+
+    /**
+     * Le bloc « Activités d'apprentissage » (formation générale) : « Libellé : valeur », la valeur parfois sur les
+     * lignes qui suivent, jusqu'au prochain libellé ou au prochain vide. Ce ne sont pas des critères. Une valeur que
+     * rien ne rattache à son libellé (les nombres en vrac de 0013) va de côté : la lecture ne devine pas.
+     */
+    function lireActivites(x, l) {
+        if (x.etat !== 'activites') return false;
+        var paire = /^([^:]{3,40}?)\s*:\s*(.*)$/.exec(l);
+        var champ = paire ? champActivite(paire[1]) : null;
+        if (champ && !x.m.activites[champ]) {
+            x.champActivite = champ;
+            x.m.activites[champ] = paire[2].trim();
+        }
+        else if (x.champActivite) x.m.activites[x.champActivite] = recoudre(x.m.activites[x.champActivite], l);
+        else x.m.ecartees.push(l);
+        return true;
+    }
+
+    /** Ce qui n'est pas la compétence : une ligne qui se répète d'une page à l'autre, un numéro de page, l'avant. */
     function lireHorsDevis(x, l, ouvreBloc) {
-        var hors = (ouvreBloc && x.repetes[l] > 1) || x.etat === 'avant' || x.etat === 'activites' || /^\d{1,4}$/.test(l);
+        var hors = (ouvreBloc && x.repetes[l] > 1) || x.etat === 'avant' || /^\d{1,4}$/.test(l);
         if (hors) x.m.ecartees.push(l);
         return hors;
     }
@@ -230,7 +274,7 @@
         if (!l) { surVide(x); return; }
         var ouvreBloc = x.videAvant;
         x.videAvant = false;
-        if (lireCode(x, l) || lireTitre(x, l) || lireHorsDevis(x, l, ouvreBloc) || lirePuce(x, l) || lireElement(x, l)) return;
+        if (lireCode(x, l) || lireTitre(x, l) || lireActivites(x, l) || lireHorsDevis(x, l, ouvreBloc) || lirePuce(x, l) || lireElement(x, l)) return;
         lireSuite(x, l, ouvreBloc);
     }
 
@@ -252,12 +296,20 @@
     // 3. LES GESTES DE CORRECTION (chacun rend un modèle neuf)
     // ------------------------------------------------------------------
 
+    /** Les cinq champs des activités, en textes, quoi qu'on ait reçu. */
+    function activitesSures(a) {
+        var r = activitesVides();
+        if (a && typeof a === 'object') CHAMPS_ACTIVITES.forEach(function (c) { if (typeof a[c] === 'string') r[c] = a[c]; });
+        return r;
+    }
+
     function copie(m) {
         return {
             numero: m.numero || '',
             enonce: m.enonce || '',
             contexte: (m.contexte || []).slice(),
             elements: (m.elements || []).map(function (el) { return { texte: el.texte || '', criteres: (el.criteres || []).slice() }; }),
+            activites: activitesSures(m.activites),
             ecartees: (m.ecartees || []).slice()
         };
     }
@@ -326,83 +378,112 @@
         return r;
     };
 
-    /** Retoucher un texte : `adr` = { zone: 'numero' | 'enonce' } ou { zone: 'elementTexte', e } ou une adresse de ligne. */
+    /** Retoucher un texte : `adr` = { zone: 'numero' | 'enonce' }, { zone: 'activite', champ }, { zone: 'elementTexte', e } ou une adresse de ligne. */
     D.retoucher = function (m, adr, texte) {
         var r = copie(m), t = String(texte == null ? '' : texte);
         if (adr.zone === 'numero') r.numero = t;
         else if (adr.zone === 'enonce') r.enonce = t;
+        else if (adr.zone === 'activite') { if (CHAMPS_ACTIVITES.indexOf(adr.champ) !== -1) r.activites[adr.champ] = t; }
         else if (adr.zone === 'elementTexte') { if (r.elements[adr.e]) r.elements[adr.e].texte = t; }
         else { var l = liste(r, adr); if (l && adr.i >= 0 && adr.i < l.length) l[adr.i] = t; }
         return r;
     };
 
     // ------------------------------------------------------------------
-    // 4. VERS LA FICHE DU COURS, ET DEPUIS ELLE
+    // 4. LA RÉSERVE DE DEVIS (une collection à elle, hors trimestre ; aucune fiche de cours n'est touchée)
     // ------------------------------------------------------------------
 
     function net(t) { return propre(t == null ? '' : t); }
-
-    /** Le texte d'une ligne d'`elementsCompetence`, sans son numéro ni sa puce. */
-    function sansRepere(l) {
-        var t = net(l).replace(PUCE, '');
-        var n = /^(\d{1,2})[.)]\s*(\S.*)$/.exec(t);
-        return n ? n[2].trim() : t;
-    }
+    function codeNet(c) { return net(c).toUpperCase(); }
+    function textes(a) { return Array.isArray(a) ? a.filter(function (t) { return typeof t === 'string'; }) : []; }
 
     /**
-     * Ce que la fiche du cours reçoit quand l'enseignant·e accepte. `elementsCompetence` reste le texte libre que ses
-     * lecteurs découpent par lignes (planification-export.js) : un élément par ligne, numéroté dans l'ordre de l'écran.
-     * Les lignes vides partent ; un élément sans texte part avec ses critères seulement s'il n'en a aucun.
+     * Ce que la réserve garde d'un devis accepté, tout ce que la création d'un cours voudra lire : le code de la
+     * compétence, son énoncé, le contexte de réalisation, les éléments avec leurs critères de performance, et les
+     * activités d'apprentissage (discipline, pondération, unités, heures ou périodes, précisions). Les lignes vides
+     * partent ; les lignes mises de côté ne sont pas gardées.
      */
-    D.versFiche = function (m) {
-        var elements = (m.elements || []).map(function (el) {
-            return { texte: net(el.texte), criteres: (el.criteres || []).map(net).filter(Boolean) };
-        }).filter(function (el) { return el.texte || el.criteres.length; });
+    D.pourReserve = function (m) {
+        var a = activitesSures(m.activites);
+        CHAMPS_ACTIVITES.forEach(function (c) { a[c] = net(a[c]); });
         return {
-            numeroCompetence: net(m.numero),
-            competence: net(m.enonce),
-            elementsCompetence: elements.map(function (el, i) { return (i + 1) + '. ' + el.texte; }).join('\n'),
-            devisCompetence: {
-                contexte: (m.contexte || []).map(net).filter(Boolean),
-                elements: elements
-            }
+            code: codeNet(m.numero),
+            enonce: net(m.enonce),
+            contexte: (m.contexte || []).map(net).filter(Boolean),
+            elements: (m.elements || []).map(function (el) {
+                return { texte: net(el.texte), criteres: (el.criteres || []).map(net).filter(Boolean) };
+            }).filter(function (el) { return el.texte || el.criteres.length; }),
+            activites: a
         };
     };
 
-    /** `devisCompetence` tel qu'on peut s'y fier : des tableaux de textes, rien d'autre (la fiche voyage). */
+    /** Un devis de la réserve tel qu'on peut s'y fier (la réserve voyage dans les exports) : des textes, rien d'autre. */
     function devisSur(d) {
-        if (!d || typeof d !== 'object') return null;
-        var textes = function (a) { return Array.isArray(a) ? a.filter(function (t) { return typeof t === 'string'; }) : []; };
-        return {
+        if (!d || typeof d !== 'object' || Array.isArray(d)) return null;
+        var r = {
+            code: typeof d.code === 'string' ? codeNet(d.code) : '',
+            enonce: typeof d.enonce === 'string' ? d.enonce : '',
             contexte: textes(d.contexte),
             elements: (Array.isArray(d.elements) ? d.elements : []).filter(function (el) { return el && typeof el === 'object'; })
-                .map(function (el) { return { texte: typeof el.texte === 'string' ? el.texte : '', criteres: textes(el.criteres) }; })
+                .map(function (el) { return { texte: typeof el.texte === 'string' ? el.texte : '', criteres: textes(el.criteres) }; }),
+            activites: activitesSures(d.activites)
         };
+        ['id', 'dateCreation', 'dateModification'].forEach(function (k) { if (typeof d[k] === 'string') r[k] = d[k]; });
+        return r;
     }
 
-    /**
-     * Ce que la fiche porte déjà, sous la forme du modèle. `elementsCompetence` fait foi pour les éléments : s'il a été
-     * retouché à la main depuis le devis, chaque ligne garde les critères de l'élément du même texte, et ce que le devis
-     * rangé portait d'autre paraît dans `ecartees` (rien n'est caché). `aDuContenu` : y a-t-il quelque chose à remplacer ?
-     */
-    D.depuisFiche = function (cours) {
-        var c = cours || {}, m = modeleVide();
-        var devis = devisSur(c.devisCompetence);
-        m.numero = net(c.numeroCompetence);
-        m.enonce = net(c.competence);
-        var lignes = String(c.elementsCompetence || '').split('\n').map(sansRepere).filter(Boolean);
-        var restants = devis ? devis.elements.slice() : [];
-        m.elements = lignes.map(function (t) {
-            var k = restants.findIndex(function (el) { return net(el.texte) === t; });
-            return { texte: t, criteres: k === -1 ? [] : restants.splice(k, 1)[0].criteres.slice() };
-        });
-        if (devis) m.contexte = devis.contexte.slice();
-        restants.forEach(function (el) {
-            [el.texte].concat(el.criteres).forEach(function (t) { if (net(t)) m.ecartees.push(t); });
-        });
-        m.aDuContenu = !!(m.numero || m.enonce || m.elements.length || m.contexte.length || m.ecartees.length);
-        m.aUnDevis = !!devis;
+    /** La réserve lue du stockage : un tableau de devis sûrs, quoi qu'on y trouve. */
+    D.reserveSure = function (v) {
+        return (Array.isArray(v) ? v : []).map(devisSur).filter(Boolean);
+    };
+
+    /** Un devis de la réserve, sous la forme du modèle de l'écran (pour le relire et le corriger). */
+    D.depuisReserve = function (d) {
+        var s = devisSur(d) || devisSur({});
+        var m = modeleVide();
+        m.numero = s.code; m.enonce = s.enonce; m.contexte = s.contexte; m.elements = s.elements; m.activites = s.activites;
         return m;
+    };
+
+    /**
+     * Où ce devis irait dans la réserve, sans rien écrire.
+     *   - rouvert (`idOuvert`) : il reprend sa place, quel que soit son code ; mais si un AUTRE devis porte déjà son
+     *     nouveau code, c'est un conflit (`conflit`), et rien ne se range ;
+     *   - collé : le devis du même code, s'il existe, est celui qu'il remplacerait (`ancien`).
+     * @returns {{index: number, ancien: Object|null, conflit: Object|null}}
+     */
+    D.place = function (reserve, devis, idOuvert) {
+        var liste = D.reserveSure(reserve), code = codeNet(devis.code);
+        var parCode = code ? liste.findIndex(function (d) { return d.code === code; }) : -1;
+        if (!idOuvert) return { index: parCode, ancien: parCode === -1 ? null : liste[parCode], conflit: null };
+        var parId = liste.findIndex(function (d) { return d.id === idOuvert; });
+        if (parId === -1) return { index: parCode, ancien: parCode === -1 ? null : liste[parCode], conflit: null };
+        if (parCode !== -1 && parCode !== parId) return { index: -1, ancien: null, conflit: liste[parCode] };
+        return { index: parId, ancien: liste[parId], conflit: null };
+    };
+
+    /**
+     * Range un devis dans la réserve et rend la réserve neuve (ou null sur un conflit, ou sans code : rien ne se range).
+     * Un devis remplacé garde son `id` et sa date de création ; aucun autre devis ne bouge ; rien n'est supprimé.
+     * @param {Array} reserve
+     * @param {Object} devis - ce que rend `pourReserve`
+     * @param {{idOuvert?: string, idNeuf: string, maintenant: string}} opts
+     */
+    D.ranger = function (reserve, devis, opts) {
+        var liste = D.reserveSure(reserve), net2 = devisSur(devis);
+        if (!net2 || !net2.code) return null;
+        var p = D.place(liste, net2, opts.idOuvert);
+        if (p.conflit) return null;
+        net2.dateModification = opts.maintenant;
+        if (p.index === -1) {
+            net2.id = opts.idNeuf;
+            net2.dateCreation = opts.maintenant;
+            return liste.concat([net2]);
+        }
+        net2.id = liste[p.index].id || opts.idNeuf;
+        net2.dateCreation = liste[p.index].dateCreation || opts.maintenant;
+        liste[p.index] = net2;
+        return liste;
     };
 
     /** Le compte que les écrans disent : éléments, critères, lignes de contexte. */
@@ -415,6 +496,10 @@
             ecartees: (m.ecartees || []).filter(net).length
         };
     };
+
+    D.CHAMPS_ACTIVITES = CHAMPS_ACTIVITES;
+    /** La clé de la réserve : globale, hors trimestre (inscrite à CLES_GLOBALES, js/trimestres.js). */
+    D.CLE_RESERVE = 'devisMinisteriels';
 
     window.devisLecture = D;
 })();

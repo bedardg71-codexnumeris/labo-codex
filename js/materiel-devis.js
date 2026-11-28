@@ -1,18 +1,19 @@
 /**
- * materiel-devis.js — Conception › « Apporter mon matériel » : le devis ministériel du cours.
+ * materiel-devis.js — Conception › « Apporter mon matériel » : numériser un devis ministériel.
  *
- * Lot « Le devis ministériel dans Apporter mon matériel » (28 nov. 2026, demande de Grégoire, 7 h 26 à 7 h 55).
- * Six gestes : l'accueil offre l'entrée ; l'enseignant·e choisit le cours ; colle son devis ; voit ce qui a été lu,
- * rangé comme le tableau d'origine ; corrige sur place ; accepte. La fiche du cours (`CoursEntite`) reçoit alors le
- * numéro, l'énoncé, les éléments (`elementsCompetence`, le texte libre que ses lecteurs découpent par lignes) et
- * `devisCompetence` (le contexte de réalisation, et les critères de performance sous chaque élément).
+ * Lot « Le devis ministériel dans Apporter mon matériel » (28 nov. 2026, demande de Grégoire, 7 h 26 à 7 h 55 ;
+ * correctif de 8 h 08, ses mots : « numériser ne touche aucun cours et c'est la création du cours qui vient puiser
+ * dans le devis numérisé »). L'enseignant·e colle son devis ; voit ce qui a été lu, rangé comme le tableau d'origine ;
+ * corrige sur place ; accepte. Le devis se range alors dans la RÉSERVE DE DEVIS (`devisMinisteriels`, clé globale,
+ * hors trimestre). L'accueil montre les devis rangés ; chacun se rouvre pour être relu et corrigé.
  *
- * ⛔ LA LECTURE NE S'ENREGISTRE JAMAIS D'OFFICE. Une seule écriture dans ce fichier (`ranger`), derrière le bouton
- * d'acceptation ; et quand la fiche porte déjà quelque chose, derrière un second accord, l'ancien et le nouveau
- * côte à côte. Ce lot ne crée ni cible ni critère d'évaluation : il range le devis.
+ * ⛔ AUCUNE FICHE DE COURS N'EST TOUCHÉE : ce fichier ne lit ni n'écrit `cours`.
+ * ⛔ LA LECTURE NE S'ENREGISTRE JAMAIS D'OFFICE. Une seule écriture (`ranger`), derrière le bouton d'acceptation ; et
+ * quand un devis du même code est déjà rangé, derrière un second accord, l'ancien et le nouveau côte à côte. Rien ne
+ * se supprime : ce lot n'offre aucun geste pour retirer un devis de la réserve.
  *
- * La lecture et les gestes de correction sont des fonctions pures (`devis-lecture.js`). Rien n'est gardé en
- * brouillon : une lecture non acceptée se perd au rechargement de la page.
+ * La lecture, les gestes de correction et le rangement sont des fonctions pures (`devis-lecture.js`). Rien n'est
+ * gardé en brouillon : une lecture non acceptée se perd au rechargement de la page.
  *
  * Sécurité (règle 1 du projet) : rien de collé n'entre dans le DOM sans `echapperHtml()` ; les valeurs des champs
  * sont posées par `.value`. Actions par `data-action` (dispatcher de main.js), saisies par des écouteurs délégués.
@@ -24,25 +25,22 @@
     'use strict';
 
     var T = {
-        titre: 'Le devis de ton cours',
-        intro: 'Le devis ministériel décrit la compétence de ton cours. Colle-le ici : tu verras ce qui a été lu, tu corrigeras au besoin, puis tu le rangeras dans la fiche de ton cours. Rien ne s’enregistre avant ton accord.',
+        titre: 'Numériser un devis ministériel',
+        intro: 'Colle ici le devis d’une compétence : tu verras ce qui a été lu, tu corrigeras au besoin, puis tu le rangeras parmi tes devis. Il ne touche aucun cours : c’est à la création d’un cours que tu viendras y puiser. Rien ne s’enregistre avant ton accord.',
         retourAccueil: 'Revenir à l’accueil',
-        etiquetteCours: 'À quel cours ce devis se rattache-t-il ?',
-        choisirCours: 'Choisis un cours',
-        aucunCours: 'Tu n’as pas encore de cours. Crée d’abord sa fiche dans Réglages, puis reviens coller son devis.',
-        dejaPorte: 'La fiche de ce cours porte déjà une compétence.',
-        revoirFiche: 'Voir et corriger ce que la fiche porte',
         etiquetteCollage: 'Colle ton devis ici',
         consigneCollage: 'Dans le PDF du ministère, sélectionne tout le devis de la compétence, toutes ses pages comprises, copie-le d’un seul geste, puis colle-le (⌘ V).',
         lire: 'Lire mon devis',
-        erreurCours: 'Choisis d’abord le cours auquel ce devis se rattache.',
         erreurVide: 'Il n’y a rien à lire. Copie ton devis dans le PDF du ministère, puis colle-le dans la zone.',
         erreurRien: 'Je n’ai rien reconnu d’un devis dans ce que tu as collé : ni « Code : », ni « Énoncé de la compétence », ni élément numéroté. Vérifie que tu as copié le devis en entier, ou compose-le à la main.',
         composerMain: 'Composer le devis à la main',
         titreLecture: 'Voici ce que j’ai lu',
-        titreFiche: 'Ce que la fiche porte',
-        consigneLecture: 'Compare avec ton devis. Retouche un texte en écrivant dedans. Pour une ligne mal rangée, choisis où elle va dans son menu « Déplacer ». Rien n’est enregistré tant que tu n’as pas rangé le devis dans la fiche.',
-        pourLeCours: 'Pour le cours',
+        titreRouvert: 'Ton devis rangé',
+        consigneLecture: 'Compare avec ton devis. Retouche un texte en écrivant dedans. Pour une ligne mal rangée, choisis où elle va dans son menu « Déplacer ». Rien n’est enregistré tant que tu n’as pas rangé le devis.',
+        ceQuiEstLu: 'Lu :',
+        activites: 'Activités d’apprentissage',
+        activitesAide: 'Quand le devis les porte (en formation générale). Laisse vide ce qu’il ne dit pas.',
+        champsActivites: { discipline: 'Discipline', ponderation: 'Pondération', unites: 'Unités', heures: 'Heures ou périodes', precisions: 'Précisions' },
         numero: 'Numéro de la compétence',
         enonce: 'Énoncé de la compétence',
         contexte: 'Contexte de réalisation',
@@ -67,38 +65,38 @@
         versCote: 'Retirer (mettre de côté)',
         enElement: 'En faire un élément',
         deCote: 'Lignes mises de côté',
-        deCoteAide: 'Ce qui ne fait pas partie de la compétence (pied de page, activités d’apprentissage) ou que tu as retiré. Rien de ceci n’ira dans la fiche. Une ligne mise de côté par erreur se replace par son menu « Déplacer ».',
+        deCoteAide: 'Ce qui ne fait pas partie de la compétence (pied de page, activités d’apprentissage) ou que tu as retiré. Rien de ceci ne sera rangé. Une ligne mise de côté par erreur se replace par son menu « Déplacer ».',
         annuler: 'Annuler le dernier geste',
-        accepter: 'Ranger ce devis dans la fiche du cours',
+        accepter: 'Ranger ce devis',
         collerAutre: 'Coller un autre devis',
-        confirmerQuitter: 'Ce devis n’est pas rangé dans la fiche du cours : ce que tu as lu et corrigé sera perdu. Continuer ?',
-        erreurIncomplet: 'Il n’y a rien à ranger : ni numéro, ni énoncé, ni élément.',
-        titreComparer: 'La fiche de ce cours porte déjà une compétence',
-        consigneComparer: 'Si tu acceptes, ce que tu apportes remplace ce que la fiche porte. Rien d’autre ne change dans la fiche.',
-        colonneAncien: 'Ce que la fiche porte',
+        confirmerQuitter: 'Ce que tu as lu et corrigé n’est pas rangé : ce sera perdu. Continuer ?',
+        erreurSansCode: 'Donne le numéro de la compétence avant de ranger ce devis : c’est par lui qu’il se retrouve.',
+        erreurConflit: 'Un autre devis rangé porte déjà ce numéro. Corrige le numéro, ou rouvre l’autre devis depuis l’accueil.',
+        titreComparer: 'Un devis de ce numéro est déjà rangé',
+        consigneComparer: 'Si tu acceptes, ce que tu apportes remplace le devis déjà rangé. Tes autres devis et tes cours ne changent pas.',
+        colonneAncien: 'Le devis déjà rangé',
         colonneNouveau: 'Ce que tu apportes',
-        remplacer: 'Remplacer ce que la fiche porte',
+        remplacer: 'Remplacer le devis déjà rangé',
         revenirLecture: 'Revenir à ma lecture',
         rien: 'Rien',
-        titreRange: 'Le devis est rangé dans la fiche du cours',
-        erreurEcriture: 'Le devis n’a pas pu être rangé dans la fiche. Rien n’a changé ; essaie de nouveau.',
-        erreurCoursParti: 'Cette fiche de cours n’existe plus. Reviens à l’accueil et choisis un autre cours.',
-        autreDevis: 'Apporter le devis d’un autre cours'
+        titreRange: 'Ton devis est rangé',
+        erreurEcriture: 'Le devis n’a pas pu être rangé. Rien n’a changé ; essaie de nouveau.',
+        autreDevis: 'Numériser un autre devis',
+        rangesTitre: 'Tes devis rangés',
+        rouvrir: 'Rouvrir'
     };
 
     var etat = etatNeuf();
-    var listeCours = [];
+    var reserve = [];
 
     function etatNeuf() {
-        return { ecran: 'ferme', coursId: '', modele: null, source: 'collage', historique: [], ancien: null, erreur: '', annonce: '', resume: null };
+        return { ecran: 'ferme', idOuvert: '', modele: null, historique: [], ancien: null, erreur: '', annonce: '', resume: null };
     }
 
     function L() { return window.devisLecture; }
     function e(v) { return echapperHtml(v == null ? '' : v); }
     function el(id) { return document.getElementById(id); }
     function pluriel(n, un, plusieurs) { return n + ' ' + (n > 1 ? plusieurs : un); }
-    function libelle(c) { return window.CoursEntite ? window.CoursEntite.genererLibelle(c) : (c.codeCours || '') + ' ' + (c.nomCours || ''); }
-    function coursChoisi() { return listeCours.find(function (c) { return c.id === etat.coursId; }) || null; }
     function court(t, n) { t = String(t || '').trim(); return t.length > n ? t.slice(0, n - 1).trim() + '…' : t; }
 
     // ------------------------------------------------------------------
@@ -120,18 +118,8 @@
     }
 
     function collerHtml() {
-        if (!listeCours.length) {
-            return tete(T.titre, 'devis-titre') + '<p class="devis-intro">' + e(T.intro) + '</p><p class="alerte alerte-information">' + e(T.aucunCours) + '</p>';
-        }
-        var c = coursChoisi();
-        var deja = c && L().depuisFiche(c).aDuContenu;
         return tete(T.titre, 'devis-titre') + '<p class="devis-intro">' + e(T.intro) + '</p>' +
             '<div class="materiel-collage">' +
-            '<label for="devis-cours">' + e(T.etiquetteCours) + '</label>' +
-            '<select id="devis-cours" class="controle-form devis-select-cours"><option value="">' + e(T.choisirCours) + '</option>' +
-            listeCours.map(function (x) { return '<option value="' + e(x.id) + '"' + (x.id === etat.coursId ? ' selected' : '') + '>' + e(libelle(x)) + '</option>'; }).join('') +
-            '</select>' +
-            (deja ? '<p class="devis-deja">' + e(T.dejaPorte) + ' <button type="button" class="materiel-btn-lien" data-action="materielDevis.revoirFiche">' + e(T.revoirFiche) + '</button></p>' : '') +
             '<label for="devis-zone-collage">' + e(T.etiquetteCollage) + '</label>' +
             '<p id="devis-consigne" class="devis-consigne">' + e(T.consigneCollage) + '</p>' +
             '<textarea id="devis-zone-collage" class="controle-form materiel-zone devis-zone" rows="8" aria-describedby="devis-consigne"></textarea>' +
@@ -140,6 +128,17 @@
             '<button type="button" class="btn btn-principal" data-action="materielDevis.lire">' + e(T.lire) + '</button>' +
             '<button type="button" class="btn btn-secondaire" data-action="materielDevis.composer">' + e(T.composerMain) + '</button>' +
             '</div></div>';
+    }
+
+    /** Sur l'accueil : les devis déjà rangés, chacun avec son bouton « Rouvrir ». Rien quand la réserve est vide. */
+    function rangesHtml() {
+        if (!reserve.length) return '';
+        return '<h4>' + e(T.rangesTitre) + '</h4><ul class="devis-ranges">' + reserve.map(function (d) {
+            var n = L().compter(d);
+            return '<li><span class="devis-range-texte"><strong>' + e(d.code) + '</strong> ' + e(d.enonce) +
+                ' <span class="devis-range-compte">' + e(pluriel(n.elements, 'élément', 'éléments') + ', ' + pluriel(n.criteres, 'critère de performance', 'critères de performance')) + '</span></span>' +
+                '<button type="button" class="btn btn-secondaire btn-compact" data-action="materielDevis.rouvrir" data-param-id="' + e(d.id) + '" aria-label="' + e(T.rouvrir + ' le devis ' + d.code) + '">' + e(T.rouvrir) + '</button></li>';
+        }).join('') + '</ul>';
     }
 
     /** Le menu « Déplacer » d'une ligne : où elle peut aller, seule ou avec celles qui la suivent. */
@@ -172,8 +171,19 @@
         return '<li class="devis-ligne">' + champ(adr, texte, etiquette) + menuHtml(adr, nb) + '</li>';
     }
 
+    /** Les activités d'apprentissage : cinq champs libres, que la création d'un cours viendra lire. */
+    function activitesHtml(m) {
+        return '<section class="devis-section" aria-labelledby="devis-t-activites"><h3 id="devis-t-activites">' + e(T.activites) + '</h3>' +
+            '<p class="devis-consigne">' + e(T.activitesAide) + '</p><div class="devis-activites">' +
+            L().CHAMPS_ACTIVITES.map(function (c) {
+                var id = 'devis-activite-' + c;
+                return '<div class="groupe-form' + (c === 'precisions' ? ' devis-activite-large' : '') + '"><label for="' + id + '">' + e(T.champsActivites[c]) + '</label>' +
+                    '<textarea id="' + id + '" class="controle-form devis-champ" rows="' + (c === 'precisions' ? 2 : 1) + '" data-devis-champ="1" data-zone="activite" data-champ="' + c + '">' + e(m.activites[c]) + '</textarea></div>';
+            }).join('') + '</div></section>';
+    }
+
     function lectureHtml() {
-        var m = etat.modele, c = coursChoisi(), n = L().compter(m);
+        var m = etat.modele, n = L().compter(m);
         var bouton = function (action, texte, param, classe) {
             return '<button type="button" class="btn ' + (classe || 'btn-secondaire') + '" data-action="materielDevis.' + action + '"' + (param !== undefined ? ' data-param="' + param + '"' : '') + '>' + e(texte) + '</button>';
         };
@@ -200,9 +210,9 @@
               '<p class="devis-consigne">' + e(T.deCoteAide) + '</p><ul class="devis-liste">' +
               m.ecartees.map(function (t, i) { return ligneHtml({ zone: 'ecartees', i: i }, t, m.ecartees.length, 'Ligne mise de côté ' + (i + 1)); }).join('') + '</ul></details>'
             : '';
-        return tete(etat.source === 'fiche' ? T.titreFiche : T.titreLecture, 'devis-titre') +
+        return tete(etat.idOuvert ? T.titreRouvert : T.titreLecture, 'devis-titre') +
             '<p class="devis-intro">' + e(T.consigneLecture) + '</p>' +
-            '<p class="devis-cours-choisi">' + e(T.pourLeCours) + ' <strong>' + e(c ? libelle(c) : '') + '</strong> · ' +
+            '<p class="devis-compte">' + e(T.ceQuiEstLu) + ' ' +
             e(pluriel(n.elements, 'élément', 'éléments') + ', ' + pluriel(n.criteres, 'critère de performance', 'critères de performance')) + '</p>' +
             '<div class="devis-feuille">' +
             '<div class="devis-entete"><div class="groupe-form"><label for="devis-numero">' + e(T.numero) + '</label>' +
@@ -213,7 +223,7 @@
             bouton('ajouterContexte', T.ajouterContexte, undefined, 'btn-secondaire btn-compact') + '</section>' +
             '<section class="devis-section" aria-labelledby="devis-t-elements"><h3 id="devis-t-elements" tabindex="-1">' + e(T.elements) + '</h3>' +
             (m.elements.length ? '<ol class="devis-elements">' + elements + '</ol>' : '<p class="devis-vide">' + e(T.elementsVide) + '</p>') +
-            bouton('ajouterElement', T.ajouterElement) + '</section>' + cote + '</div>' +
+            bouton('ajouterElement', T.ajouterElement) + '</section>' + activitesHtml(m) + cote + '</div>' +
             '<p id="devis-annonce" class="devis-annonce" role="status" aria-live="polite">' + e(etat.annonce) + '</p>' + erreurHtml() +
             '<div class="materiel-actions devis-pied">' +
             bouton('accepter', T.accepter, undefined, 'btn-principal') +
@@ -232,23 +242,23 @@
             '<dt>' + e(T.contexte) + '</dt><dd>' + (m.contexte.length ? liste(m.contexte) : rien) + '</dd>' +
             '<dt>' + e(T.elements) + '</dt><dd>' + (el2.length ? '<ol>' + el2.map(function (x) {
                 return '<li>' + e(x.texte) + (x.criteres.length ? liste(x.criteres) : '') + '</li>';
-            }).join('') + '</ol>' : rien) + '</dd></dl>';
+            }).join('') + '</ol>' : rien) + '</dd>' +
+            L().CHAMPS_ACTIVITES.filter(function (c) { return m.activites && m.activites[c]; }).map(function (c) {
+                return '<dt>' + e(T.champsActivites[c]) + '</dt><dd>' + e(m.activites[c]) + '</dd>';
+            }).join('') + '</dl>';
     }
 
-    /** Le modèle tel que la fiche le recevra (lignes vides parties), pour la colonne « Ce que tu apportes ». */
-    function modeleNet(m) {
-        var f = L().versFiche(m);
-        return { numero: f.numeroCompetence, enonce: f.competence, contexte: f.devisCompetence.contexte, elements: f.devisCompetence.elements };
+    /** Un devis de la réserve (ou ce qui va y entrer), sous la forme que lit `apercuHtml`. */
+    function enApercu(d) {
+        return { numero: d.code, enonce: d.enonce, contexte: d.contexte, elements: d.elements, activites: d.activites };
     }
 
     function comparerHtml() {
-        var c = coursChoisi();
         return tete(T.titreComparer, 'devis-titre') +
             '<p class="devis-intro">' + e(T.consigneComparer) + '</p>' +
-            '<p class="devis-cours-choisi">' + e(T.pourLeCours) + ' <strong>' + e(c ? libelle(c) : '') + '</strong></p>' +
             '<div class="devis-comparaison">' +
-            '<section class="devis-colonne" aria-labelledby="devis-col-ancien"><h3 id="devis-col-ancien">' + e(T.colonneAncien) + '</h3>' + apercuHtml(etat.ancien) + '</section>' +
-            '<section class="devis-colonne devis-colonne-neuve" aria-labelledby="devis-col-neuf"><h3 id="devis-col-neuf">' + e(T.colonneNouveau) + '</h3>' + apercuHtml(modeleNet(etat.modele)) + '</section>' +
+            '<section class="devis-colonne" aria-labelledby="devis-col-ancien"><h3 id="devis-col-ancien">' + e(T.colonneAncien) + '</h3>' + apercuHtml(enApercu(etat.ancien)) + '</section>' +
+            '<section class="devis-colonne devis-colonne-neuve" aria-labelledby="devis-col-neuf"><h3 id="devis-col-neuf">' + e(T.colonneNouveau) + '</h3>' + apercuHtml(enApercu(L().pourReserve(etat.modele))) + '</section>' +
             '</div>' + erreurHtml() +
             '<div class="materiel-actions devis-pied">' +
             '<button type="button" class="btn btn-principal" data-action="materielDevis.remplacer">' + e(T.remplacer) + '</button>' +
@@ -260,9 +270,9 @@
         return '<section class="materiel-confirmation" aria-labelledby="devis-titre">' +
             '<div class="materiel-confirmation-titre"><svg aria-hidden="true" width="48" height="48" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="24" cy="24" r="21"></circle><path d="M14 25l7 7 13-15"></path></svg>' +
             '<h2 id="devis-titre" tabindex="-1">' + e(T.titreRange) + '</h2></div>' +
-            '<p>' + e('La fiche de « ' + r.cours + ' » porte maintenant la compétence ' + (r.modele.numero || '') + ', avec ' +
+            '<p>' + e('Le devis ' + r.modele.numero + ' est rangé parmi tes devis, avec ' +
                 pluriel(r.n.elements, 'élément', 'éléments') + ' et ' + pluriel(r.n.criteres, 'critère de performance', 'critères de performance') +
-                (r.n.contexte ? ', et son contexte de réalisation' : '') + '. Rien d’autre n’a changé dans l’application.') + '</p>' +
+                (r.n.contexte ? ', et son contexte de réalisation' : '') + '. Aucun cours n’a changé : tu y puiseras en créant un cours.') + '</p>' +
             apercuHtml(r.modele) +
             '<div class="materiel-actions devis-pied">' +
             '<button type="button" class="btn btn-secondaire" data-action="materielDevis.ouvrir">' + e(T.autreDevis) + '</button>' +
@@ -306,9 +316,14 @@
         p.classList.toggle('u-hide', !etat.erreur);
     }
 
-    async function chargerCours() {
-        var tous = window.CoursEntite ? (await window.CoursEntite.obtenirTous()) : [];
-        listeCours = (tous || []).filter(function (c) { return c && c.nature !== 'service' && c.dansBibliotheque !== false; });
+    /** Lit la réserve de devis (clé globale) et rend la liste de l'accueil. */
+    async function chargerReserve() {
+        var lue = null;
+        try { lue = await db.get(L().CLE_RESERVE); }
+        catch (err) { console.warn('[Devis] Réserve de devis illisible :', err); }
+        reserve = L().reserveSure(lue);
+        var zone = el('materiel-devis-ranges');
+        if (zone) zone.innerHTML = rangesHtml();   // security-ok: tout texte passe par echapperHtml
     }
 
     /** Un geste de correction : le modèle d'avant reste dans l'historique (« Annuler le dernier geste »). */
@@ -325,6 +340,7 @@
 
     function adresse(noeud) {
         var d = noeud.dataset, a = { zone: d.zone };
+        if (d.champ !== undefined) a.champ = d.champ;
         if (d.e !== undefined) a.e = Number(d.e);
         if (d.i !== undefined) a.i = Number(d.i);
         return a;
@@ -368,19 +384,12 @@
             var t = ev.target;
             if (!t || !t.dataset) return;
             if (t.dataset.devisMenu) surMenu(t);
-            else if (t.id === 'devis-cours') {
-                var zone = el('devis-zone-collage'), texte = zone ? zone.value : '';
-                etat.coursId = t.value;
-                etat.erreur = '';
-                rendre('devis-cours');
-                if (el('devis-zone-collage')) el('devis-zone-collage').value = texte;
-            }
         });
     }
 
-    function ouvrirLecture(modele, source) {
+    function ouvrirLecture(modele, idOuvert) {
         etat.modele = L().copie(modele);
-        etat.source = source;
+        etat.idOuvert = idOuvert || '';
         etat.historique = [];
         etat.annonce = '';
         etat.erreur = '';
@@ -389,23 +398,28 @@
         rendre('devis-titre');
     }
 
+    function idNeuf() {
+        return 'DEVIS_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
+    }
+
+    /** La SEULE écriture de ce fichier : la réserve relue au moment d'écrire, le devis rangé, rien d'autre ne bouge. */
     async function ranger() {
-        var fiche = L().versFiche(etat.modele), id = etat.coursId, cours = coursChoisi();
+        var devis = L().pourReserve(etat.modele), opts = { idOuvert: etat.idOuvert, idNeuf: idNeuf(), maintenant: new Date().toISOString() };
         var ecrit = null;
         try {
-            var ecrire = function () { return window.CoursEntite.mettreAJour(id, fiche); };
-            ecrit = typeof window.ecrireEtAnnoncer === 'function'
-                ? await window.ecrireEtAnnoncer(window.CoursEntite.CLE, ecrire, { geste: 'Ranger le devis' })
-                : await ecrire();
+            ecrit = await window.modifierEtAnnoncer(L().CLE_RESERVE, function (lue) {
+                var neuve = L().ranger(lue, devis, opts);
+                return neuve === null ? undefined : neuve;
+            }, [], { geste: 'Ranger le devis' });
         } catch (err) {
-            console.error('[Devis] Écriture de la fiche échouée :', err);
+            console.error('[Devis] Écriture de la réserve échouée :', err);
         }
         if (!ecrit) { dire(T.erreurEcriture); return; }
-        var modele = modeleNet(etat.modele);
+        var modele = enApercu(devis);
         etat = etatNeuf();
         etat.ecran = 'range';
-        etat.resume = { cours: libelle(ecrit || cours), modele: modele, n: L().compter(modele) };
-        await chargerCours();
+        etat.resume = { modele: modele, n: L().compter(modele) };
+        await chargerReserve();
         rendre('devis-titre');
     }
 
@@ -415,7 +429,7 @@
             var vue = el('materiel-devis');
             if (!vue || !L()) return;
             brancher(vue);
-            await chargerCours();
+            await chargerReserve();
             etat = etatNeuf();
             etat.ecran = 'coller';
             rendre('devis-titre');
@@ -427,24 +441,27 @@
             if (window.materiel && typeof window.materiel.revenirDissection === 'function') window.materiel.revenirDissection();
             else { var a = el('materiel-accueil'); if (a) a.classList.remove('u-hide'); }
         },
-        /** Gestes 3 et 4 : lire le collage, montrer ce qui a été lu. */
+        /** Lire le collage, montrer ce qui a été lu. */
         lire: function () {
             var zone = el('devis-zone-collage'), texte = zone ? zone.value : '';
-            if (!etat.coursId) { dire(T.erreurCours); if (el('devis-cours')) el('devis-cours').focus(); return; }
             if (!texte.trim()) { dire(T.erreurVide); if (zone) zone.focus(); return; }
             var m = L().lire(texte);
             if (!m.reconnu) { dire(T.erreurRien); return; }
-            ouvrirLecture(m, 'collage');
+            ouvrirLecture(m, '');
         },
         /** Le devis composé à la main : la même feuille, vide. */
-        composer: function () {
-            if (!etat.coursId) { dire(T.erreurCours); if (el('devis-cours')) el('devis-cours').focus(); return; }
-            ouvrirLecture(L().modeleVide(), 'collage');
-        },
-        /** Ce que la fiche porte déjà, sur la même feuille : le devis se revoit et se corrige après coup. */
-        revoirFiche: function () {
-            var c = coursChoisi();
-            if (c) ouvrirLecture(L().depuisFiche(c), 'fiche');
+        composer: function () { ouvrirLecture(L().modeleVide(), ''); },
+        /** Un devis rangé se rouvre sur la même feuille, pour être relu et corrigé (`data-param-id` : l'id n'est pas un nombre). */
+        rouvrir: async function (bouton) {
+            var id = bouton && bouton.dataset ? bouton.dataset.paramId : String(bouton);
+            var vue = el('materiel-devis');
+            if (!vue || !L()) return;
+            brancher(vue);
+            await chargerReserve();
+            var d = reserve.find(function (x) { return x.id === id; });
+            if (!d) return;
+            etat = etatNeuf();
+            ouvrirLecture(L().depuisReserve(d), d.id);
         },
         ajouterContexte: function () {
             appliquer(L().ajouterLigne(etat.modele, { zone: 'contexte' }), '', '.devis-section .devis-liste > li:last-child textarea');
@@ -468,21 +485,19 @@
             rendre('devis-annonce');
         },
         collerAutre: function () {
-            var id = etat.coursId;
             etat = etatNeuf();
             etat.ecran = 'coller';
-            etat.coursId = id;
             rendre('devis-zone-collage');
         },
-        /** Geste 6 : accepter. La fiche porte déjà quelque chose : l'ancien et le nouveau côte à côte, d'abord. */
+        /** Accepter. Un devis de ce code est déjà rangé : l'ancien et le nouveau côte à côte, d'abord. */
         accepter: async function () {
-            var f = L().versFiche(etat.modele);
-            if (!f.numeroCompetence && !f.competence && !f.devisCompetence.elements.length) { dire(T.erreurIncomplet); return; }
-            var cours = window.CoursEntite ? await window.CoursEntite.obtenirParId(etat.coursId) : null;   // la fiche d'aujourd'hui, pas celle de l'ouverture
-            if (!cours) { dire(T.erreurCoursParti); return; }
-            var ancien = L().depuisFiche(cours);
-            if (ancien.aDuContenu) {
-                etat.ancien = ancien;
+            var devis = L().pourReserve(etat.modele);
+            if (!devis.code) { dire(T.erreurSansCode); if (el('devis-numero')) el('devis-numero').focus(); return; }
+            await chargerReserve();   // la réserve d'aujourd'hui, pas celle de l'ouverture
+            var p = L().place(reserve, devis, etat.idOuvert);
+            if (p.conflit) { dire(T.erreurConflit); return; }
+            if (p.ancien) {
+                etat.ancien = p.ancien;
                 etat.erreur = '';
                 etat.ecran = 'comparer';
                 rendre('devis-titre');
@@ -498,8 +513,20 @@
             rendre('devis-titre');
         },
         estOuvert: function () { return etat.ecran !== 'ferme'; },
+        /** L'accueil vient de s'afficher : la liste des devis rangés suit la réserve. */
+        rafraichirAccueil: chargerReserve,
         textes: T
     };
+
+    function initialiser() {
+        if (typeof window.auDbPret === 'function') window.auDbPret(chargerReserve);
+        if (typeof window.addEventListener !== 'function') return;
+        window.addEventListener('sectionAffichee', function (ev) {
+            if (ev.detail && ev.detail.idSousSection === 'conception-materiel' && typeof window.auDbPret === 'function') window.auDbPret(chargerReserve);
+        });
+    }
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initialiser);
+    else initialiser();
 
     window.materielDevis = materielDevis;
 })();

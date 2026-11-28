@@ -30456,7 +30456,8 @@ body.mode-clair {
 .materiel-btn-lien:focus-visible { outline: 3px solid var(--accent-primaire); outline-offset: 2px; }
 
 /* Lot « Le devis ministériel » (28 nov. 2026, js/materiel-devis.js) : l'entrée de l'accueil, puis la feuille du devis,
-   rangée comme le tableau du ministère (le numéro et l'énoncé en tête, chaque élément avec ses critères dessous).
+   rangée comme le tableau du ministère (le numéro et l'énoncé en tête, chaque élément avec ses critères dessous) ;
+   correctif de 8 h 08 : les devis rangés sur l'accueil, les activités d'apprentissage sur la feuille.
    Couleurs : variables seulement, clair comme sombre. Cibles tactiles ≥ 44 px (iPad). */
 .materiel-devis-entree h3 { margin: 0; font-size: 1.1rem; }
 .materiel-devis-entree .btn { min-height: 44px; align-self: flex-start; }
@@ -30467,10 +30468,20 @@ body.mode-clair {
 .devis-tete h2:focus, .materiel-devis h3:focus { outline: none; }
 .materiel-devis .btn { min-height: 44px; }
 .devis-intro { margin: 0; max-width: 780px; font-size: 1.05rem; line-height: 1.55; color: var(--texte-secondaire); }
-.devis-consigne, .devis-deja { margin: 0; line-height: 1.5; color: var(--texte-secondaire); }
-.devis-select-cours { max-width: 520px; min-height: 44px; }
+.devis-consigne { margin: 0; line-height: 1.5; color: var(--texte-secondaire); }
 .devis-zone { min-height: 180px; }
-.devis-cours-choisi { margin: 0; color: var(--texte-principal); }
+.devis-compte { margin: 0; color: var(--texte-principal); }
+/* Sur l'accueil : les devis déjà rangés, un par rangée, « Rouvrir » à droite. */
+#materiel-devis-ranges:empty { display: none; }
+#materiel-devis-ranges h4 { margin: 0 0 8px; font-size: 0.95rem; color: var(--texte-secondaire); }
+.devis-ranges { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.devis-ranges li { display: flex; gap: 12px; align-items: center; justify-content: space-between; padding: 8px 0; border-top: 1px solid var(--bordure-claire); }
+.devis-ranges .btn { min-height: 44px; flex: none; }
+.devis-range-texte { line-height: 1.45; color: var(--texte-principal); overflow-wrap: anywhere; }
+.devis-range-compte { color: var(--texte-muted); font-size: 0.9rem; white-space: nowrap; }
+.devis-activites { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; align-self: stretch; }
+.devis-activites .groupe-form { margin: 0; }
+.devis-activite-large { grid-column: 1 / -1; }
 .devis-feuille {
     display: flex; flex-direction: column; gap: 20px;
     background: var(--surface-carte); border: 1px solid var(--bordure-claire);
@@ -30512,6 +30523,7 @@ body.mode-clair {
 .devis-apercu ol > li ul { font-weight: 400; }
 @media (max-width: 820px) {
     .devis-entete, .devis-comparaison { grid-template-columns: 1fr; }
+    .devis-activites { grid-template-columns: 1fr 1fr; }
     .devis-ligne { grid-template-columns: 1fr; }
     .devis-element-tete { grid-template-columns: auto 1fr; }
     .devis-element-gestes { grid-column: 1 / -1; justify-content: flex-start; }

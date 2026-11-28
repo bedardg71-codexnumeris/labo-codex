@@ -2618,6 +2618,9 @@ var LIBELLES_DES_CLES = {
     categoriesObservation: { nom: 'tes catégories de tampons d\'observation', ou: 'Annotation › Tampons', unite: 'catégorie' },
     brouillonDissection: { nom: 'ta grille en cours dans « Apporter mon matériel »', titre: 'Ta grille en cours',
         ou: 'Conception › Apporter mon matériel', cote: _coteDeLaGrilleEnCours },
+    // Lot « Le devis ministériel » (28 nov. 2026) : la réserve des devis numérisés, une liste à `id` (la fusion la
+    // traite devis par devis). Mots de travail, à relire (TEXTES-2026-11-28-devis-ministeriel.md).
+    devisMinisteriels: { nom: 'tes devis ministériels', ou: 'Conception › Apporter mon matériel', unite: 'devis' },
     interventions: { nom: 'les interventions' },
     // Lot 2 « Par standards » (21 nov. 2026) : une liste où l'on ajoute (une annulation est une entrée de plus) ; la fusion
     // en fait l'union, sans conflit. Mots PROPOSÉS (TEXTES-2026-11-21-par-standards-lot-2.md, H2).

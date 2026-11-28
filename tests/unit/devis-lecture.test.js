@@ -10,8 +10,11 @@
  *   H — HONNÊTETÉ : rien d'inventé, rien de perdu. Chaque mot du collage est dans le modèle ou dans `ecartees` ;
  *       le sort mélangé de 000Z n'est pas reconstruit.
  *   G — GESTES : 000Z se remet en ordre en DEUX gestes ; retirer, c'est mettre de côté.
- *   F — LA FICHE : `elementsCompetence` reste un élément par ligne (son lecteur, planification-export.js, le
- *       découpe par lignes) et correspond à `devisCompetence` ; l'aller-retour ne perd rien.
+ *   A — ACTIVITÉS D'APPRENTISSAGE : discipline, pondération, unités, heures ou périodes, précisions, quand le devis
+ *       les porte ; une valeur que rien ne rattache à son libellé n'est pas devinée.
+ *   R — LA RÉSERVE (correctif du 28 nov., 8 h 08 : « numériser ne touche aucun cours ») : un devis se range par son
+ *       code ; un devis du même code est remplacé à sa place, les autres ne bougent pas ; rien n'est supprimé ;
+ *       l'aller-retour ne perd rien ; AUCUN fichier du lot ne lit ni n'écrit la fiche d'un cours.
  *   S — SÉCURITÉ : l'écran ne pose un texte collé dans la page que par `echapperHtml`.
  */
 import { describe, it, expect, beforeAll } from 'vitest';
@@ -19,6 +22,7 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chargerScript } from './_helpers/charger-script.js';
+import { tranche } from './_helpers/tranche.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racine = path.resolve(__dirname, '..', '..');
@@ -30,7 +34,7 @@ beforeAll(() => { D = chargerScript('js/devis-lecture.js').devisLecture; });
 const mots = (t) => String(t).normalize('NFC').replace(/[•\f]/g, ' ').split(/\s+/).filter(Boolean);
 /** Tous les mots que porte un modèle, écartés compris. */
 function motsDuModele(m) {
-    return mots([m.numero, m.enonce].concat(m.contexte, m.ecartees, ...m.elements.map((e) => [e.texte].concat(e.criteres))).join(' '));
+    return mots([m.numero, m.enonce].concat(m.contexte, m.ecartees, Object.values(m.activites || {}), ...m.elements.map((e) => [e.texte].concat(e.criteres))).join(' '));
 }
 
 describe('L — lire par repères, sur les cinq devis', () => {
@@ -46,7 +50,7 @@ describe('L — lire par repères, sur les cinq devis', () => {
         expect(m.elements[1].criteres[1]).toBe('Classement approprié des principales manifestations thématiques et stylistiques.');
         // Le bloc « Activités d'apprentissage » n'est pas pris pour des critères.
         expect(m.elements[5].criteres).toEqual(['Utilisation appropriée de stratégies de révision.', 'Correction appropriée du texte.']);
-        expect(m.ecartees).toContain('Pondération : 2-2-3 ou 1-3-3');
+        expect(m.elements.flatMap((e) => e.criteres).join(' ')).not.toMatch(/Pondération|Discipline/);
     });
 
     it('01FB : le code sur la ligne suivante, les numéros sans point, un contexte en phrases', () => {
@@ -104,7 +108,8 @@ describe('L — lire par repères, sur les cinq devis', () => {
 describe('H — honnêteté : rien d’inventé, rien de perdu', () => {
     it.each(['4EF0', '01FB', '0013', '01FL', '000Z'])('%s : chaque mot du collage est dans le modèle, hors les intitulés reconnus', (code) => {
         const m = D.lire(devis(code));
-        const intitules = ['Code', ':', 'Objectif', 'Standard', 'Énoncé', 'de', 'la', 'compétence', 'Contexte', 'réalisation', 'Éléments', 'Critères', 'performance', 'Activités', 'd’apprentissage'];
+        const intitules = ['Code', ':', 'Objectif', 'Standard', 'Énoncé', 'de', 'la', 'compétence', 'Contexte', 'réalisation', 'Éléments', 'Critères', 'performance', 'Activités', 'd’apprentissage',
+            'Discipline', 'Pondération', 'Unités', 'Précision', 'Précisions', 'Périodes', 'd’enseignement', 'Nombre', 'd’heures-contact', 'd’unités'];
         const rendus = motsDuModele(m);
         const compte = (liste) => liste.reduce((c, w) => { c[w] = (c[w] || 0) + 1; return c; }, {});
         const attendus = compte(mots(devis(code).replace(/^(\d{1,2})[.)]?\s+(?=[A-ZÀ-Þ])/gm, '')));
@@ -145,7 +150,7 @@ describe('G — les gestes de correction', () => {
     });
 
     it('retirer une ligne la met de côté ; elle se replace, ou devient un élément', () => {
-        const m = { numero: 'X1', enonce: 'É.', contexte: [], elements: [{ texte: 'A', criteres: ['c1', 'Pied de page'] }], ecartees: [] };
+        const m = D.copie({ numero: 'X1', enonce: 'É.', contexte: [], elements: [{ texte: 'A', criteres: ['c1', 'Pied de page'] }], ecartees: [] });
         const retire = D.deplacer(m, { zone: 'element', e: 0, i: 1 }, { zone: 'ecartees' });
         expect(retire.elements[0].criteres).toEqual(['c1']);
         expect(retire.ecartees).toEqual(['Pied de page']);
@@ -172,55 +177,103 @@ describe('G — les gestes de correction', () => {
     });
 });
 
-describe('F — vers la fiche du cours, et depuis elle', () => {
-    it('`elementsCompetence` : un élément par ligne, numéroté, que son lecteur découpe comme avant', () => {
-        const f = D.versFiche(D.lire(devis('4EF0')));
-        expect(f.numeroCompetence).toBe('4EF0');
-        expect(f.competence).toBe('Analyser des textes littéraires.');
-        // Le découpage de planification-export.js, mot pour mot.
-        const lignes = String(f.elementsCompetence || '').split('\n').map((l) => l.trim()).filter(Boolean);
-        expect(lignes).toHaveLength(6);
-        expect(lignes[0]).toBe('1. Reconnaître le propos du texte.');
-        expect(f.devisCompetence.elements.map((e) => e.texte)).toEqual(lignes.map((l) => l.replace(/^\d+\. /, '')));
-        expect(f.devisCompetence.elements.reduce((n, e) => n + e.criteres.length, 0)).toBe(17);
-        expect(f.devisCompetence).not.toHaveProperty('ecartees');
+describe('A — les activités d’apprentissage', () => {
+    it('4EF0 : la discipline, la pondération, les unités et la précision, valeur sur la ligne ou sur la suivante', () => {
+        expect(D.lire(devis('4EF0')).activites).toEqual({
+            discipline: 'Français, langue d’enseignement et littérature', ponderation: '2-2-3 ou 1-3-3', unites: '2⅓', heures: '',
+            precisions: 'Les textes littéraires analysés appartiennent à deux époques distinctes et à deux genres différents.'
+        });
     });
 
-    it('les lignes vides partent ; les lignes mises de côté ne vont pas dans la fiche', () => {
-        const f = D.versFiche({ numero: ' 00AB ', enonce: 'É.', contexte: ['', 'Seul.'], elements: [{ texte: '', criteres: [] }, { texte: 'A', criteres: ['', 'c'] }], ecartees: ['77'] });
-        expect(f).toEqual({ numeroCompetence: '00AB', competence: 'É.', elementsCompetence: '1. A', devisCompetence: { contexte: ['Seul.'], elements: [{ texte: 'A', criteres: ['c'] }] } });
+    it('000Z : les périodes d’enseignement, les unités, des précisions sur plusieurs lignes recousues', () => {
+        const a = D.lire(devis('000Z')).activites;
+        expect([a.heures, a.unites, a.discipline, a.ponderation]).toEqual(['45', '2', '', '']);
+        expect(a.precisions).toMatch(/^L’acquisition d’une langue moderne/);
+        expect(a.precisions).toMatch(/à l’exception des codes 601, 602, 603 et 604\.$/);
     });
 
-    it('aller-retour : ce que la fiche a reçu se relit tel quel', () => {
-        const lu = D.lire(devis('01FL'));
-        const relu = D.depuisFiche(D.versFiche(lu));
-        expect(relu.aDuContenu).toBe(true);
-        expect(relu.aUnDevis).toBe(true);
-        expect(relu.ecartees).toEqual([]);
-        expect(D.versFiche(relu)).toEqual(D.versFiche(lu));
+    it('0013 : les libellés sans leur valeur ne sont pas devinés, les nombres en vrac restent de côté', () => {
+        const m = D.lire(devis('0013'));
+        expect(m.activites).toEqual({ discipline: '', ponderation: '', unites: '', heures: '', precisions: '' });
+        expect(m.ecartees).toEqual(expect.arrayContaining(['48', '45', '2']));
     });
 
-    it('une fiche remplie à la main, sans devis : ses lignes deviennent des éléments sans critères ; une fiche vide n’a rien à remplacer', () => {
-        const m = D.depuisFiche({ numeroCompetence: '4EF0', competence: 'Analyser', elementsCompetence: '• Reconnaître le propos\n• Repérer des thèmes\n' });
-        expect(m.elements).toEqual([{ texte: 'Reconnaître le propos', criteres: [] }, { texte: 'Repérer des thèmes', criteres: [] }]);
-        expect(m.aDuContenu).toBe(true);
-        expect(m.aUnDevis).toBe(false);
-        expect(D.depuisFiche({ codeCours: '601-101-MQ' }).aDuContenu).toBe(false);
-        expect(D.depuisFiche(null).aDuContenu).toBe(false);
+    it('un devis de formation spécifique n’en porte pas ; le champ se retouche à la main', () => {
+        const m = D.lire(devis('01FL'));
+        expect(Object.values(m.activites).join('')).toBe('');
+        expect(D.retoucher(m, { zone: 'activite', champ: 'heures' }, '60').activites.heures).toBe('60');
+        expect(D.retoucher(m, { zone: 'activite', champ: 'constructor' }, 'x').activites).toEqual(m.activites);
+    });
+});
+
+describe('R — la réserve de devis', () => {
+    const opts = (n, idOuvert) => ({ idNeuf: 'DEVIS_' + n, maintenant: '2026-11-28T13:0' + n + ':00.000Z', idOuvert });
+    const pour = (code) => D.pourReserve(D.lire(devis(code)));
+
+    it('ce que la réserve garde : le code, l’énoncé, le contexte, les éléments et leurs critères, les activités ; pas les lignes mises de côté', () => {
+        const d = pour('4EF0');
+        expect(Object.keys(d).sort()).toEqual(['activites', 'code', 'contexte', 'elements', 'enonce']);
+        expect(d.code).toBe('4EF0');
+        expect(d.elements).toHaveLength(6);
+        expect(d.elements.reduce((n, e) => n + e.criteres.length, 0)).toBe(17);
+        expect(d.activites.ponderation).toBe('2-2-3 ou 1-3-3');
+        const net = D.pourReserve({ numero: ' 00ab ', enonce: 'É.', contexte: ['', 'Seul.'], elements: [{ texte: '', criteres: [] }, { texte: 'A', criteres: ['', 'c'] }], ecartees: ['77'] });
+        expect(net).toEqual({ code: '00AB', enonce: 'É.', contexte: ['Seul.'], elements: [{ texte: 'A', criteres: ['c'] }], activites: { discipline: '', ponderation: '', unites: '', heures: '', precisions: '' } });
     });
 
-    it('`elementsCompetence` retouché à la main après le devis : il fait foi, et ce que le devis portait d’autre reste visible', () => {
-        const fiche = D.versFiche({ numero: 'X', enonce: 'É', contexte: [], elements: [{ texte: 'A', criteres: ['a1'] }, { texte: 'B', criteres: ['b1'] }], ecartees: [] });
-        fiche.elementsCompetence = '1. A\n2. C';
-        const m = D.depuisFiche(fiche);
-        expect(m.elements).toEqual([{ texte: 'A', criteres: ['a1'] }, { texte: 'C', criteres: [] }]);
-        expect(m.ecartees).toEqual(['B', 'b1']);
+    it('plusieurs devis se rangent côte à côte, chacun avec son id et ses dates', () => {
+        let r = D.ranger(undefined, pour('4EF0'), opts(1));
+        r = D.ranger(r, pour('000Z'), opts(2));
+        expect(r.map((d) => [d.id, d.code, d.dateCreation])).toEqual([['DEVIS_1', '4EF0', '2026-11-28T13:01:00.000Z'], ['DEVIS_2', '000Z', '2026-11-28T13:02:00.000Z']]);
     });
 
-    it('un `devisCompetence` venu d’ailleurs et mal formé ne casse rien, et n’apporte que des textes', () => {
-        const m = D.depuisFiche({ elementsCompetence: 'A', devisCompetence: { contexte: 'pas un tableau', elements: [null, 7, { texte: 'A', criteres: ['ok', { x: 1 }, 3] }] } });
-        expect(m.contexte).toEqual([]);
-        expect(m.elements).toEqual([{ texte: 'A', criteres: ['ok'] }]);
+    it('recoller un devis dont le code est déjà rangé : `place` nomme l’ancien sans rien écrire ; `ranger` le remplace À SA PLACE, les autres ne bougent pas', () => {
+        const depart = D.ranger(D.ranger([], pour('4EF0'), opts(1)), pour('000Z'), opts(2));
+        const gele = JSON.stringify(depart);
+        const neuf = Object.assign(pour('4EF0'), { enonce: 'Énoncé corrigé.' });
+        const p = D.place(depart, neuf);
+        expect(p.ancien.enonce).toBe('Analyser des textes littéraires.');
+        const r = D.ranger(depart, neuf, opts(3));
+        expect(JSON.stringify(depart)).toBe(gele);   // ni `place` ni `ranger` ne modifient la réserve reçue
+        expect(r).toHaveLength(2);
+        expect(r[0]).toMatchObject({ id: 'DEVIS_1', code: '4EF0', enonce: 'Énoncé corrigé.', dateCreation: '2026-11-28T13:01:00.000Z', dateModification: '2026-11-28T13:03:00.000Z' });
+        expect(r[1]).toEqual(depart[1]);
+    });
+
+    it('un devis rouvert reprend sa place, même si son code est corrigé ; le code d’un AUTRE devis est un conflit, et rien ne se range', () => {
+        const depart = D.ranger(D.ranger([], pour('4EF0'), opts(1)), pour('000Z'), opts(2));
+        const corrige = Object.assign(pour('4EF0'), { code: '4EF1' });
+        const r = D.ranger(depart, corrige, opts(3, 'DEVIS_1'));
+        expect(r.map((d) => [d.id, d.code])).toEqual([['DEVIS_1', '4EF1'], ['DEVIS_2', '000Z']]);
+        const conflit = Object.assign(pour('4EF0'), { code: '000z' });
+        expect(D.place(depart, conflit, 'DEVIS_1').conflit.id).toBe('DEVIS_2');
+        expect(D.ranger(depart, conflit, opts(3, 'DEVIS_1'))).toBeNull();
+        expect(D.ranger(depart, Object.assign(pour('4EF0'), { code: '' }), opts(3))).toBeNull();   // sans code : rien ne se range
+    });
+
+    it('aller-retour : un devis rangé se rouvre tel quel', () => {
+        const d = pour('01FL');
+        const rouvert = D.depuisReserve(D.ranger([], d, opts(1))[0]);
+        expect(rouvert.ecartees).toEqual([]);
+        expect(D.pourReserve(rouvert)).toEqual(d);
+    });
+
+    it('une réserve venue d’ailleurs et mal formée ne casse rien, et n’apporte que des textes', () => {
+        expect(D.reserveSure('pas un tableau')).toEqual([]);
+        const r = D.reserveSure([null, 7, [], { id: 'D1', code: ' 4ef0 ', enonce: 3, contexte: 'x', elements: [null, { texte: 'A', criteres: ['ok', { x: 1 }, 3] }], activites: { heures: 45, unites: '2' } }]);
+        expect(r).toEqual([{ id: 'D1', code: '4EF0', enonce: '', contexte: [], elements: [{ texte: 'A', criteres: ['ok'] }], activites: { discipline: '', ponderation: '', unites: '2', heures: '', precisions: '' } }]);
+    });
+
+    it('la réserve est une clé GLOBALE, hors trimestre ; aucun fichier du lot ne touche la fiche d’un cours', () => {
+        expect(D.CLE_RESERVE).toBe('devisMinisteriels');
+        const trimestres = readFileSync(path.join(racine, 'js', 'trimestres.js'), 'utf8');
+        const globales = tranche(trimestres, 'const CLES_GLOBALES = [', '];');
+        expect(globales).toMatch(/'devisMinisteriels'/);
+        for (const f of ['js/devis-lecture.js', 'js/materiel-devis.js']) {
+            const code = readFileSync(path.join(racine, f), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
+            expect(code, f).not.toMatch(/CoursEntite|numeroCompetence|elementsCompetence|devisCompetence|['"]cours['"]/);
+        }
+        expect(readFileSync(path.join(racine, 'js', 'entites', 'cours-entite.js'), 'utf8')).not.toMatch(/devisCompetence|devisMinisteriels/);
     });
 });
 
@@ -230,26 +283,23 @@ describe('S — l’écran ne pose rien de collé dans la page sans l’échappe
     it('aucun handler inline, aucun console.log, une seule écriture', () => {
         expect(source).not.toMatch(/\son(click|change|input|paste)\s*=/);
         expect(source).not.toMatch(/console\.log/);
-        expect(source.match(/mettreAJour\(/g)).toHaveLength(1);
-        expect(source).not.toMatch(/db\.(set|setSync|modifier)\(/);
+        expect(source.match(/modifierEtAnnoncer\(/g)).toHaveLength(1);
+        expect(source).not.toMatch(/db\.(set|setSync|modifier|remove|removeSync)\(/);
     });
 
-    it('le nom d’un cours piégé n’entre pas dans la page tel quel (le collage piégé : materiel-devis.spec.js, dans WebKit)', () => {
+    it('un devis piégé dans la réserve n’entre pas tel quel dans la liste de l’accueil', async () => {
         const piege = '<img src=x onerror=alert(1)>';
         const elements = {};
         const noeud = (id) => (elements[id] || (elements[id] = { id, innerHTML: '', value: '', dataset: {}, classList: { add() {}, remove() {}, toggle() {} },
             addEventListener() {}, querySelector() { return null; }, focus() {} }));
-        const document = { getElementById: noeud, querySelector: () => null };
+        const document = { getElementById: noeud, querySelector: () => null, readyState: 'complete' };
         const echapperHtml = (v) => String(v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-        const cours = { id: 'C<1>', codeCours: piege, nomCours: piege, nature: 'cours', numeroCompetence: piege, competence: piege, elementsCompetence: piege };
-        const CoursEntite = { CLE: 'cours', obtenirTous: async () => [cours], obtenirParId: async () => cours, genererLibelle: (c) => c.codeCours + ' - ' + c.nomCours, mettreAJour: async () => null };
+        const db = { get: async () => [{ id: 'D"1', code: piege, enonce: piege, contexte: [piege], elements: [{ texte: piege, criteres: [piege] }] }] };
         const w = chargerScript('js/devis-lecture.js');
-        chargerScript('js/materiel-devis.js', { document, echapperHtml, CoursEntite, scrollTo() {}, scrollY: 0 }, w);
-        return (async () => {
-            w.CoursEntite = CoursEntite;
-            await w.materielDevis.ouvrir();
-            expect(noeud('materiel-devis').innerHTML).toContain('&lt;img');
-            expect(noeud('materiel-devis').innerHTML).not.toContain('<img');
-        })();
+        chargerScript('js/materiel-devis.js', { document, echapperHtml, db, scrollTo() {}, scrollY: 0 }, w);
+        await w.materielDevis.rafraichirAccueil();
+        expect(noeud('materiel-devis-ranges').innerHTML).toContain('&lt;IMG');
+        expect(noeud('materiel-devis-ranges').innerHTML).not.toMatch(/<img/i);
+        expect(noeud('materiel-devis-ranges').innerHTML).toContain('data-param-id="D&quot;1"');
     });
 });

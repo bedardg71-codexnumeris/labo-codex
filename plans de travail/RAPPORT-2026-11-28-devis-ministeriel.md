@@ -1,115 +1,166 @@
-# Rapport – le devis ministériel dans « Apporter mon matériel »
+# Rapport – numériser un devis ministériel dans « Apporter mon matériel »
 
-> Dernier relais : 28 novembre 2026, 8 h 45 (Toronto), session du nuage.
-> Branche : `claude/devis-ministeriel-8vylul` (le mandat disait `lot/devis-ministeriel` ; la session du nuage impose son propre nom de branche). Base : `main` à `574bb60`, la 1.260.0.
+> Dernier relais : 28 novembre 2026, 9 h 15 (Toronto), session du nuage. Il remplace le relais de 8 h 45.
+> Branche : `claude/devis-ministeriel-8vylul` (les mandats disent `lot/devis-ministeriel` ; la session du nuage impose son propre nom de branche). Base : `main` à `574bb60`, la 1.260.0.
 > PR #67, en brouillon. Sans bump ni changelog. Rien n'est fusionné.
-> Fait : les six gestes, la lecture par repères, les bancs, les mots de travail (`TEXTES-2026-11-28-devis-ministeriel.md`).
-> Reste : la relecture des mots par Grégoire ; le verdict WebKit (aucun WebKit dans le conteneur) ; l'essai avec un vrai geste de copie (Aperçu, Safari, iPad) ; trois questions plus bas (« Ce qui remonte à Grégoire »).
+> Fait : le lot du relais de 8 h 02, puis sa refonte selon le correctif de 8 h 08 (« numériser ne touche aucun cours et c'est la création du cours qui vient puiser dans le devis numérisé »).
+> Reste : la relecture des mots par Grégoire ; le verdict WebKit (aucun WebKit dans le conteneur) ; l'essai avec un vrai geste de copie (Aperçu, Safari, iPad) ; quatre questions plus bas.
+
+## Ce que le correctif de 8 h 08 a fait retirer
+
+Le correctif est arrivé après la première livraison. J'avais construit le choix du cours et l'écriture dans la fiche. **Retiré** :
+
+- le choix du cours (l'ancien geste 2), son menu et ses messages ;
+- l'écriture dans la fiche : `numeroCompetence`, `competence`, `elementsCompetence` ne sont plus ni lus ni écrits ;
+- le champ `devisCompetence` de l'entité cours : `js/entites/cours-entite.js` est revenu, octet pour octet, à celui de `main` (seul son `?v=` dans `index.html` a dû changer, la garde anti-cache l'exige pour un fichier touché puis rétabli) ;
+- les fonctions `versFiche` et `depuisFiche`, et leurs essais ;
+- la ligne ajoutée à `cours` dans `docs/DATA-OWNERSHIP.md`.
+
+Un essai le verrouille : aucun des deux fichiers du lot ne nomme `CoursEntite`, `'cours'` ni un champ de compétence de la fiche. Au navigateur, la collection `cours` est comparée avant et après chaque parcours : identique.
 
 ## Ce qui est livré
 
-Une seconde entrée sur l'accueil d'« Apporter mon matériel ». Le parcours suit les six gestes du mandat : choisir le cours, coller, voir la lecture, corriger, accepter. La fiche du cours reçoit le numéro, l'énoncé, les éléments, et un champ neuf, `devisCompetence`, qui porte le contexte de réalisation et les critères de performance sous chaque élément.
+L'accueil d'« Apporter mon matériel » a une seconde entrée, « Tes devis ministériels ». Le parcours : coller, voir la lecture, corriger, ranger. Le devis accepté entre dans une réserve de devis. L'accueil montre les devis rangés ; chacun se rouvre pour être relu et corrigé.
 
 | Fichier | Rôle |
 |---|---|
-| `js/devis-lecture.js` (neuf) | lire par repères ; les gestes de correction ; vers la fiche et depuis elle. Fonctions pures |
-| `js/materiel-devis.js` (neuf) | l'écran. Une seule écriture, `CoursEntite.mettreAJour`, derrière le bouton d'acceptation |
-| `js/entites/cours-entite.js` | `devisCompetence` ajouté aux champs modifiables |
+| `js/devis-lecture.js` (neuf) | lire par repères ; les gestes de correction ; la réserve (où un devis irait, le ranger). Fonctions pures |
+| `js/materiel-devis.js` (neuf) | l'écran. Une seule écriture, `modifierEtAnnoncer('devisMinisteriels', …)`, derrière le bouton « Ranger ce devis » |
+| `js/trimestres.js` | `devisMinisteriels` inscrite à `CLES_GLOBALES` |
+| `js/codex.js` | le nom lisible de la réserve dans la fenêtre de fusion |
 | `js/materiel.js` | une garde : la dissection en brouillon ne se rouvre pas par-dessus le devis |
-| `index.html`, `styles.css` | l'entrée de l'accueil, la feuille |
-| `docs/DATA-OWNERSHIP.md` | la ligne de `cours` dit le nouvel écrivain et le champ neuf |
+| `index.html`, `styles.css` | l'entrée de l'accueil, la liste des devis rangés, la feuille |
+| `docs/DATA-OWNERSHIP.md` | la ligne de `devisMinisteriels` |
+
+### Ce qu'un devis rangé porte
+
+```
+{ id: 'DEVIS_…', code, enonce,
+  contexte: [texte],
+  elements: [{ texte, criteres: [texte] }],
+  activites: { discipline, ponderation, unites, heures, precisions },
+  dateCreation, dateModification }
+```
+
+Un devis par code. Les cinq champs d'`activites` sont des textes, tels que le devis les écrit (« 2-2-3 ou 1-3-3 », « 2⅓ », « 45 »).
+
+### Les règles de la réserve
+
+- Recoller un devis dont le code est déjà rangé : l'ancien et le nouveau côte à côte, puis « Remplacer le devis déjà rangé ». Il est remplacé à sa place, sous le même `id` ; les autres ne bougent pas.
+- Rouvrir un devis et le ranger de nouveau passe par la même comparaison. S'il reçoit le numéro d'un AUTRE devis rangé, c'est refusé, avec un message.
+- Sans numéro de compétence, rien ne se range.
+- Aucun geste ne supprime un devis.
+- La réserve est relue au moment d'écrire, pas à l'ouverture de l'écran.
+
+## Où la réserve est branchée
+
+| Endroit | État | Preuve |
+|---|---|---|
+| Clé globale, hors trimestre | **branché** : `CLES_GLOBALES`, `js/trimestres.js` | essai Vitest R |
+| Suppression d'un trimestre | la réserve survit (son nom ne porte aucun identifiant de trimestre) | lu, `trimestres.js` l. 1504 |
+| Codex, sauvegarde complète | **rien à brancher** : l'export prend toutes les clés (`db.keys()`, `codex.js` l. 481), l'ouverture les réécrit telles quelles | lu dans le code, **non exécuté** : mon essai au navigateur restait bloqué sur l'appel de l'export, je l'ai retiré |
+| Codex, fusion de deux appareils | la réserve est une liste à `id`, la fusion la traite devis par devis ; **branché** : son nom lisible (`LIBELLES_DES_CLES`) | lu, non exécuté |
+| Migrations | **aucune** : pas de version de schéma à incrémenter, pas de semis, pas d'écriture au démarrage | lu, `js/migrations.js` |
+| Réserve (archive d'un groupe-cours) | **non branché, par choix** : comme `registreLongitudinal`. L'archive d'un groupe n'emporte pas les devis | lu, `reserve.js` l. 58 |
+| Import par cases | **non branché** : ce chemin a ses familles codées en dur, et `cours` lui-même n'y passe pas | lu, `import-export.js` l. 3314 |
+| Mode démonstration | une clé globale s'écrit dans les VRAIES données, même en démonstration. Un devis numérisé pendant la démo reste après la sortie | lu, `trimestres.js` l. 412 |
+
+Ce relevé vient d'une lecture déléguée à un agent ; j'ai revérifié moi-même les lignes de `codex.js` et de `trimestres.js`, pas les autres.
 
 ## Mesures : les cinq devis
 
-Faits mesurés par le banc `tests/unit/devis-lecture.test.js`, sur les textes extraits par `pdftotext` (`tests/fixtures/devis/`).
+Faits mesurés par `tests/unit/devis-lecture.test.js` (28 essais), sur les textes extraits par `pdftotext` (`tests/fixtures/devis/`).
 
-| Devis | Lu | Mis de côté |
+| Devis | Lu | Activités d'apprentissage |
 |---|---|---|
-| 4EF0 | 6 éléments, **17** critères (1, 2, 1, 3, 8, 2), pas de contexte | l'en-tête, le bloc « Activités d'apprentissage », le numéro de page |
-| 01FB | 2 éléments, 8 critères, contexte de 2 phrases | le pied de page (4 lignes) |
-| 0013 | 3 éléments, 3 critères, contexte de 3 puces | l'en-tête, les activités, le pied |
-| 01FL | 6 éléments, 17 critères, contexte de 4 phrases | les pieds des deux pages ; le code répété est reconnu et ignoré |
-| 000Z | 4 éléments, 23 critères mal répartis (0, 3, 14, 6), pas de contexte | les pieds, les activités |
+| 4EF0 | 6 éléments, **17** critères (1, 2, 1, 3, 8, 2), pas de contexte | discipline, pondération, unités, précision |
+| 01FB | 2 éléments, 8 critères, contexte de 2 phrases | aucune |
+| 0013 | 3 éléments, 3 critères, contexte de 3 puces | libellés sans leur valeur : rien n'est deviné |
+| 01FL | 6 éléments, 17 critères, contexte de 4 phrases | aucune |
+| 000Z | 4 éléments, 23 critères mal répartis (0, 3, 14, 6), pas de contexte | périodes (45), unités (2), précisions |
 
-**Écart avec le mandat** : il annonçait 16 critères pour 4EF0. Le texte en porte 17 (l'élément 5 en a huit). Je n'ai rien retiré.
+**Écart avec le mandat** : il annonçait 16 critères pour 4EF0. Le texte en porte 17.
 
-**000Z se corrige en DEUX gestes.** La lecture range sous l'élément 3 ses sept critères, puis les quatre lignes du contexte, puis les trois critères de l'élément 1. Geste 1 : sur la première ligne du contexte, menu « Déplacer », « Cette ligne et les suivantes » vers le contexte de réalisation (sept lignes partent). Geste 2 : dans le contexte, sur la cinquième ligne, « Cette ligne et les suivantes » sous l'élément 1. Vérifié au navigateur (`materiel-devis.spec.js`). Une réserve : les trois critères de l'élément 1 et ceux de l'élément 2 sont mot pour mot les mêmes dans ce devis, donc je ne peux pas dire lequel des deux groupes appartient à quel élément ; le résultat est identique dans les deux cas.
+**0013** : `pdftotext` rend « Nombre d'heures-contact : », « Nombre d'unités : », puis « 48 », « 45 », « 2 » en vrac. Rien ne rattache un nombre à son libellé : les trois nombres vont de côté, les champs restent vides, l'enseignant·e les remplit.
 
-Un mot de `01FL` arrive abîmé de l'extraction (« personnesressources », le trait d'union perdu par `pdftotext`) : la lecture ne l'invente pas, c'est une retouche du geste 5.
+**000Z se corrige en DEUX gestes**, comme avant le correctif : « Cette ligne et les suivantes » vers le contexte de réalisation, puis sous l'élément 1. Réserve inchangée : les trois critères de l'élément 1 et ceux de l'élément 2 sont mot pour mot les mêmes dans ce devis.
 
 ## Ce que j'ai tranché
 
-1. **La branche** : celle de la session du nuage, pas `lot/devis-ministeriel`.
-2. **Où vit le devis** : dans la fiche du cours, champ `devisCompetence` = `{ contexte: [texte], elements: [{ texte, criteres: [texte] }] }`. Pas de nouvelle clé de stockage.
-3. **`elementsCompetence` reste la source des éléments** pour ses lecteurs (`planification-export.js` le découpe par lignes, inchangé). À l'acceptation il est écrit en même temps que `devisCompetence`, un élément par ligne. S'il est retouché à la main ensuite dans la fiche, il fait foi : chaque ligne garde les critères de l'élément du même texte, et ce que le devis portait d'autre reparaît dans les lignes mises de côté quand on rouvre le devis. Rien n'est caché, rien n'est réconcilié d'office.
-4. **Les éléments sont numérotés** dans `elementsCompetence` (« 1. Reconnaître… »), dans l'ordre de l'écran.
-5. **« Retirer », c'est mettre de côté.** Une ligne retirée va dans le tiroir « Lignes mises de côté », d'où elle se replace. Tout ce que la lecture ne sait pas ranger y va aussi. Le banc H vérifie que chaque mot du collage est dans le modèle ou dans ce tiroir. Ce tiroir ne va pas dans la fiche.
-6. **Le pied de page d'un devis d'une page** : je n'ai pas cherché à le deviner. Une seule règle de structure s'applique : une ligne sans repère qui vient après un vide, sous une phrase finie par un point, n'est pas tenue pour la suite de cette phrase ; elle va de côté. Sur les cinq devis, cela suffit à écarter les pieds. Si le geste de copie réel ne laisse aucune ligne vide, le pied se collera au dernier critère, comme le mandat le prévoyait.
-7. **Le menu « Déplacer » a deux portées** : « Cette ligne seulement » et « Cette ligne et les suivantes ». C'est ce qui ramène 000Z à deux gestes. Une ligne déplacée se pose au bout de sa destination ; il n'y a pas de geste pour réordonner les critères à l'intérieur d'un élément.
-8. **Ajouts hors des six gestes, petits** : « Annuler le dernier geste » ; monter ou descendre un élément ; « Composer le devis à la main » (la même feuille, vide) ; « Voir et corriger ce que la fiche porte », qui rouvre un devis rangé. Ce dernier est le seul endroit où les critères se revoient après l'acceptation.
-9. **Aucun brouillon.** Une lecture non acceptée se perd au rechargement ; une question du navigateur protège la sortie.
-10. **Les `?v=`** portent le jour du build (27 nov.), comme l'exigent la garde anti-cache et son hook quand il n'y a pas de bump.
-11. **La complexité** : la garde du projet a refusé ma première lecture (une fonction à 54 branches). Elle est découpée en dix petites fonctions.
+1. **La branche** : celle de la session du nuage.
+2. **Le nom de la clé** : `devisMinisteriels`.
+3. **L'identité d'un devis** : son code pour un collage, son `id` pour un devis rouvert.
+4. **Rouvrir puis ranger passe par la comparaison**, même pour une simple retouche : « rien ne s'efface sans accord explicite » lu au sens large.
+5. **« Retirer », c'est mettre de côté.** Le tiroir « Lignes mises de côté » reçoit aussi ce que la lecture ne sait pas ranger. Il n'est PAS gardé dans la réserve : un devis rouvert n'a plus ses lignes mises de côté.
+6. **Le pied de page d'un devis d'une page** : pas deviné. Une seule règle de structure : une ligne sans repère, après un vide, sous une phrase finie par un point, va de côté.
+7. **Le menu « Déplacer » a deux portées**, « Cette ligne seulement » et « Cette ligne et les suivantes ».
+8. **Ajouts hors mandat, petits** : « Annuler le dernier geste » ; monter ou descendre un élément ; « Composer le devis à la main ».
+9. **Aucun brouillon** : une lecture non acceptée se perd au rechargement ; une question du navigateur protège la sortie.
+10. **La Réserve et l'import par cases ne sont pas branchés** (tableau ci-dessus).
+11. **Les `?v=`** portent le jour du build (27 nov.), comme l'exigent la garde anti-cache et son hook sans bump.
 
 ## Ce que j'ai supposé
 
-- **Une compétence par cours** : confirmé par le code. La fiche n'a qu'un `numeroCompetence`, un `competence`, un `elementsCompetence`. Un cours de formation spécifique à plusieurs compétences n'a pas de place aujourd'hui. Un second devis accepté pour le même cours REMPLACE le premier, après la comparaison.
-- **« Ses cours »** : les fiches de la collection `cours` qui ne sont pas des services et qui sont dans la sélection (`dansBibliotheque` non faux).
-- **Le code du devis** (4EF0) n'est jamais rapproché d'un cours : le choix du cours est toujours fait à la main.
-- **Le geste de copie réel** peut donner un autre ordre, d'autres puces ou aucune ligne vide. La lecture accepte déjà : une puce ou un numéro seuls sur leur ligne, les repères sans accents, les fins de ligne Windows, plusieurs caractères de puce. Non éprouvé sur un vrai collage.
+- **Le geste de copie réel** peut donner un autre ordre, d'autres puces ou aucune ligne vide. Non éprouvé sur un vrai collage.
+- **Les activités d'apprentissage** n'existent qu'en formation générale, d'après les cinq devis.
+- **En démonstration**, laisser un devis entrer dans les vraies données est sans danger : c'est un document public du ministère. C'est une supposition, et la question 3 plus bas.
 
 ## Source ou stock
 
 - **Source** : rien n'est tari, c'est un ajout.
-- **Stock** : aucune migration, aucune écriture au démarrage. Les fiches existantes restent telles quelles ; `devisCompetence` n'existe que sur une fiche où un devis a été accepté. Une fiche remplie à la main garde ses lignes (avec leurs puces) jusqu'à ce que son enseignant·e accepte un devis par-dessus, après comparaison.
-- **Ce qui voyage** : `devisCompetence` est un champ de la fiche du cours, il part donc avec elle dans les exports. Une version antérieure qui reçoit cette fiche ignore le champ. Une fiche reçue d'ailleurs avec un `devisCompetence` mal formé est lue sans casser (banc F), et ses textes sont échappés à l'affichage.
+- **Stock** : aucune donnée existante n'est touchée. La clé `devisMinisteriels` n'existe chez personne avant le premier devis rangé.
+- **Ce qui voyage** : la réserve part dans le codex. Une version antérieure qui ouvre ce codex garde la clé sans la lire. Une réserve reçue mal formée est lue sans casser (essai R), et ses textes sont échappés à l'affichage (essai S, et essai du piège au navigateur).
+
+## Ce que j'ai lu de l'onglet « Cadre » et de la création d'un cours
+
+Pour le lot suivant (les champs liés au devis proposés en listes déroulantes, avec « Autre »). Lecture déléguée, non revérifiée ligne à ligne.
+
+**Ce qui aidera**
+- Un seul point de lecture du formulaire (`_lireChampsInfosCoursDOM`, `js/trimestre-v2-cours.js`) et un seul point de remplissage (`_remplirChampsInfosCours`).
+- Un seul écrivain, `sauvegarderCoursV2`, avec ses vérifications.
+- En création, rien n'est écrit avant « Créer le cours » : la confirmation de chaque choix a une place naturelle.
+- Un trimestre porte déjà plusieurs cours, par ses groupes-cours (`<trimestre>_groupesCours`, chacun avec son `coursId`).
+
+**Ce qui gênera**
+- **La discipline** est un menu fermé d'environ 128 options, du type « 601 Français (langue et littérature) », sans « Autre ». Le devis dit « Français, langue d'enseignement et littérature » : les deux textes ne se correspondent pas. Il faudra un rapprochement, et il n'est pas mécanique.
+- **Les heures** sont un nombre dans la fiche ; dans le devis c'est un texte, parfois des périodes.
+- **La pondération** du devis peut en porter deux (« 2-2-3 ou 1-3-3 ») ; la fiche en veut une, au format « n-n-n », et s'en sert pour proposer les heures.
+- **Une fiche modifiée s'enregistre champ par champ** en relisant tout le formulaire : basculer vers « Autre » ne devra pas écrire une valeur vide.
+- **L'entité cours n'accepte que des champs nommés** (`champsModifiables`) : un lien vers le devis d'origine, si tu en veux un, devra y être ajouté.
+- **Une compétence par cours** : la fiche n'a qu'un numéro, un énoncé, une liste d'éléments.
+- **Les critères de performance et le contexte de réalisation n'ont aucune place dans la fiche du cours** aujourd'hui.
 
 ## Trouvailles, et leur issue
 
-1. **L'accueil est caché quand une dissection est en brouillon** (comportement d'avant le lot : l'onglet rouvre la dissection). L'entrée du devis n'est alors pas atteignable sans « Coller une autre grille », qui efface le brouillon. Issue : **inscrire et continuer**, et c'est la première question ci-dessous, parce que la solution touche l'en-tête de la dissection et ses mots.
-2. **`carte-aide-materiel-2026-11-13.spec.js`, essai I1, rouge sous Chromium** : rouge aussi sur `main` sans le lot (mesuré : le texte de la carte défile de 132 px sur `main`, de 93 px avec le lot). Ce banc est réglé pour WebKit. Issue : **commenter et oublier** ; il n'est pas jugé ici.
-3. Ce même banc (I4) liste les boutons de la rangée d'actions de l'accueil : mon bouton n'est pas dans cette rangée, le banc reste vrai sans être touché.
+1. **L'accueil est caché quand une dissection est en brouillon** (comportement d'avant le lot). L'entrée des devis et la liste des devis rangés ne sont alors atteignables que par « Coller une autre grille », qui efface le brouillon. Issue : **inscrire et continuer** ; question 2 plus bas.
+2. **`carte-aide-materiel-2026-11-13.spec.js`, essai I1, rouge sous Chromium**, rouge aussi sur `main` sans le lot. Réglé pour WebKit, non jugé ici. Issue : **commenter et oublier**.
 
 ## Ce que je n'ai pas pu vérifier
 
 - **WebKit, Safari, l'iPad** : les quatre essais Playwright du lot sont verts sous Chromium seulement.
-- **Les deux modes de couleur** : capturés sous Chromium, pas jugés sous Safari.
+- **L'export et l'ouverture d'un codex** avec la réserve : lus, non exécutés.
+- **Le mode sombre** : dans mes captures de la première version, les menus « Déplacer » et le champ du numéro sortaient sur fond gris. J'avais basculé le mode par un raccourci, pas par le bouton de l'application. À regarder sur ton écran.
 
-## Les six gestes joués à l'écran, sur l'aperçu Netlify
+## Le parcours joué à l'écran, sur l'aperçu Netlify
 
-Aperçu : https://deploy-preview-67--codexnumeris-051225.netlify.app (commit `b05e237`). Joués par moi sous Chromium (pas Safari), avec deux cours fictifs créés pour l'essai, puis 4EF0 et 000Z collés depuis les jeux d'essai. L'hôte de l'aperçu a dû être ajouté aux hôtes permis de l'environnement « labo-codex » (approuvé à 8 h 50).
-
-Captures dans `plans de travail/captures-2026-11-28-devis-ministeriel/` :
-
-| Geste | 4EF0 | 000Z |
-|---|---|---|
-| 1. L'accueil, deux entrées | `1-accueil-deux-entrees.jpg` | |
-| 2. Le cours choisi | `2-4EF0-cours-choisi.jpg` | |
-| 3. Le devis collé | `3-4EF0-colle.jpg` | |
-| 4. La lecture | `4-4EF0-lecture.jpg` | `4-000Z-lecture-sort-melange.jpg` |
-| 5. La correction | `5-4EF0-corrige.jpg` | `5-000Z-geste-1-vers-le-contexte.jpg`, `5-000Z-geste-2-vers-l-element-1.jpg` |
-| 6. L'acceptation | `6-4EF0-range.jpg`, `6-4EF0-fiche-deja-remplie-comparaison.jpg` | `6-000Z-range.jpg` |
-
-Plus `ipad-debout-000Z.jpg` (820 × 1180, aucun débord horizontal mesuré).
-
-Mesuré pendant ce jeu, en lisant la fiche en base : avant « Ranger », les deux fiches n'ont ni numéro ni devis ; après, seule la fiche choisie a changé.
-
-Vu sur les captures, non corrigé : en mode sombre, les menus « Déplacer » et le champ du numéro sortent sur un fond gris, moins assorti que les zones de texte. J'ai basculé le mode par la classe du `body`, pas par le bouton de l'application : je ne sais pas si c'est ce que l'application montre vraiment. À regarder sur ton écran.
+Voir la section « Captures » en fin de fichier.
 
 ## Ce qui remonte à Grégoire
 
-1. **Les mots** : `TEXTES-2026-11-28-devis-ministeriel.md`, 40 textes numérotés.
-2. **L'entrée du devis quand une dissection est en cours** : veux-tu un bouton vers le devis dans l'en-tête de l'étiquetage, ou acceptes-tu que le devis ne s'atteigne que depuis l'accueil ?
-3. **Les éléments dans la fiche** : numérotés (« 1. … »), avec des puces, ou nus ?
+1. **Les mots** : `TEXTES-2026-11-28-devis-ministeriel.md`, 39 textes numérotés.
+2. **L'entrée des devis quand une dissection est en cours** : un bouton vers les devis dans l'en-tête de l'étiquetage, ou seulement depuis l'accueil ?
+3. **En démonstration**, un devis numérisé reste dans tes vraies données après la sortie. Est-ce ce que tu veux ?
+4. **L'archive d'un groupe-cours et l'import par cases** n'emportent pas les devis ; seule la sauvegarde complète (le codex) le fait. Est-ce suffisant ?
 
 ## Gestes d'essai pour Grégoire
 
-Aucun de ces gestes n'écrit avant ton accord ; tu peux abandonner à tout moment par « Revenir à l'accueil ».
+Aucun de ces gestes n'écrit avant ton accord, et aucun ne touche un cours.
 
-1. **Copie ton propre devis depuis ton PDF et colle-le.** Dans Aperçu sur le Mac : ouvre le PDF du devis de ton cours, sélectionne tout le devis de la compétence, copie. Dans Labo Codex : Conception › Mon matériel › « Apporter le devis de mon cours », choisis ton cours, colle, « Lire mon devis ». Dis ce que tu vois : le bon nombre d'éléments ? les critères sous le bon élément ? un pied de page collé à un critère ?
+1. **Copie ton propre devis depuis ton PDF et colle-le.** Dans Aperçu sur le Mac : ouvre le PDF, sélectionne tout le devis de la compétence, copie. Dans Labo Codex : Conception › Mon matériel › « Numériser un devis », colle, « Lire mon devis ». Dis ce que tu vois : le bon nombre d'éléments ? les critères sous le bon élément ? un pied de page collé à un critère ? la pondération et les unités dans leurs champs ?
 2. **Refais-le depuis Safari**, puis **depuis l'iPad**, avec le même PDF. L'ordre du texte copié peut changer d'un outil à l'autre : c'est ce que je n'ai pas pu mesurer.
 3. **Corrige une ligne mal rangée** par son menu « Déplacer », puis « Annuler le dernier geste ».
-4. **Range le devis dans la fiche**, puis ouvre la fiche du cours dans Réglages : le numéro, l'énoncé et les éléments y sont-ils comme tu les attends ?
-5. **Recolle un devis sur ce même cours** : l'écran doit te montrer l'ancien et le nouveau côte à côte avant de remplacer.
+4. **Range le devis**, reviens à l'accueil : il doit paraître sous « Tes devis rangés ». **Rouvre-le.**
+5. **Recolle le même devis** : l'écran doit te montrer l'ancien et le nouveau côte à côte avant de remplacer.
+6. **Numérise un second devis**, d'un autre cours : les deux doivent rester dans la liste.
 
 Si un collage sort mal, garde le texte collé tel quel et envoie-le : il devient un jeu d'essai.

@@ -236,7 +236,11 @@
         'enseignants',
         // Lot E3 (28 sept. 2026) : les seuils d'interprétation (Réglages) sont lus et écrits sans
         // préfixe depuis toujours ; même motif que `enseignants`. Aucun changement de rangement.
-        'seuilsInterpretation'
+        'seuilsInterpretation',
+        // Lot « Le devis ministériel » (28 nov. 2026, correctif de 8 h 08) : la réserve des devis numérisés. Un devis
+        // du ministère ne change pas d'un trimestre à l'autre : global, jamais préfixé ; survit à supprimerTrimestre.
+        // Seul écrivain : js/materiel-devis.js (au geste d'acceptation). Aucune fiche de cours n'en dépend.
+        'devisMinisteriels'
     ];
 
     // ✅ AJOUT (28 janvier 2026) : Templates à copier lors de l'archivage
