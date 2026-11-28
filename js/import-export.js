@@ -2586,6 +2586,9 @@ function afficherModalPreviewLocalStorageBrut(config, nomFichier) {
                 </div>
                 ` : ''}
 
+                <!-- SECTION: Devis ministériels (28 nov. 2026), rendue et échappée par js/materiel-devis.js ; vide sans devis -->
+                ${_devisImport().sectionHtml(config)}
+
                 <!-- SECTION: Fichiers travaux (PDF annotés) + Annotations -->
                 ${analyse.fichiersTravaux.count > 0 || analyse.annotationsTravaux.count > 0 ? `
                 <div style="margin-bottom: 20px;">
@@ -2634,6 +2637,18 @@ function afficherModalPreviewLocalStorageBrut(config, nomFichier) {
  * @param {Object} config - Données brutes localStorage
  * @returns {Object} Détails des ressources et données par type
  */
+/** L'import des devis ministériels (js/materiel-devis.js), ou un remplaçant muet s'il n'est pas chargé. */
+function _devisImport() {
+    return window.devisImport || { compter: () => 0, sectionHtml: () => '', importer: async () => 0 };
+}
+
+async function _importerDevisCoches(donnees, coches, details, compteurs) {
+    const n = await _devisImport().importer(donnees, coches);
+    if (n === 0) return;
+    details.push(n + ' devis ministériel(s)');
+    compteurs.ressources += n;
+}
+
 function analyserRessourcesDetaillees(config) {
     // #1046 : les ressources des trimestres du fichier, repliées sur les clés nues.
     config = _ressourcesDesTrimestresSurLesClesNues(config);
@@ -2915,6 +2930,10 @@ function analyserRessourcesDetaillees(config) {
                              result.ressources.echelles.count +
                              result.ressources.productions.count +
                              result.ressources.cartouches.count;
+
+    // Lot « Le devis ministériel », second amendement (28 nov. 2026) : les devis numérisés du fichier comptent parmi
+    // les ressources (js/materiel-devis.js, `devisImport`), pour que la fenêtre ne se dise pas vide.
+    result.totalRessources += _devisImport().compter(config);
 
     result.totalDonnees = result.donnees.etudiants.count +
                           result.donnees.presences.count +
@@ -3885,6 +3904,10 @@ async function executerImportSelectif() {
                 compteurs.donnees++;
             }
         }
+
+        // Les devis ministériels cochés (28 nov. 2026) : rangés par js/materiel-devis.js, un code déjà rangé seulement
+        // si sa case a été cochée après comparaison. Aucun cours n'est touché.
+        await _importerDevisCoches(donnees, getCheckedItemIds('devis'), details, compteurs);
 
         // Synchroniser le cache après tous les imports
         if (typeof db.syncToLocalStorageCache === 'function') {

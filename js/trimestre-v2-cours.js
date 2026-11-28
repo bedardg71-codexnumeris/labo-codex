@@ -552,6 +552,8 @@ async function nouveauCoursV2() {
     // Réinitialiser tous les champs
     reinitialiserFormCoursV2();
     rendreModeFicheCoursV2(true);
+    // Lot « Créer un cours à partir d'un devis rangé » (28 nov. 2026) : la liste des devis rangés, « Aucun » choisi.
+    _coursDevis().preparerCreation();
 
     // Masquer le bouton Supprimer (mode création)
     const btnSupprimer = document.getElementById('v2-btnSupprimerCours');
@@ -687,6 +689,17 @@ function remplirFormCoursV2(cours) {
     // ministériels. Enseignant/horaire/pratique/groupe sont édités dans le
     // formulaire de groupe-cours ; la période se dérive du trimestre actif.
     _remplirChampsInfosCours(cours);
+    // Lot du 28 nov. 2026 : une fiche EXISTANTE montre le lien vers le devis dont elle vient ; une copie (« Dupliquer »,
+    // en création) n'en retient aucun. Aucune proposition hors de la création d'un cours neuf.
+    _coursDevis().montrerFiche(coursEnEditionV2 ? cours : null);
+}
+
+/**
+ * Lot « Créer un cours à partir d'un devis rangé » (28 nov. 2026) : les propositions d'un devis (js/cours-devis.js), ou
+ * un remplaçant muet s'il n'est pas chargé — le formulaire est alors celui d'avant.
+ */
+function _coursDevis() {
+    return window.coursDevis || { preparerCreation() {}, montrerFiche() {}, suivreNature() {}, codeRetenu() { return ''; } };
 }
 
 /* ===============================
@@ -956,6 +969,7 @@ function changerNatureCoursV2() {
     const nom = document.getElementById('v2-nomCours');
     if (nom) nom.placeholder = service ? 'Ex: Aide à la réussite en français' : 'Ex: Écriture et littérature';
     _titrerFormCoursV2(); // #842 : le titre suit la fiche (« Nouveau service » dès que le menu bascule)
+    _coursDevis().suivreNature();   // un service n'a pas de devis (lot du 28 nov. 2026)
     const btnCreer = document.getElementById('v2-btnCreerCours');
     if (btnCreer) btnCreer.textContent = mots.creer;     // lot E2 : « Créer le cours » / « Créer le service »
 }
@@ -1127,7 +1141,18 @@ function _lireDonneesFormCoursV2() {
     // Enseignant/horaire/pratique/groupe vivent dans le groupe-cours ; session/année
     // se dérivent du trimestre actif (cf. _deriverSessionAnneeTrimestreActif), jamais
     // du cours.
-    return _lireChampsInfosCoursDOM();
+    return _avecLeDevisRetenu(_lireChampsInfosCoursDOM());
+}
+
+/**
+ * Lot du 28 nov. 2026 : un cours CRÉÉ en puisant dans un devis rangé retient le code de ce devis (`devisCode`), rien
+ * d'autre. Sur une fiche existante le champ n'est pas lu : il reste `undefined`, donc `CoursEntite.mettreAJour` ne
+ * le touche pas — l'enregistrement champ par champ ne peut ni l'effacer ni le changer.
+ */
+function _avecLeDevisRetenu(d) {
+    const code = coursEnEditionV2 ? '' : _coursDevis().codeRetenu();
+    if (code) d.devisCode = code;
+    return d;
 }
 
 // Re-synchronise infoCours quand on vient de modifier le cours actuellement actif.

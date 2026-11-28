@@ -266,6 +266,8 @@
      */
     function reprendreDissection() {
         if (etat.ecran !== 'accueil' || !window.materielDissection || window.materielDissection.estOuverte()) return;
+        // Le devis ministériel ouvert (28 nov. 2026) : l'onglet rouvert ne pose pas la dissection par-dessus lui.
+        if (window.materielDevis && window.materielDevis.estOuvert()) return;
         if (window.materielDissection.reprendre() === 'illisible') montrerErreur(MESSAGE_BROUILLON_ILLISIBLE);
     }
 

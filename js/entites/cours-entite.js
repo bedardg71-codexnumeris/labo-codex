@@ -26,6 +26,9 @@ const CLE_COURS = 'cours';
  * @property {string} numeroCompetence - Numéro de la compétence
  * @property {string} competence - Description de la compétence
  * @property {string} elementsCompetence - Éléments de compétence
+ * @property {string} [devisCode] - Le CODE du devis ministériel rangé dont ce cours a été créé (lot du 28 nov. 2026,
+ *   js/cours-devis.js). Un code seulement, jamais une copie du devis : les valeurs ont été copiées dans les champs
+ *   ci-dessus à la création. Absent sur un cours rempli à la main. Le devis peut avoir été remplacé ou ne plus exister.
  * @property {number|null} heuresContact - Heures d'enseignement attendues du cours (RREC). Source de vérité de la conformité.
  * @property {string} ponderation - Pondération « théorie-labo-perso » (ex. "2-2-3"). Métadonnée de saisie ; propose heuresContact et le repère d'unités.
  * @property {string} [nature] - 'cours' (défaut ; absent = cours) ou 'service' (cadrage « Rencontres », 12 sept. 2026).
@@ -79,6 +82,11 @@ async function chercherDoublonCode(donnees, opts) {
  * @param {boolean} [options.doublonAssume] - true = l'utilisateur a confirmé
  * @returns {Promise<Cours|null>} - Le cours créé, ou null si la garde a refusé
  */
+/** Pose `devisCode` (le code du devis rangé dont le cours vient) quand il est donné ; jamais une copie du devis. */
+function _retenirDevis(cours, donnees) {
+    if (typeof donnees.devisCode === 'string' && donnees.devisCode.trim()) cours.devisCode = donnees.devisCode.trim();
+}
+
 async function creerCours(donnees, options) {
     const cours = await db.get(CLE_COURS) || [];
 
@@ -111,6 +119,8 @@ async function creerCours(donnees, options) {
         dateCreation: new Date().toISOString(),
         dateModification: new Date().toISOString()
     };
+    // Lot « Créer un cours à partir d'un devis rangé » (28 nov. 2026) : le champ n'existe que sur un cours qui en vient.
+    _retenirDevis(nouveauCours, donnees);
 
     cours.push(nouveauCours);
     await db.set(CLE_COURS, cours);
@@ -229,7 +239,7 @@ async function mettreAJourCours(coursId, modifications, options) {
     }
 
     // Mettre à jour les champs (sauf id et dateCreation)
-    const champsModifiables = ['codeCours', 'nomCours', 'discipline', 'numeroCompetence', 'competence', 'elementsCompetence', 'heuresContact', 'ponderation', 'nature'];
+    const champsModifiables = ['codeCours', 'nomCours', 'discipline', 'numeroCompetence', 'competence', 'elementsCompetence', 'heuresContact', 'ponderation', 'nature', 'devisCode'];
 
     champsModifiables.forEach(champ => {
         if (modifications[champ] !== undefined) {
