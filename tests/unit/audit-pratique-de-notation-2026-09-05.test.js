@@ -30,6 +30,7 @@
  * #709 tiennent le comportement corrigé. Les autres mesures sont inchangées : inscrites.
  */
 import { describe, it, expect, afterAll } from 'vitest';
+import { ANCIEN_REGLAGE_DU_TRIMESTRE } from './_helpers/jetons-declares.js';   // sans déclaration, pas de jetons (28 nov. 2026)
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -250,7 +251,9 @@ function monter(jeu, opts = {}) {
         test_grillesTemplates: [clone(GRILLE)],
         test_groupeEtudiants: clone(ETUDIANTS),
         test_jugementsDenotation: clone(jeu.jugements || {}),
-        test_modalitesEvaluation: {},
+        // ↻ 28 nov. 2026 (sans déclaration, pas de jetons) : les bancs qui accordent ou retirent un jeton (`avecJetons`) posent
+        // l'ancien réglage explicite du trimestre, une déclaration qui vaut pour toute pratique sans réglage, codée comprise.
+        test_modalitesEvaluation: opts.avecJetons ? { configurationJetons: clone(ANCIEN_REGLAGE_DU_TRIMESTRE) } : {},
         test_portfoliosEleves: {},
         infoCours: { id: 'GC1', nom: 'Cours banc', groupe: '01' }
     }, opts.store || {});

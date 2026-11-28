@@ -96,7 +96,7 @@ describe('B · les bulles G1, G2 et l\'assistant (A1, A2, A3)', () => {
         // ↻ 28 nov. 2026 (familles par réglages, texte 12 de Grégoire) : le début de la bulle ; la suite (STD, SPE, DEN) ne change pas.
         const DEBUT_27 = 'CUM = cumulative (moyenne pondérée traditionnelle, souvent dite sommative), HYB = hybride (des niveaux ; la note retient certaines productions), ';
         expect(texte('G5')[0].startsWith(DEBUT_27)).toBe(true);
-        const g5 = texte('G5')[0].replace(DEBUT_27, 'CUM = cumulative (tout compte, sans reprise ; souvent dite sommative), HYB = hybride (un cumul où une note peut être révisée), ');
+        const g5 = texte('G5')[0].replace(DEBUT_27, 'CUM = cumulative (un cumul sans reprise ; souvent dite sommative), HYB = hybride (un cumul où une note peut être révisée), ');
         expect(bulle).toContain(`'cn-pratique-type':\n        '${g5}'`);
         expect(/HYB = ([^(]*)\(/.exec(g5)[1]).not.toMatch(INTERDIT);   // ↻ 27 nov. 2026 : le sigle HYB
     });

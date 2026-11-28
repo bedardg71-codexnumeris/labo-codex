@@ -1453,10 +1453,10 @@ function remplirFormulairePratique(pratique) {
     }
 
     // Système de jetons — jetons par défaut (29 oct. 2026) : la case et les valeurs disent CE QUE LE MOTEUR RÉSOUT pour
-    // cette pratique (`configJetonsResolueDeLaPratique`, evaluation-jetons.js), une seule source. Avant, seule la forme
-    // plate était lue : une pratique sans réglage, dont le moteur offre les jetons, s'affichait DÉCOCHÉE — et le premier
-    // enregistrement d'un champ voisin les éteignait. Même écart, plus discret, pour « reprise ciblée » et « l'originale »
-    // absentes du bloc plat : le moteur les lit « non », l'écran disait « oui ».
+    // cette pratique (`configJetonsResolueDeLaPratique`, evaluation-jetons.js), une seule source.
+    // ↻ 28 nov. 2026 (décision de Grégoire, 8 h 42) : SANS DÉCLARATION, PAS DE JETONS. Une pratique sans réglage s'affiche
+    // DÉCOCHÉE, parce que le moteur ne lui prête plus rien ; et l'enregistrement d'un champ voisin n'écrit aucun bloc de
+    // jetons tant qu'on n'a pas touché aux jetons (`instantaneJetonsMat`, `blocJetonsAEcrireMat`).
     const jetons = window.configJetonsResolueDeLaPratique(pratique);
     setCheckbox('mat-jetons-actif', jetons.actif);
     toggleSystemeJetonsMat(); // Afficher/masquer le contenu
@@ -1480,6 +1480,8 @@ function remplirFormulairePratique(pratique) {
     if (noteAilleurs) noteAilleurs.classList.toggle('u-hide', !jetonsAilleurs);
     CHAMPS_JETONS_MAT.forEach(id => { const el = document.getElementById(id); if (el) el.disabled = jetonsAilleurs; });
     document.querySelectorAll('input[name="mat-reprise-originale"]').forEach(r => { r.disabled = jetonsAilleurs; });
+    // Ce que la fiche montre des jetons à l'ouverture : le témoin de « l'enseignant·e n'y a pas touché » (28 nov. 2026).
+    instantaneJetonsMat = JSON.stringify(lireBlocJetonsMat());
 
     // 🆕 Beta 95.4 : Afficher le panneau métadonnées CC
     const panneauMeta = document.getElementById('panneauMetadonneesPratique');
@@ -1512,6 +1514,38 @@ function getValeurChamp(id) {
 function getCheckbox(id) {
     const el = document.getElementById(id);
     return el ? el.checked : false;
+}
+
+/** Ce que les champs des jetons de la fiche montraient à son ouverture (JSON), ou null avant toute ouverture. */
+let instantaneJetonsMat = null;
+
+/** Le bloc plat de jetons, tel que les champs de la fiche le disent en ce moment. Lit le DOM, n'écrit rien. */
+function lireBlocJetonsMat() {
+    const repriseOriginale = document.querySelector('input[name="mat-reprise-originale"]:checked');
+    return {
+        actif: getCheckbox('mat-jetons-actif'),
+        nombre: parseInt(getValeurChamp('mat-jetons-nombre')) || 2,  // 🆕 Beta 95.7 : défaut 2
+        delaiDuree: parseInt(getValeurChamp('mat-delai-duree')) || 2,  // 🆕 Beta 95.7 : défaut 2 jours
+        delaiSurReprise: getCheckbox('mat-delai-sur-reprise'),  // #853 : réglage de la pratique
+        repriseOriginale: repriseOriginale ? repriseOriginale.value : 'archiver',
+        cibleeActif: getCheckbox('mat-jeton-ciblee-actif'),
+        cibleePlafond: getValeurChamp('mat-ciblee-plafond') || ''  // 🆕 Beta 95.7 : pas de défaut
+    };
+}
+
+/**
+ * SANS DÉCLARATION, PAS DE JETONS (décision de Grégoire, 28 nov. 2026, 8 h 42) — le bloc de jetons que l'enregistrement
+ * de la fiche doit écrire, ou `undefined` pour n'en écrire AUCUN. Une pratique qui porte déjà un bloc le voit récrit, comme
+ * avant. Une pratique sans bloc n'en reçoit un que si les champs des jetons ont bougé depuis l'ouverture de la fiche : sans
+ * geste sur les jetons, rien ne s'écrit, son badge et ce que l'élève reçoit ne changent pas. Pure.
+ * @param {object|undefined} blocPorte - le bloc `jetons` que la pratique porte déjà
+ * @param {object} blocDuFormulaire - `lireBlocJetonsMat()`
+ * @param {?string} instantane - le JSON du bloc lu à l'ouverture de la fiche
+ * @returns {object|undefined}
+ */
+function blocJetonsAEcrireMat(blocPorte, blocDuFormulaire, instantane) {
+    if (blocPorte) return blocDuFormulaire;
+    return (instantane !== null && JSON.stringify(blocDuFormulaire) !== instantane) ? blocDuFormulaire : undefined;
 }
 
 /**
@@ -2012,18 +2046,13 @@ function appliquerFormulaireDansCollection(lues) {
     // Système de jetons
     // #853 (relecture de Cowork) : jetons réglés ailleurs (assistant, import) → le moteur ne lit pas le
     // bloc plat ; on n'en fabrique pas un qu'il ignorerait (cause profonde : #854).
-    if (!jetonsReglesAilleurs(configurations[index])) {
-    const repriseOriginale = document.querySelector('input[name="mat-reprise-originale"]:checked');
+    // 28 nov. 2026 (décision de Grégoire, 8 h 42) : une pratique SANS bloc de jetons n'en reçoit un que si l'enseignant·e
+    // a touché aux jetons depuis l'ouverture de la fiche (`blocJetonsAEcrireMat`). Enregistrer un champ voisin n'écrit rien.
+    const blocJetons = jetonsReglesAilleurs(configurations[index]) ? undefined
+        : blocJetonsAEcrireMat(configurations[index].jetons, lireBlocJetonsMat(), instantaneJetonsMat);
+    if (blocJetons) {
     const jetonsAvant = configurations[index].jetons || {};
-    configurations[index].jetons = {
-        actif: getCheckbox('mat-jetons-actif'),
-        nombre: parseInt(getValeurChamp('mat-jetons-nombre')) || 2,  // 🆕 Beta 95.7 : défaut 2
-        delaiDuree: parseInt(getValeurChamp('mat-delai-duree')) || 2,  // 🆕 Beta 95.7 : défaut 2 jours
-        delaiSurReprise: getCheckbox('mat-delai-sur-reprise'),  // #853 : réglage de la pratique
-        repriseOriginale: repriseOriginale ? repriseOriginale.value : 'archiver',
-        cibleeActif: getCheckbox('mat-jeton-ciblee-actif'),
-        cibleePlafond: getValeurChamp('mat-ciblee-plafond') || ''  // 🆕 Beta 95.7 : pas de défaut
-    };
+    configurations[index].jetons = blocJetons;
     // #900 (lot N6) : les cases « actif » du délai et de la reprise sont retirées (aucun lecteur) ; une
     // pratique qui porte leurs valeurs les garde — on cesse d'écrire, on n'efface pas.
     for (const cleMorte of ['delaiActif', 'repriseActif']) {
@@ -3459,6 +3488,7 @@ window.supprimerTypeTravailMat = supprimerTypeTravailMat;
 // PAN-Spécifications : Forfaits
 window.afficherForfaitsMat = afficherForfaitsMat;
 window.modeSelectionDuMenu = modeSelectionDuMenu;   // neuvième parcours (8 nov., nuit) : pour le banc
+window.blocJetonsAEcrireMat = blocJetonsAEcrireMat;   // sans déclaration, pas de jetons (28 nov. 2026) : pour le banc
 window.ajouterForfaitMat = ajouterForfaitMat;
 window.modifierForfaitMat = modifierForfaitMat;
 window.modifierTravailForfaitMat = modifierTravailForfaitMat;

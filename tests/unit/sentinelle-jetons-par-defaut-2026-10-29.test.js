@@ -6,6 +6,14 @@
  * sans réglage garde ce qu'elle fait (les jetons offerts) et sa case s'affiche cochée. Décision de Cowork : un « non »
  * explicite est respecté.
  *
+ * ↻ RÉÉCRITE LE 28 NOV. 2026 — SANS DÉCLARATION, PAS DE JETONS, POUR LES ANCIENNES PRATIQUES AUSSI (décision de Grégoire,
+ * 8 h 42, relayée par Cowork à 8 h 45 et 9 h 05). Il étend aux pratiques d'avant le 29 oct. la règle qu'il a posée pour
+ * l'élève (D5, 24 sept.) et pour toute pratique neuve (29 oct.) : une pratique qui ne porte aucun réglage de jetons n'en
+ * offre pas, nulle part. Sa fiche s'affiche DÉCOCHÉE ; l'enregistrer sans toucher aux jetons n'écrit aucun bloc ; le
+ * moteur ne lui prête plus le défaut (2 / 2 / 2). Changement de comportement, pas une réécriture : aucune pratique n'est
+ * modifiée, et les jetons déjà accordés restent comptés, affichés et retirables. Les essais A(a), B(a), C(e) et le
+ * dernier de D disent la règle neuve ; les autres n'ont pas bougé.
+ *
  * VERROUILLÉ ICI :
  *   A. Le moteur (`_normaliserConfigJetons`, js/evaluation-jetons.js) : `actif: false` ou `activer: false` explicite donne
  *      des jetons inactifs, quelle que soit la forme (plate, imbriquée, le seul drapeau). Sans réglage : le défaut, actif.
@@ -16,8 +24,11 @@
  * Données fictives. BREAK-TESTS : journal en fin de fichier.
  */
 import { describe, it, expect } from 'vitest';
+import { readFileSync } from 'node:fs';
+import path from 'node:path';
+import { JETONS_DECLARES, pratiqueQuiDeclareSesJetons, ANCIEN_REGLAGE_DU_TRIMESTRE } from './_helpers/jetons-declares.js';
 import { chargerScript } from './_helpers/charger-script.js';
-import { chargerAvecInterne, fauxDocument, dbBanc, echapperHtml, elementDom, monter, storeBase } from './_helpers/bac-suivi.js';
+import { chargerAvecInterne, fauxDocument, dbBanc, echapperHtml, elementDom, monter, storeBase, RACINE } from './_helpers/bac-suivi.js';
 
 const clone = (x) => JSON.parse(JSON.stringify(x));
 
@@ -44,9 +55,14 @@ function blocDeLaClasseSpecifications(configuration) {
 
 /* ================================================================ A. LE MOTEUR */
 describe('A · le moteur respecte un « non » explicite', () => {
-    it('(a) une pratique sans aucun réglage de jetons : le défaut, actif (inchangé)', () => {
-        expect(moteur({ type: 'sommative' }).obtenirConfigJetons()).toEqual({
-            actif: true, delai: { nombre: 2, dureeJours: 2 }, reprise: { nombre: 2, maxParProduction: 1, archiverOriginale: true },
+    it('(a) une pratique sans aucun réglage de jetons : AUCUN jeton (↻ 28 nov. 2026 ; du 29 oct. au 28 nov. : le défaut, actif)', () => {
+        const w = moteur({ type: 'sommative' });
+        expect(w.verifierDisponibiliteJeton('1111111', 'reprise')).toBe(false);
+        expect(w.verifierDisponibiliteJeton('1111111', 'delai')).toBe(false);
+        expect(w.jetonsDeclares()).toBeNull();
+        // Les valeurs restent celles du défaut (ce que la fiche pré-remplit) ; seuls les jetons sont éteints.
+        expect(w.obtenirConfigJetons()).toEqual({
+            actif: false, delai: { nombre: 2, dureeJours: 2 }, reprise: { nombre: 2, maxParProduction: 1, archiverOriginale: true },
             repriseCiblee: { actif: true, nombre: 2, plafondNote: null }
         });
     });
@@ -110,19 +126,75 @@ function formulaire(pratique) {
     chargerAvecInterne('js/pratiques-gestion.js', globaux, win, ['appliquerFormulaireDansCollection']);
     return { win, store, elements, radios, interne: win.__audit['pratiques-gestion.js'] };
 }
+/** La famille déduite d'une pratique, par le VRAI registre et le vrai lecteur des jetons de la fenêtre du banc. */
+function familleDe(f, pratique) {
+    const reg = chargerScript('js/pratiques/pratique-registre.js', { db: { getSync: (k, d) => (d !== undefined ? d : null) }, cle: (k) => k },
+        { configJetonsDeclareeDeLaPratique: f.win.configJetonsDeclareeDeLaPratique });
+    return reg.familleDeduiteDeLaPratique(pratique);
+}
 const lu = (f) => ({
     actif: f.elements['mat-jetons-actif'].checked, nombre: f.elements['mat-jetons-nombre'].value, duree: f.elements['mat-delai-duree'].value,
     ciblee: f.elements['mat-jeton-ciblee-actif'].checked, archiver: f.radios[0].checked
 });
 
 describe('B · le formulaire affiche ce que le moteur résout', () => {
-    it('(a) une pratique sans réglage : la case s\'affiche COCHÉE, avec les valeurs du défaut (avant : décochée)', async () => {
+    // ↻ 28 nov. 2026 (décision de Grégoire, 8 h 42). Du 29 oct. au 28 nov. : la case s'affichait COCHÉE, et le premier
+    // enregistrement d'un champ voisin écrivait un bloc de jetons actifs (la pratique passait hybride sans qu'on l'ait voulu).
+    it('(a) une pratique sans réglage : la case s\'affiche DÉCOCHÉE, avec les valeurs du défaut pré-remplies', async () => {
         const f = formulaire({});
         await f.win.chargerPratiquePourModif('PR');
-        expect(lu(f)).toEqual({ actif: true, nombre: 2, duree: 2, ciblee: true, archiver: true });
-        // Enregistrer la fiche sans toucher aux jetons garde les jetons offerts (avant : le bloc plat s'écrivait `actif: false`).
+        expect(lu(f)).toEqual({ actif: false, nombre: 2, duree: 2, ciblee: true, archiver: true });
+    });
+
+    it('(a2) l\'enregistrer SANS toucher aux jetons n\'écrit aucun bloc : son badge reste CUM, l\'élève ne reçoit rien de neuf', async () => {
+        const f = formulaire({});
+        await f.win.chargerPratiquePourModif('PR');
+        f.elements['mat-pratique-nom'] = f.elements['mat-pratique-nom'] || elementDom({ id: 'mat-pratique-nom' });
+        f.elements['mat-pratique-nom'].value = 'Un nom changé';   // un champ voisin
         const ecrite = f.interne.appliquerFormulaireDansCollection(clone(f.store.test_pratiquesConfigurables));
+        expect('jetons' in ecrite[0]).toBe(false);
+        expect(ecrite[0].configuration && ecrite[0].configuration.jetons).toBeFalsy();
+        expect(f.win.configJetonsDeclareeDeLaPratique(ecrite[0])).toBeNull();
+        expect(familleDe(f, ecrite[0])).toMatchObject({ sigle: 'CUM', motif: 'tout-compte' });
+        expect(moteur(ecrite[0]).jetonsDeclares()).toBeNull();
+        // Deux enregistrements de suite : toujours rien.
+        expect('jetons' in f.interne.appliquerFormulaireDansCollection(clone(ecrite))[0]).toBe(false);
+    });
+
+    it('(a3) COCHER la case écrit le bloc : les jetons sont offerts, le badge passe HYB', async () => {
+        const f = formulaire({});
+        await f.win.chargerPratiquePourModif('PR');
+        f.elements['mat-jetons-actif'].checked = true;
+        const ecrite = f.interne.appliquerFormulaireDansCollection(clone(f.store.test_pratiquesConfigurables));
+        expect(ecrite[0].jetons).toMatchObject({ actif: true, nombre: 2, delaiDuree: 2 });
         expect(moteur(ecrite[0]).obtenirConfigJetons().actif).toBe(true);
+        expect(familleDe(f, ecrite[0])).toMatchObject({ sigle: 'HYB', motif: 'reprise' });
+    });
+
+    it('(a4) RÉGLER un champ des jetons sans cocher écrit aussi le bloc (un refus explicite, avec la valeur réglée)', async () => {
+        const f = formulaire({});
+        await f.win.chargerPratiquePourModif('PR');
+        f.elements['mat-jetons-nombre'].value = 3;
+        const ecrite = f.interne.appliquerFormulaireDansCollection(clone(f.store.test_pratiquesConfigurables));
+        expect(ecrite[0].jetons).toMatchObject({ actif: false, nombre: 3 });
+        expect(familleDe(f, ecrite[0]).sigle).toBe('CUM');
+    });
+
+    it('(a5) une pratique qui PORTE un bloc le voit récrit à chaque enregistrement, comme avant', async () => {
+        const f = formulaire({ jetons: { actif: true, nombre: 3, delaiDuree: 4, repriseOriginale: 'archiver', cibleeActif: false } });
+        await f.win.chargerPratiquePourModif('PR');
+        const ecrite = f.interne.appliquerFormulaireDansCollection(clone(f.store.test_pratiquesConfigurables));
+        expect(ecrite[0].jetons).toMatchObject({ actif: true, nombre: 3, delaiDuree: 4, cibleeActif: false });
+    });
+
+    it('(a6) la décision d\'écrire, seule : `blocJetonsAEcrireMat`', () => {
+        const f = formulaire({});
+        const bloc = { actif: false, nombre: 2 };
+        const ecrire = f.win.blocJetonsAEcrireMat;
+        expect(ecrire(undefined, bloc, JSON.stringify(bloc))).toBeUndefined();              // sans bloc, intouché : rien
+        expect(ecrire(undefined, { actif: true, nombre: 2 }, JSON.stringify(bloc))).toEqual({ actif: true, nombre: 2 });   // sans bloc, touché
+        expect(ecrire({ actif: false }, bloc, JSON.stringify(bloc))).toBe(bloc);            // un bloc porté : récrit
+        expect(ecrire(undefined, bloc, null)).toBeUndefined();                             // aucune fiche ouverte : rien
     });
 
     it('une pratique « non » (bloc plat `actif: false`) : décochée', async () => {
@@ -179,9 +251,90 @@ describe('C · une reprise déjà appliquée garde sa note quand les jetons devi
     }
 
     it('(e) sommative, reprise à 90 sur une originale à 60 : P = (90 × 40 + 80 × 60) / 100 = 84, jetons offerts ou refusés', () => {
-        expect(noteSous({})).toEqual({ P: 84, actif: true });
+        // ↻ 28 nov. 2026 : une pratique SANS réglage n'offre plus de jetons (`actif: false`) ; sa reprise déjà accordée
+        // garde sa note, 84, au point près. C'est la mesure du point 1 de l'amendement de 8 h 45.
+        expect(noteSous({})).toEqual({ P: 84, actif: false });
+        expect(noteSous({ jetons: { actif: true, nombre: 2, delaiDuree: 2 } })).toEqual({ P: 84, actif: true });
         expect(noteSous({ jetons: { actif: false } })).toEqual({ P: 84, actif: false });
         expect(noteSous({ configuration: { jetons: { activer: false } } })).toEqual({ P: 84, actif: false });
+    });
+});
+
+/* ================================================================ A bis. LA DÉCLARATION QUE LA DÉMO PORTERA (28 nov. 2026) */
+describe('A bis · la déclaration que le pack de la démo portera rend exactement l\'ancien défaut', () => {
+    const ANCIEN_DEFAUT = { actif: true, delai: { nombre: 2, dureeJours: 2 }, reprise: { nombre: 2, maxParProduction: 1, archiverOriginale: true },
+        repriseCiblee: { actif: true, nombre: 2, plafondNote: null } };
+    it('posée à la racine d\'une pratique, pour les trois types de la démo : actifs, 2 délais de 2 jours, 2 reprises, reprise ciblée active', () => {
+        for (const type of ['standards', 'specifications', 'cibles']) {
+            const w = moteur(pratiqueQuiDeclareSesJetons('PR', { type }));
+            expect(JSON.parse(JSON.stringify(w.obtenirConfigJetons())), type).toEqual(ANCIEN_DEFAUT);
+            expect(w.jetonsDeclares(), type).not.toBeNull();
+            expect(w.verifierDisponibiliteJeton('1111111', 'reprise'), type).toBe(true);
+        }
+        expect(JSON.parse(JSON.stringify(JETONS_DECLARES))).toEqual(ANCIEN_DEFAUT);
+    });
+    it('l\'ancien réglage explicite du trimestre est une déclaration : il vaut pour une pratique sans réglage, et sans pratique du tout', () => {
+        const monte = (pratiques, actif) => chargerScript('js/evaluation-jetons.js', {
+            db: { getSync: (k, d) => (k === 'pratiquesConfigurables' ? pratiques : (k === 'modalitesEvaluation' ? { configurationJetons: clone(ANCIEN_REGLAGE_DU_TRIMESTRE) }
+                : (k === 'evaluationsSauvegardees' ? [] : (d !== undefined ? d : null)))), setSync: () => {} },
+            cle: (k) => k, obtenirIdPratiqueActive: () => actif, obtenirDonneesSelonMode: () => []
+        });
+        for (const w of [monte([{ id: 'PR', type: 'sommative' }], 'PR'), monte([], null)]) {
+            expect(w.obtenirConfigJetons()).toMatchObject({ actif: true, delai: { nombre: 2, dureeJours: 2 }, reprise: { nombre: 2 } });
+            expect(w.verifierDisponibiliteJeton('1111111', 'reprise')).toBe(true);
+        }
+    });
+});
+
+/* ================================================================ C bis. LES JETONS DÉJÀ ACCORDÉS (28 nov. 2026) */
+describe('C bis · dans une pratique sans réglage, un jeton déjà accordé reste compté et retirable', () => {
+    const DA = '2000001';
+    function moteurAvec(evaluations) {
+        const store = { pratiquesConfigurables: [{ id: 'PR', type: 'sommative' }], evaluationsSauvegardees: clone(evaluations) };
+        const notifs = [];
+        const win = chargerScript('js/evaluation-jetons.js', {
+            db: { getSync: (k, d) => (k in store ? clone(store[k]) : (d !== undefined ? d : null)), setSync: () => {}, get: async () => null, set: async () => {} },
+            cle: (k) => k, obtenirIdPratiqueActive: () => 'PR',
+            obtenirDonneesSelonMode: (k) => store[k],
+            sauvegarderDonneesSelonMode: (k, v) => { store[k] = v; return true; },
+            notifications: { succes: (t) => notifs.push('succes:' + t), erreur: (t) => notifs.push('erreur:' + t), info() {}, avertissement() {} },
+            confirm: () => true
+        });
+        return { win, store, notifs };
+    }
+    const ORIGINALE = { id: 'O1', etudiantDA: DA, productionId: 'P1', noteFinale: 60, remplaceeParId: 'R1', archivee: true };
+    const REPRISE = { id: 'R1', etudiantDA: DA, productionId: 'P1', noteFinale: 90, repriseDeId: 'O1', jetonRepriseApplique: true };
+    const AVEC_DELAI = { id: 'E2', etudiantDA: DA, productionId: 'P2', noteFinale: 80, jetonDelaiApplique: true, delaiAccorde: true, dureeDelaiJours: 2 };
+
+    it('la pratique n\'offre plus de jetons, mais la reprise et le délai accordés restent COMPTÉS', () => {
+        const b = moteurAvec([ORIGINALE, REPRISE, AVEC_DELAI]);
+        expect(b.win.obtenirConfigJetons().actif).toBe(false);
+        expect(b.win.compterJetonsUtilises(DA, 'reprise')).toBe(1);
+        expect(b.win.compterJetonsUtilises(DA, 'delai')).toBe(1);
+        const statut = b.win.obtenirStatutJetonsEtudiant(DA);
+        expect(statut.reprise).toMatchObject({ utilises: 1, total: 2 });
+        expect(statut.delai).toMatchObject({ utilises: 1, total: 2 });
+        // Et rien de NEUF ne s'accorde.
+        expect(b.win.verifierDisponibiliteJeton(DA, 'reprise')).toBe(false);
+        expect(b.win.verifierDisponibiliteJeton(DA, 'delai')).toBe(false);
+    });
+    it('ils restent RETIRABLES : le délai se retire, la reprise aussi (l\'originale revient)', async () => {
+        const b = moteurAvec([ORIGINALE, REPRISE, AVEC_DELAI]);
+        expect(b.win.retirerJetonDelai('E2')).toBe(true);
+        expect(b.store.evaluationsSauvegardees.find(e => e.id === 'E2').jetonDelaiApplique).toBeUndefined();
+        expect(await b.win.retirerJetonReprise('R1')).toBe(true);
+        const originale = b.store.evaluationsSauvegardees.find(e => e.id === 'O1');
+        expect(originale.remplaceeParId).toBeUndefined();
+        expect(b.win.compterJetonsUtilises(DA, 'reprise')).toBe(0);
+    });
+    it('les écrans qui les montrent et les retirent ne lisent pas la configuration des jetons', () => {
+        const source = readFileSync(path.join(RACINE, 'js/evaluation-sauvegarde.js'), 'utf8');
+        const debut = source.indexOf('function afficherBadgesJetons() {');
+        const fin = source.indexOf('\nfunction ', debut + 10);
+        expect(debut).toBeGreaterThan(-1);
+        const badges = source.slice(debut, fin);
+        expect(badges).toContain('data-action="retirerJetonDepuisSidebar"');
+        expect(badges).not.toMatch(/obtenirConfigJetons|verifierDisponibiliteJeton|jetonsDeclares/);
     });
 });
 
@@ -250,11 +403,12 @@ describe('D · une pratique neuve n\'offre les jetons que si on les active', () 
         expect(actif(await a.creer(REPONSES.SPE_OUI))).toBe(true);
     });
 
-    it('l\'assistant en MODIFICATION d\'une pratique sans réglage : rien n\'est posé, elle garde les jetons du défaut', async () => {
+    // ↻ 28 nov. 2026 : rien n'est toujours posé en modification ; mais sans réglage, la pratique n'offre plus de jetons.
+    it('l\'assistant en MODIFICATION d\'une pratique sans réglage : rien n\'est posé, et elle n\'offre pas de jetons', async () => {
         const existante = { id: 'PR', nom: 'SOM banc', type: 'sommative', dansBibliotheque: true, calcul_note: { methode: 'moyenne_ponderee' }, configuration: {} };
         const p = await assistant().creer(REPONSES.SOM, { modeEdition: true, existantes: [existante] });
         expect(p.jetons).toBeUndefined();
-        expect(actif(p)).toBe(true);
+        expect(actif(p)).toBe(false);
     });
 
     it('les cinq modèles fournis refusent les jetons ; une pratique installée d\'un modèle aussi (copie telle quelle)', async () => {

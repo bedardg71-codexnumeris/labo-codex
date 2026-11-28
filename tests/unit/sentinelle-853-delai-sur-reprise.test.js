@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest';
+import { pratiqueQuiDeclareSesJetons } from './_helpers/jetons-declares.js';   // sans déclaration, pas de jetons (28 nov. 2026)
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -78,7 +79,10 @@ describe('#853 · appliquerJetonDelai sur une reprise suit le réglage de la pra
             expect(r.dureeDelaiJours).toBe(3);
         });
     }
-    for (const [nom, pratique] of [['plate décochée', PLATE(false)], ['imbriquée décochée', IMBRIQUEE(false)], ['aucune pratique : défaut', null]]) {
+    for (const [nom, pratique] of [['plate décochée', PLATE(false)], ['imbriquée décochée', IMBRIQUEE(false)],
+        // ↻ 28 nov. 2026 : « aucune pratique : défaut » devient une pratique qui DÉCLARE ses jetons sans régler le délai sur
+        // reprise (le moteur ne prête plus le défaut ; le cas sans aucune déclaration est l'essai suivant).
+        ['jetons déclarés, réglage absent', pratiqueQuiDeclareSesJetons('PR')]]) {
         it(`réglage absent ou décoché (${nom}) : refus « Conflit » qui nomme le réglage, rien d'écrit`, () => {
             const b = monterMoteur({ pratique });
             expect(b.win.appliquerJetonDelai('R')).toBe(false);
@@ -87,6 +91,12 @@ describe('#853 · appliquerJetonDelai sur une reprise suit le réglage de la pra
             expect(b.store.evaluationsSauvegardees.find(e => e.id === 'R').jetonDelaiApplique).toBeUndefined();
         });
     }
+    it('↻ 28 nov. 2026 — aucune pratique, aucune déclaration : pas de jetons du tout, le délai est refusé avant même la question de la reprise', () => {
+        const b = monterMoteur({ pratique: null });
+        expect(b.win.obtenirConfigJetons().actif).toBe(false);
+        expect(b.win.appliquerJetonDelai('R')).toBe(false);
+        expect(b.store.evaluationsSauvegardees.find(e => e.id === 'R').jetonDelaiApplique).toBeUndefined();
+    });
     it('une copie REMPLACÉE reste refusée, même réglage coché', () => {
         const b = monterMoteur({ pratique: PLATE(true) });
         expect(b.win.appliquerJetonDelai('O')).toBe(false);

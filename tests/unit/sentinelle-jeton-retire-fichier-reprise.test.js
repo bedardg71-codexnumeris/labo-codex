@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
+import { pratiqueQuiDeclareSesJetons } from './_helpers/jetons-declares.js';   // sans déclaration, pas de jetons (28 nov. 2026)
 import { chargerScript } from './_helpers/charger-script.js';
 
 // #607 (S1 du plan « chaîne d'importation des travaux », constat S5 de l'audit
@@ -69,9 +70,12 @@ function monter({ evaluations, fichiers, reponseConfirm = true }) {
         setSync: () => {}, get: async () => null, set: async () => {}
     };
 
+    // ↻ 28 nov. 2026 : la pratique active DÉCLARE ses jetons ; le moteur n'en prête plus à une pratique sans réglage.
+    stores.pratiquesConfigurables = [pratiqueQuiDeclareSesJetons('PR_JETONS')];
     const globaux = {
         db,
         cle: (k) => k,
+        obtenirIdPratiqueActive: () => 'PR_JETONS',
         obtenirDonneesSelonMode: (k) => stores[k],
         sauvegarderDonneesSelonMode: (k, v) => { stores[k] = v; return true; },
         notifications: {

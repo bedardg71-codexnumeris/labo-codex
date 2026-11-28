@@ -38,10 +38,13 @@ const AVEC_JETONS = (actif) => ({ id: 'P_STD', type: 'standards', configuration:
     actif, delai: { nombre: 1, dureeJours: 3 }, reprise: { nombre: 2 }, repriseCiblee: { actif: false } } } });
 
 describe('#941 S3 · T.a — les jetons DÉCLARÉS, jamais les défauts', () => {
-    it('une sommative sans bloc de jetons : aucun jeton — alors que obtenirConfigJetons rend les défauts actifs', () => {
+    // ↻ 28 nov. 2026 (décision de Grégoire, 8 h 42) : sans déclaration, le moteur non plus ne prête plus de jetons. Du 24 sept.
+    // au 28 nov., `obtenirConfigJetons` rendait le défaut ACTIF pour les gestes de l'enseignant·e.
+    it('une sommative sans bloc de jetons : aucun jeton, pour l\'élève comme pour les gestes de l\'enseignant·e', () => {
         const w = jetons({ pratique: SOMMATIVE_SANS_JETONS });
         expect(w.jetonsDeclares()).toBe(null);
-        expect(w.obtenirConfigJetons().actif).toBe(true);   // le défaut du code reste pour les gestes de l'enseignant·e
+        expect(w.obtenirConfigJetons().actif).toBe(false);
+        expect(w.obtenirConfigJetons().reprise.nombre).toBe(2);   // les valeurs de départ restent, éteintes
     });
     it('une pratique qui déclare des jetons actifs : ses jetons', () => {
         const d = jetons({ pratique: AVEC_JETONS(true) }).jetonsDeclares();

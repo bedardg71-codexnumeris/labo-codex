@@ -124,10 +124,11 @@ describe('#328 L2-c · obtenirConfigJetons dérive de la pratique active', () =>
         expect(win.obtenirConfigJetons().actif).toBe(false);
     });
 
-    it('REPLI — aucune pratique active : défaut (delai.nombre=2)', () => {
+    // ↻ 28 nov. 2026 (décision de Grégoire, 8 h 42) : sans déclaration, pas de jetons. Les valeurs de départ restent, éteintes.
+    it('REPLI — aucune pratique active : les valeurs de départ (delai.nombre=2), jetons ÉTEINTS', () => {
         const win = chargerJetons(null, []);
         expect(win.obtenirConfigJetons()).toEqual({
-            actif: true,
+            actif: false,
             delai: { nombre: 2, dureeJours: 2 },
             reprise: { nombre: 2, maxParProduction: 1, archiverOriginale: true },
             repriseCiblee: { actif: true, nombre: 2, plafondNote: null }

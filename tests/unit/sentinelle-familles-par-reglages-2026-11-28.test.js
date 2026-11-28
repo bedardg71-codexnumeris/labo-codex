@@ -75,8 +75,9 @@ describe('A · la table de la règle', () => {
             ['le verrou sur une évaluation', Object.assign(som(J.refuses), { configuration: { reglesSpeciales: [{ type: 'double_verrou', actif: true }] } }), CUM],
             // Amendement du 28 nov., 8 h 40 : ni l'un ni l'autre ne révise une note.
             ['des productions écartées pour tout le groupe (`productionsExclues`)', Object.assign(som(J.refuses), { configuration: { productionsExclues: ['P2', 'P5'] } }), CUM],
-            ['des évaluations formatives déclarées dans la pratique', Object.assign(som(J.refuses), { configuration: { evaluations: [
-                { id: 1, nom: 'Exercice', type: 'exercice-formatif', ponderation: 0 }, { id: 2, nom: 'Examen', type: 'examen', ponderation: 100 }] } }), CUM]
+            // ↻ 9 h 05 (décision de Grégoire, 8 h 59) : un travail formatif est une production à pondération 0.
+            ['une production à pondération 0 (un travail formatif)', Object.assign(som(J.refuses), { configuration: { evaluations: [
+                { id: 1, nom: 'Exercice', type: 'travail', ponderation: 0 }, { id: 2, nom: 'Examen', type: 'examen', ponderation: 100 }] } }), CUM]
         ];
         for (const [nom, pratique, attendu] of CAS) {
             it(nom, () => { expect(famille(pratique)).toMatchObject(Object.assign({ type: 'sommative', code: attendu === CUM ? 'SOM' : 'STD' }, attendu)); });
@@ -109,7 +110,7 @@ describe('A · la table de la règle', () => {
         }
     });
 
-    it('des productions formatives dans le cours ne changent rien : la règle ne reçoit que la pratique, jamais les productions', () => {
+    it('des productions à pondération 0 dans le cours (des travaux formatifs) ne changent rien : la règle ne reçoit que la pratique, jamais les productions', () => {
         expect(REG.familleDeduiteDeLaPratique.length).toBe(1);
         const source = lire('js/pratiques/pratique-registre.js');
         const debut = source.indexOf('// LA FAMILLE SE DÉDUIT DES RÉGLAGES');
@@ -118,7 +119,7 @@ describe('A · la table de la règle', () => {
         expect(fin).toBeGreaterThan(debut);
         const regle = source.slice(debut, fin).split('\n').filter(l => !/^\s*(\/\/|\*|\/\*)/.test(l)).join('\n');
         // Elle ne lit ni les productions du cours, ni leurs évaluations, ni les productions écartées, ni un type formatif.
-        expect(regle).not.toMatch(/cle\('productions'\)|productionsExclues|formati|evaluationsSauvegardees|\.categorie\b/i);
+        expect(regle).not.toMatch(/cle\('productions'\)|productionsExclues|formati|ponderation|evaluationsSauvegardees|\.categorie\b/i);
         expect(regle.split('db.getSync').length - 1).toBe(0);   // la bibliothèque se lit par `trouverPratiqueEnBibliotheque`, hors de la règle
     });
 

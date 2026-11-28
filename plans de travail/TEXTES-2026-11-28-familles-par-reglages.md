@@ -6,6 +6,8 @@
 > **Amendement du 28 nov., 8 h 40 (décidé par Grégoire à 8 h 36)** : dans une cumulative, seuls les travaux certificatifs ou
 > sommatifs entrent dans le cumul ; « toutes les productions comptent » était trop fort. Les textes R1, R4, R8 et R13 sont
 > ceux de l'amendement ; les dix autres n'ont pas bougé.
+> **Troisième amendement du 28 nov., 9 h 05 (décision de Grégoire, 8 h 59)** : un travail formatif est une production à
+> pondération 0. Les textes R1 (une phrase) et R12 (le début) sont ceux de cet amendement.
 > **Second amendement du 28 nov., 8 h 45 (décision de Grégoire, 8 h 40)** : le modèle « Hybride » de la vue simple s'appelle
 > « Cumulative par niveaux » (repères V1 et V3, qui remplacent ceux du 27 nov.). Le nom est de Grégoire ; la phrase V1 est
 > sa conséquence mécanique (le nom du modèle dans la liste), PROPOSÉE.
@@ -16,7 +18,7 @@
 
 ## R1 · js/accompagnement-contenu-terme.js · le glossaire, « CUM — Cumulative », la définition entière
 
-> Pratique de notation habituelle, souvent appelée sommative ou traditionnelle : la note est le cumul pondéré des résultats. Toutes les évaluations sommatives comptent, celles du début autant que celles de la fin, chacune selon sa pondération, et aucune note n'est révisée. Un travail formatif n'entre pas dans la note, et cela ne change pas la famille. Dès qu'une reprise est offerte, la pratique devient hybride.
+> Pratique de notation habituelle, souvent appelée sommative ou traditionnelle : la note est le cumul pondéré des résultats. Toutes les évaluations sommatives comptent, celles du début autant que celles de la fin, chacune selon sa pondération, et aucune note n'est révisée. Un travail formatif reçoit une pondération de 0 : il reste hors de la note, et cela ne change pas la famille. Dès qu'une reprise est offerte, la pratique devient hybride.
 
 ## R2 · js/accompagnement-contenu-terme.js · le glossaire, « HYB — Hybride », la définition entière
 
@@ -62,7 +64,7 @@
 
 ## R12 · js/accompagnement-contenu-hover.js · la bulle des sigles, le début seulement
 
-> CUM = cumulative (tout compte, sans reprise ; souvent dite sommative), HYB = hybride (un cumul où une note peut être révisée),
+> CUM = cumulative (un cumul sans reprise ; souvent dite sommative), HYB = hybride (un cumul où une note peut être révisée),
 
 ## R13 · js/accompagnement-contenu-popup.js · la fenêtre « Pratiques », ligne Cumulative
 

@@ -43,9 +43,11 @@ function _optionDelaiSurReprise(valeur) {
 }
 
 /**
- * Les jetons d'une pratique qui n'en règle aucun : la configuration du moteur par défaut (actifs, 2 / 2 / 2).
- * Une seule source pour le moteur (`obtenirConfigJetons`) et pour le formulaire de la pratique (jetons par défaut,
- * 29 oct. 2026 : la case s'affiche cochée pour une pratique sans réglage, parce que c'est ce que fait le moteur).
+ * Les VALEURS de départ des jetons (2 / 2 / 2, reprise ciblée active) : ce qu'un réglage incomplet reçoit pour ses
+ * champs absents, et ce que le formulaire de la pratique pré-remplit.
+ * ⚠ 28 nov. 2026 (décision de Grégoire, 8 h 42) : ce n'est PLUS ce que vaut une pratique sans réglage. Du 29 oct. au
+ * 28 nov., le moteur prêtait ces jetons, actifs, à toute pratique sans réglage, et sa fiche s'affichait cochée. Sans
+ * déclaration, pas de jetons : voir `jetonsSansDeclaration`.
  */
 function jetonsParDefaut() {
     return {
@@ -54,6 +56,17 @@ function jetonsParDefaut() {
         reprise: { nombre: 2, maxParProduction: 1, archiverOriginale: true },
         repriseCiblee: { actif: true, nombre: 2, plafondNote: null }
     };
+}
+
+/**
+ * SANS DÉCLARATION, PAS DE JETONS (décision de Grégoire, 28 nov. 2026, 8 h 42) — ce que vaut une pratique qui ne porte
+ * AUCUN réglage de jetons, ancienne ou neuve : les valeurs du défaut (pour ce qu'un écran doit pré-remplir), jetons
+ * ÉTEINTS. Il étend aux pratiques d'avant le 29 oct. la règle posée pour l'élève (D5, 24 sept.) et pour toute pratique
+ * neuve (29 oct.). Changement de comportement du moteur, pas une réécriture : aucune pratique n'est modifiée. Les jetons
+ * déjà accordés se lisent sur les évaluations, pas ici : ils restent comptés, affichés et retirables.
+ */
+function jetonsSansDeclaration() {
+    return Object.assign(jetonsParDefaut(), { actif: false });
 }
 
 function _normaliserConfigJetons(brut) {
@@ -113,7 +126,7 @@ function _normaliserConfigJetons(brut) {
     }
 
     // Le seul drapeau (`{ activer: false }`, `{ actif: false }`) : les jetons sont refusés, les valeurs sont celles du défaut.
-    if (refuse) return Object.assign(jetonsParDefaut(), { actif: false });
+    if (refuse) return jetonsSansDeclaration();
 
     // Forme non reconnue → null (repli LOUD : obtenirConfigJetons retombe sur le défaut).
     return null;
@@ -132,8 +145,8 @@ function _jetonsBrutsDeLaPratique(pratique) {
 }
 
 /**
- * Jetons par défaut (29 oct. 2026) — CE QUE LE MOTEUR RÉSOUT POUR UNE PRATIQUE DONNÉE : son réglage normalisé, sinon le
- * défaut. Lu par le formulaire de la pratique (la case et les valeurs affichées), qui n'a plus sa propre lecture.
+ * Jetons par défaut (29 oct. 2026) — CE QUE LE MOTEUR RÉSOUT POUR UNE PRATIQUE DONNÉE : son réglage normalisé, sinon
+ * AUCUN jeton (`jetonsSansDeclaration`, 28 nov. 2026 ; avant : le défaut, actif). Lu par le formulaire de la pratique (la case et les valeurs affichées), qui n'a plus sa propre lecture.
  * (Le repli `modalitesEvaluation.configurationJetons` du trimestre n'a plus d'écrivain : il n'est pas reflété ici.)
  * @param {object} pratique - une entrée de `pratiquesConfigurables`
  * @returns {object} configuration canonique
@@ -151,7 +164,7 @@ function configJetonsDeclareeDeLaPratique(pratique) {
 }
 
 function configJetonsResolueDeLaPratique(pratique) {
-    return configJetonsDeclareeDeLaPratique(pratique) || jetonsParDefaut();
+    return configJetonsDeclareeDeLaPratique(pratique) || jetonsSansDeclaration();   // 28 nov. 2026 : sans déclaration, pas de jetons
 }
 
 /**
@@ -228,7 +241,9 @@ function obtenirConfigJetons() {
         };
     }
 
-    return jetonsParDefaut();
+    // 28 nov. 2026 (décision de Grégoire, 8 h 42) : sans déclaration (ni la pratique, ni l'ancien réglage du trimestre),
+    // le moteur ne prête plus les jetons du défaut. Vaut aussi pour la pratique codée sans entrée de bibliothèque.
+    return jetonsSansDeclaration();
 }
 
 /**

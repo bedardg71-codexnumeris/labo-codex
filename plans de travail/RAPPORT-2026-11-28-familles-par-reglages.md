@@ -4,6 +4,8 @@
 **Fait** : la fonction unique au registre, tous les lecteurs branchés, les 14 textes posés, la sentinelle neuve (52 essais), 10 bancs existants réécrits, 10 break-tests rouges, Vitest vert en entier.
 **Pas fait, par mandat** : aucune fusion vers `main`, aucun bump de version, aucun changelog. Les jetons anti-cache `?v=` des 13 fichiers `js/` modifiés sont montés dans `index.html` (le hook de pré-commit l'exige ; `version.json` n'est pas touché).
 **Reste** : le verdict WebKit (Mac) ; **B du second amendement, non codé** (§ 0 bis : la démo n'offre des jetons que par le défaut du moteur, arrêt demandé par le mandat) ; les listes de textes à relire (§ 6 et § 0 bis). Les deux conséquences renvoyées au premier rapport ont été tranchées : le modèle de la vue simple est renommé (fait) ; la fiche d'une ancienne pratique sans réglage attend B.
+> ⚠ **D'ICI LA RELEASE, LA DÉMO DE CETTE BRANCHE N'OFFRE PLUS DE JETONS. C'EST ATTENDU** (troisième amendement, 9 h 05). Ses trois pratiques n'ont aucun réglage de jetons, et le moteur ne prête plus le défaut. La reprise et la reprise ciblée déjà présentes dans son corpus restent comptées, affichées et retirables. La déclaration s'écrit dans `js/pack-demo-10.js` au mandat de release : les lignes exactes sont au § 0 ter.
+
 **Arrêt du matin** : la mesure a déclenchait l'arrêt prévu au mandat ; tranché par Cowork à 8 h 00 (réglage DÉCLARÉ : sans réglage, CUM).
 
 ## 0. Amendement du 28 nov., 8 h 40 (décidé par Grégoire à 8 h 36)
@@ -67,9 +69,9 @@ Ils sont maintenant incomplets : une « Cumulative par niveaux » y est servie s
 
 **Bancs.** Vitest vert (12 758). Sous Chromium : `vue-simple.spec.js`, 60 verts sur 61 au passage joué, le rouge étant un texte attendu que j'ai corrigé ensuite (la carte de l'accueil) ; non rejoué après cette correction. Écrans épinglés : sept fragments de la référence WebKit repris à la main (le nom, partout où il s'affiche) ; mesuré sous Chromium, ces sept fragments sont les seuls écarts dus au lot.
 
-### B. Sans déclaration, pas de jetons, pour les anciennes pratiques aussi : NON CODÉ, arrêt au point 2
+### B. Sans déclaration, pas de jetons : mesuré à 8 h 45, arrêt au point 2 ; CODÉ après le troisième amendement (§ 0 ter)
 
-Rien n'est écrit pour B. Les quatre mesures demandées :
+Ce qui suit est la mesure d'avant le code. Elle a fondé l'arrêt, que Grégoire a levé à 8 h 59.
 
 **Point 1 — les jetons déjà accordés : ils tiendraient.** Lu dans le code, non joué.
 
@@ -108,6 +110,91 @@ Conséquence pour lundi : un testeur qui explore les jetons dans la démo n'y tr
 **Point 4 — les bancs du 29 oct. à réécrire** (repérés, non touchés) : `tests/integration/jetons-par-defaut-29-oct.spec.js` (deux essais : « sans réglage, la case s'affiche cochée » ; « Jeton de reprise est proposé sans réglage ») ; côté Vitest, `sentinelle-853-delai-sur-reprise` et `sentinelle-wizard-golden-creation-319`, plus ceux que le rouge désignera. Je n'ai pas compté les bancs de navigateur qui accordent un jeton dans la démo sans réglage : une trentaine de fichiers parlent de jetons.
 
 **Source ou stock, pour B tel que décidé** : ni l'un ni l'autre n'est écrit, c'est le comportement du moteur qui change. Mais l'effet tombe sur le stock : toute pratique sans réglage, chez tous, perd les jetons que le défaut lui prêtait, sans qu'aucune donnée ne bouge. Les jetons déjà accordés restent.
+
+## 0 ter. Troisième amendement du 28 nov., 9 h 05 (décisions de Grégoire, 8 h 57 à 8 h 59)
+
+### B, codé : sans déclaration, pas de jetons, pour les anciennes pratiques aussi
+
+**Le moteur** (`js/evaluation-jetons.js`). Une pratique qui ne porte aucun réglage de jetons, et dont le trimestre ne porte pas d'ancien réglage explicite, n'offre plus de jetons : `jetonsSansDeclaration()` rend les valeurs de départ (2 / 2 / 2), jetons éteints. Trois endroits la lisent : `obtenirConfigJetons` (le dernier repli), `configJetonsResolueDeLaPratique` (ce que la fiche affiche), et le « non » explicite, qui valait déjà cela. Aucune exception pour la démo, rien de posé à son activation, le pack n'est pas touché.
+
+**La fiche** (`js/pratiques-gestion.js`).
+- Une pratique sans réglage s'ouvre avec « Activer le système de jetons » décochée, les valeurs de départ pré-remplies.
+- À l'ouverture, la fiche garde ce qu'elle montre des jetons (`instantaneJetonsMat`). À l'enregistrement, `blocJetonsAEcrireMat` n'écrit un bloc que si la pratique en porte déjà un, ou si les champs des jetons ont bougé depuis l'ouverture. Enregistrer un champ voisin n'écrit donc rien.
+- Cocher la case écrit le bloc : le badge passe HYB. Régler un champ des jetons sans cocher écrit aussi le bloc, avec `actif: false` : un refus explicite qui garde la valeur réglée. C'est ma lecture de « coche ou règle » ; à corriger si Grégoire voulait autre chose.
+
+**Les quatre points, après le code.**
+
+1. **Jetons déjà accordés** : comptés, affichés, retirables. Prouvé par trois essais neufs (section « C bis » de la sentinelle du 29 oct.) : la reprise et le délai restent comptés (1 sur 2), le délai et la reprise se retirent, l'originale revient. **La note ne bouge pas** : l'essai (e), qui calcule la note d'un élève dont la reprise à 90 remplace une originale à 60, rend 84 avec ou sans jetons offerts.
+2. **La démo** : voir l'encadré de tête et « Pour la release » ci-dessous.
+3. **La pratique codée sans entrée de bibliothèque** (« Cumulative habituelle » désignée directement) n'offre plus ni délais ni reprises, sauf ancien réglage explicite du trimestre (accepté par Grégoire tel quel). **L'ancien réglage du trimestre continue de valoir** : un break-test (B5) le prouve.
+4. **Les bancs du 29 oct.** : réécrits avec la date et le motif, aucun supprimé (liste plus bas).
+
+**Source ou stock.** Rien n'est écrit dans les données de personne : ni migration, ni réécriture. C'est le comportement du moteur qui change, et l'effet tombe sur le STOCK :
+- toute pratique sans réglage de jetons, chez tous, cesse d'offrir les jetons que le défaut lui prêtait depuis le 29 oct. : plus de case « reprise » à l'import, plus de cases dans le panneau « Jetons » de l'évaluation (il dit « Système de jetons désactivé »), plus de délai ni de reprise à accorder ;
+- la pratique codée sans entrée de bibliothèque aussi, sans moyen de les lui rendre autrement qu'en adoptant une pratique de la bibliothèque ;
+- les jetons déjà accordés restent, et aucune note ne change ;
+- pour retrouver les jetons : cocher la case dans la fiche de la pratique. C'est alors une déclaration, et la pratique devient hybride.
+
+**Pour la release : ce qu'il faut écrire dans `js/pack-demo-10.js`** (non touché ici).
+
+Ajouter le même bloc à chacune des trois pratiques, à la racine de la pratique, juste après sa ligne `"calcul_note"` :
+
+```
+"jetons": { "actif": true, "delai": { "nombre": 2, "dureeJours": 2 }, "reprise": { "nombre": 2, "maxParProduction": 1, "archiverOriginale": true }, "repriseCiblee": { "actif": true, "nombre": 2, "plafondNote": null } },
+```
+
+| Pratique | Ligne de `"calcul_note"` (après laquelle insérer) |
+|---|---|
+| `demo-std-litt` | 7424 |
+| `demo-spe-litt` | 7449 |
+| `demo-cib-litt` (bloc `groupeParStandards`) | 10157 |
+
+Un essai fige que ce bloc, lu par le moteur, rend exactement l'ancien défaut (actifs, 2 délais de 2 jours, 2 reprises, 1 par production, originale archivée, reprise ciblée active à 2). Les bancs le lisent dans `tests/unit/_helpers/jetons-declares.js`.
+
+Deux conséquences de cette écriture, à connaître avant la release :
+- la pratique « Hybride (démo) » gardera le badge HYB, avec le motif « retient certaines productions et offre des jetons de reprise » ; les deux PAN ne changent pas de badge ;
+- la sentinelle neuve des familles fige aujourd'hui que les trois pratiques de la démo n'ont AUCUN réglage de jetons (section F) : elle rougira, à dessein, et se met à jour dans le même commit.
+
+**Une démo déjà ouverte.** Le mandat nomme « Modèle antérieur détecté » : ce message appartient à l'import d'un Codex (`js/codex.js`), pas à la démo. La démo installée se met à jour par un autre mécanisme (`js/demo-namespace.js`) : elle compare la version rangée chez la personne à `_metadata.version` du pack (aujourd'hui « 21.3 », ligne 20).
+- Monter cette version (par exemple « 21.4 ») réécrit la démo de chacun à la prochaine ouverture : tout ce qui a été fait DANS la démo est remplacé. C'est le geste que le rapport du 22 nov. avait laissé à Grégoire, et il n'a pas été fait le 27 nov. pour le nom « Hybride (démo) ».
+- Ne pas la monter : une démo déjà installée garde ses pratiques sans réglage, donc sans jetons, jusqu'à « Remettre la démo à neuf » (panneau Assistance).
+- Le troisième groupe a son propre chemin (`verserGroupeParStandardsSiAbsent`) : il n'ajoute que s'il manque, il ne mettra pas à jour une pratique déjà versée.
+La décision de monter ou non la version revient à Grégoire : elle touche ce que les testeurs ont fait dans leur démo.
+
+**Le hook de pré-push** n'a pas bloqué à cause du pack (voir l'état des pushes en fin de section).
+
+### Les travaux formatifs : les mots, pas le calcul
+
+- Glossaire, « CUM — Cumulative » : « Un travail formatif reçoit une pondération de 0 : il reste hors de la note, et cela ne change pas la famille. »
+- Bulle des sigles (texte 12) : « CUM = cumulative (un cumul sans reprise ; souvent dite sommative), … »
+- Table de la règle : le cas se lit « une production à pondération 0 (un travail formatif) » ; il ne rend pas hybride. La règle ne lit ni les productions ni leur pondération (essai).
+- Aucun calcul n'est touché. Le texte dit vrai pour le calcul cumulatif (une pondération de 0 vaut 0, décision E1 du 28 oct.). **Réserve, rapportée sans corriger** : dans le calcul de type standards, une production à pondération 0 ENTRE dans le pool (les artefacts y sont à 0 par construction). « Un travail formatif reçoit une pondération de 0 : il reste hors de la note » n'y est donc pas vrai ; il faut y décocher la production (« compte dans la note »). Le texte vit dans l'entrée « CUM — Cumulative », ce qui limite la portée de la réserve.
+
+### Laissé pour Grégoire, d'un bloc, sans rien poser
+
+1. La description de la carte « Cumulative par niveaux » de la vue simple. Actuelle : « Chaque production reçoit un niveau. La note se construit à partir des niveaux que la règle retient. » Proposée : « Chaque production reçoit un niveau. La note est le cumul de tous ces niveaux ; tu peux ensuite ne retenir que les meilleurs ou les plus récents. »
+2. Les trois textes de la vue simple qui disent encore « hybride » (`groupeMotAutres`, `pratiqueAutre`, `tableau.autreFamille`), cités au § 0 bis.
+3. La phrase de la carte de l'accueil, POSÉE au second amendement comme conséquence du nom, et qui reste à relire : « Choisis un modèle : par standards, par spécifications ou cumulative par niveaux. Tu règles ensuite ce qui construit la note. »
+
+### Bancs du troisième amendement
+
+**Vitest, suite complète : 986 fichiers, 12 769 essais, tous verts.**
+
+- Réécrits avec la date et le motif, aucun supprimé : `sentinelle-jetons-par-defaut-2026-10-29` (A(a), B(a), C(e), le dernier de D), `sentinelle-941-s3-ce-que-la-synthese-tait`, `sentinelle-jetons-derivation-L2c`, `sentinelle-853-delai-sur-reprise` (le cas « aucune pratique : défaut »).
+- Neufs, dans la sentinelle du 29 oct. : la fiche s'ouvre décochée ; l'enregistrer sans toucher aux jetons n'écrit aucun bloc et laisse CUM ; cocher écrit le bloc et le badge passe HYB ; régler un champ écrit un refus explicite ; un bloc porté est récrit ; la décision d'écrire, seule ; la déclaration de la démo rend l'ancien défaut ; l'ancien réglage du trimestre vaut ; une reprise et un délai déjà accordés restent comptés et retirables.
+- Bancs qui accordaient un jeton sur le défaut du moteur : ils posent maintenant la déclaration eux-mêmes (`tests/unit/_helpers/jetons-declares.js`, `tests/integration/harness/declarer-jetons.js`). Aucun n'est neutralisé : `sentinelle-725-617-724-720-jetons-de-reprise`, `sentinelle-jeton-retire-fichier-reprise`, `audit-pratique-de-notation-2026-09-05` (par l'ancien réglage du trimestre), `1007-propose-codex-2a2.spec.js`.
+
+**Break-tests de B** (mutation posée, quatre fichiers de bancs lancés, mutation retirée ; 128 verts avant) :
+
+| Mutation | Rouges |
+|---|---|
+| B1 la fiche récrit le bloc à chaque enregistrement (l'ancien comportement) | 2 |
+| B2 la fiche n'écrit plus le bloc quand on coche | 3 |
+| B3 le moteur prête de nouveau le défaut | 17 |
+| B4 l'instantané n'est plus pris à l'ouverture | 2 |
+| B5 l'ancien réglage du trimestre ne vaut plus | 3 |
+
+**Navigateur (Chromium ; rien sous WebKit).** En cours au moment de ce commit : voir le commit suivant.
 
 ## 1. Les mesures demandées avant d'écrire la règle
 
@@ -363,6 +450,8 @@ Aucune porte terrain n'est due (règles de tête du skill `portes-terrain`) : le
 3. Ouvre une pratique de type « Cumulative ». Laisse la souris sur le badge CUM : la bulle dit « Cumulative : toutes les évaluations sommatives comptent, sans reprise. »
 4. Dans cette fiche, coche « Activer le système de jetons ». Le badge passe à HYB sans recharger ; sa bulle dit « Hybride : cette pratique offre des jetons de reprise. » Décoche : il revient à CUM.
 5. Ouvre une pratique de type « Hybride », mets « Mode de sélection » sur « Toutes les productions » (ou « Tous les artefacts »), jetons décochés : le badge passe à CUM.
+6 bis. Ouvre la fiche d'une pratique ancienne, qui n'a jamais eu de jetons réglés : « Activer le système de jetons » est décochée. Change sa description, quitte le champ : le badge reste CUM. Coche la case : il passe à HYB.
+6 ter. Dans la démo de cette branche, l'écran d'évaluation dit « Système de jetons désactivé » : c'est attendu jusqu'à la release.
 6. Sur iPad, il n'y a pas de survol : la bulle ne s'y lit pas. Le badge, lui, doit changer de la même façon.
 7. Dans l'assistant, choisis la famille hybride puis, à « Construction de la note », « Toutes les productions » : le récapitulatif doit dire « Cumulative », en orange.
 8. En vue simple, à « Ta pratique », la première carte s'appelle « Cumulative par niveaux ». Choisis-la et va au tableau : le badge dit CUM à côté du nom « Cumulative par niveaux ». Une pratique installée avant garde son ancien nom (« Hybride ») à côté du même badge CUM.

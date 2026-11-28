@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { declarerJetonsDeLaPratiqueActive } from './harness/declarer-jetons.js';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { attendreApplication } from './harness/attendre-application.js';
@@ -234,6 +235,8 @@ test.describe('#1007, lot 2a-2 — le codex proposé sur les gestes qui restent'
     test('P12 (jeton de reprise) : « archiver », aucune fenêtre ; « supprimer l\'originale », la fenêtre ; une écriture pendant l\'attente survit', async ({ page }) => {
         const ecoute = brancher(page);
         await demarrer(page);
+        // ↻ 28 nov. 2026 (sans déclaration, pas de jetons) : la pratique de la démonstration déclare ses jetons, comme le pack le fera.
+        await declarerJetonsDeLaPratiqueActive(page);
         await page.evaluate(async () => {
             const c = cle('evaluationsSauvegardees');
             db.setSync(c, (db.getSync(c, []) || []).concat([1, 2, 3, 4].map((n) => (

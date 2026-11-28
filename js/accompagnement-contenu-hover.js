@@ -313,7 +313,7 @@ const TOOLTIPS = {
     'cn-pratique-titre':
         'Assemblage final de ta pratique : type de notation, échelle, structure des évaluations et système de jetons. C\'est la recette complète de ta façon de construire la note.',
     'cn-pratique-type':
-        'CUM = cumulative (tout compte, sans reprise ; souvent dite sommative), HYB = hybride (un cumul où une note peut être révisée), STD = PAN par standards (un niveau par cible d\'apprentissage), SPE = PAN basée sur des spécifications (contrat), DEN = dénotation (pratiques réduisant ou éliminant la notation).',
+        'CUM = cumulative (un cumul sans reprise ; souvent dite sommative), HYB = hybride (un cumul où une note peut être révisée), STD = PAN par standards (un niveau par cible d\'apprentissage), SPE = PAN basée sur des spécifications (contrat), DEN = dénotation (pratiques réduisant ou éliminant la notation).',
     'cn-pratique-echelle':
         'Échelle utilisée pour convertir les pourcentages en niveaux (ex. : I-D-M-E). Configurable dans Échelles.',
     'cn-pratique-jetons':

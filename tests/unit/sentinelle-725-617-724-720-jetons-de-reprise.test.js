@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest';
+import { pratiqueQuiDeclareSesJetons } from './_helpers/jetons-declares.js';   // sans déclaration, pas de jetons (28 nov. 2026)
 import { chargerScript } from './_helpers/charger-script.js';
 
 // Lot « les jetons de reprise ne mentent plus » (13 sept. 2026) — #725, #617, #724, #720.
@@ -44,15 +45,17 @@ const REGISTRE = (() => {
     return chargerScript('js/pratiques/pratique-registre.js', { PratiqueConfigurable: win.PratiqueConfigurable }, win);
 })();
 
-/** evaluation-jetons.js RÉEL ; configuration des jetons = défauts du module (délai 2/élève, reprise 2, 1 par production). */
+/** evaluation-jetons.js RÉEL. ↻ 28 nov. 2026 : la pratique active DÉCLARE ses jetons (délai 2/élève, reprise 2, 1 par production),
+ * aux valeurs de l'ancien défaut, que le moteur ne prête plus à une pratique sans réglage. */
 function monter({ evaluations, fichiers = [], retourEcriture = true }) {
-    const stores = { evaluationsSauvegardees: evaluations.map(e => JSON.parse(JSON.stringify(e))) };
+    const stores = { evaluationsSauvegardees: evaluations.map(e => JSON.parse(JSON.stringify(e))), pratiquesConfigurables: [pratiqueQuiDeclareSesJetons('PR_JETONS')] };
     const travauxStockage = creerStockage(fichiers);
     const notifs = [];
     const gestes = [];
     const globaux = {
         db: { getSync: (k, d) => (k in stores ? JSON.parse(JSON.stringify(stores[k])) : (d !== undefined ? d : null)), setSync: () => {}, get: async () => null, set: async () => {} },
         cle: (k) => k,
+        obtenirIdPratiqueActive: () => 'PR_JETONS',
         obtenirDonneesSelonMode: (k) => stores[k],
         // Le faux magasin rend le refus de `modes.js` et n'écrit que sur `true`.
         sauvegarderDonneesSelonMode: (k, v, options) => { gestes.push(options && options.geste); if (retourEcriture !== true) return retourEcriture; stores[k] = v; return true; },
