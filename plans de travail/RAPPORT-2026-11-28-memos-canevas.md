@@ -10,7 +10,7 @@ Branche `claude/memos-canevas-r21btn`, partie de `main` à `574bb60` (la 1.260.0
 
 **Écart d'ouverture** : le mandat nommait `lot/memos-canevas` ; cette session du nuage ne peut pousser que sur `claude/memos-canevas-r21btn`. Même base, même contenu.
 
-**Non fait** : la session coordonnatrice me renvoie à `claude/coordination-2026-11-28.md`. Ce fichier n'existe ni dans mon arbre, ni sur `main`, ni sur aucune branche distante (cherché deux fois, après `fetch`, à 14 h 20 et 14 h 55). Je n'ai donc rien pu y lire ni y écrire.
+**Non fait** : la session coordonnatrice me renvoie à `claude/coordination-2026-11-28.md`. Ce fichier n'existe ni dans mon arbre, ni sur `main`, ni sur aucune branche distante (cherché trois fois, après `fetch`, sur toutes les branches distantes). Je n'ai donc rien pu y lire ni y écrire.
 
 ## 1. Ce que j'ai tranché
 
