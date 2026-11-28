@@ -101,9 +101,14 @@ test.describe('Mémos du canevas', () => {
         await expect(bouton).toBeVisible();
         expect(await bouton.evaluate(b => !b.classList.contains('planif-palette-btn') && !b.dataset.type && !b.closest('.planif-palette-categorie')),
             'le bouton n\'est ni un bouton de bloc ni dans une famille de blocs').toBe(true);
-        await poserMemo(page, '');
+        // Frappe IMMÉDIATE après le clic, espaces et Entrée compris : tout va dans le mémo, et le bouton
+        // « Mémo », qui avait le focus, n'en pose pas d'autres (défaut trouvé le 28 nov. : focus différé de 50 ms).
+        await bouton.click();
+        await page.keyboard.type('une idée, tout de suite\net une autre');
+        await attendreEcriture(page);
         const m = await memos(page);
         expect(m).toHaveLength(1);
+        expect(m[0].texte).toBe('une idée, tout de suite\net une autre');
         expect(await page.evaluate(() => window.planificationCarte.etat.noeuds.size), 'aucun bloc créé').toBe(avant);
         await expect(page.locator('.planif-memo')).toBeInViewport();
         expect(await enregistres(page)).toHaveLength(1);
@@ -385,6 +390,11 @@ test.describe('Mémos du canevas', () => {
         expect(plans.tout.length).toBeGreaterThan(500);
         expect(plans.tout).not.toContain(MARQUE);
         expect(plans.structure, 'la traversée unique de l\'export ne voit pas le mémo').not.toContain(MARQUE);
+        // 3 bis. Imprimer la page (ou l'enregistrer en PDF) : la couche des mémos ne sort pas.
+        await expect(page.locator('.planif-memo')).toBeVisible();
+        await page.emulateMedia({ media: 'print' });
+        expect(await page.evaluate(() => getComputedStyle(document.getElementById('planif-couche-memos')).display)).toBe('none');
+        await page.emulateMedia({ media: 'screen' });
         // 4. La longue-vue montre la carte, pas ce qui l'accompagne.
         await page.keyboard.press('Escape');
         const loupe = await page.evaluate(() => {

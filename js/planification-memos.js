@@ -390,8 +390,10 @@ function creer() {
         var el = construire(m);
         canevas.couche.appendChild(el);
         var champ = el.querySelector('.planif-memo-texte');
-        // `preventScroll` : la place a été choisie dans la vue, le canevas n'a pas à sauter.
-        setTimeout(function() { try { champ.focus({ preventScroll: true }); } catch (e) { champ.focus(); } }, 50);
+        // Le focus TOUT DE SUITE, dans le geste : différé, une frappe immédiate retombait sur le bouton
+        // « Mémo » (Espace ou Entrée y posent un autre mémo), et Safari n'ouvre le clavier de l'iPad que
+        // pour un focus pris pendant le toucher. `preventScroll` : la place est déjà dans la vue.
+        try { champ.focus({ preventScroll: true }); } catch (e) { champ.focus(); }
     }
     canevas.enregistrer();
     return m.id;

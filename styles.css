@@ -23589,6 +23589,10 @@ body.planif-plein-ecran-actif #planif-guide-panel {
     .planif-palette-memo { min-height: 44px; }
 }
 .planif-btn-memos { margin-left: 6px; }
+/* Imprimer la page (ou « Enregistrer en PDF ») : la carte sort sans ses mémos, comme de tout export. */
+@media print {
+    #planif-couche-memos { display: none !important; }
+}
 
 #planif-rect-selection {
     position: absolute;
