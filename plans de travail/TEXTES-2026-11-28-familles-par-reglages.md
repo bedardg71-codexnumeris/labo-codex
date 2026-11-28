@@ -3,6 +3,9 @@
 > **Textes relus et acceptés par Grégoire le 28 nov. 2026 (7 h 18 et 7 h 19)**, relayés par Cowork dans le mandat du lot
 > « familles par réglages » (rapport : `RAPPORT-2026-11-28-familles-par-reglages.md`). Ils ne se reformulent pas : un mot
 > corrigé se corrige ICI et à sa source ; les sentinelles qui relisent ce fichier suivent.
+> **Amendement du 28 nov., 8 h 40 (décidé par Grégoire à 8 h 36)** : dans une cumulative, seuls les travaux certificatifs ou
+> sommatifs entrent dans le cumul ; « toutes les productions comptent » était trop fort. Les textes R1, R4, R8 et R13 sont
+> ceux de l'amendement ; les dix autres n'ont pas bougé.
 > **Ce fichier REMPLACE, pour les repères A1 et C1 seulement**, les citations de `TEXTES-2026-11-27-familles-cum-hyb.md`,
 > qui reste intact (mêmes noms de repères). Les repères R1 à R14 portent le numéro du texte dans le mandat.
 > **Relu par** `tests/unit/sentinelle-familles-par-reglages-2026-11-28.test.js` (les quatorze textes, chacun à sa source) et
@@ -10,7 +13,7 @@
 
 ## R1 · js/accompagnement-contenu-terme.js · le glossaire, « CUM — Cumulative », la définition entière
 
-> Pratique de notation habituelle, souvent appelée sommative ou traditionnelle : la note est le cumul pondéré des résultats. Toutes les productions comptent, celles du début autant que celles de la fin, chacune selon sa pondération, et aucune note n'est révisée. Dès qu'une reprise est offerte, la pratique devient hybride.
+> Pratique de notation habituelle, souvent appelée sommative ou traditionnelle : la note est le cumul pondéré des résultats. Toutes les évaluations sommatives comptent, celles du début autant que celles de la fin, chacune selon sa pondération, et aucune note n'est révisée. Un travail formatif n'entre pas dans la note, et cela ne change pas la famille. Dès qu'une reprise est offerte, la pratique devient hybride.
 
 ## R2 · js/accompagnement-contenu-terme.js · le glossaire, « HYB — Hybride », la définition entière
 
@@ -22,7 +25,7 @@
 
 ## R4 · index.html · la note des sigles, ligne CUM
 
-> <strong>CUM</strong> (Cumulative) : toutes les productions comptent, chacune à sa pondération, sans reprise.
+> <strong>CUM</strong> (Cumulative) : toutes les évaluations sommatives comptent, chacune à sa pondération, sans reprise.
 
 ## R5 · index.html · la note des sigles, ligne HYB
 
@@ -38,7 +41,7 @@
 
 ## R8 · js/pratiques/pratique-registre.js · le survol du badge CUM
 
-> Cumulative : toutes les productions comptent, sans reprise.
+> Cumulative : toutes les évaluations sommatives comptent, sans reprise.
 
 ## R9 · js/pratiques/pratique-registre.js · le survol du badge HYB, selon le motif (retenu ; reprise ; les deux)
 
@@ -60,7 +63,7 @@
 
 ## R13 · js/accompagnement-contenu-popup.js · la fenêtre « Pratiques », ligne Cumulative
 
-> <strong>Cumulative (CUM)</strong> — calcule une moyenne pondérée de toutes les productions, sans reprise.
+> <strong>Cumulative (CUM)</strong> — calcule une moyenne pondérée de toutes les évaluations sommatives, sans reprise.
 
 ## R14 · js/accompagnement-contenu-popup.js · la fenêtre « Pratiques », ligne Hybride
 

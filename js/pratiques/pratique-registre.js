@@ -203,7 +203,7 @@ const TYPE_PAR_CODE = Object.freeze(Object.keys(REPRESENTATIONS_PRATIQUES).reduc
 
 /** Survols du badge, par motif (textes de Grégoire, 28 nov. 2026, 7 h 18 et 7 h 19 : ne pas reformuler). */
 const SURVOLS_FAMILLE_DEDUITE = Object.freeze({
-    'tout-compte': 'Cumulative : toutes les productions comptent, sans reprise.',
+    'tout-compte': 'Cumulative : toutes les évaluations sommatives comptent, sans reprise.',
     'retenu': 'Hybride : cette pratique retient certaines productions.',
     'reprise': 'Hybride : cette pratique offre des jetons de reprise.',
     'retenu-et-reprise': 'Hybride : cette pratique retient certaines productions et offre des jetons de reprise.'

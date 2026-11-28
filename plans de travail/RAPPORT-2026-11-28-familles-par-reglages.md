@@ -6,6 +6,37 @@
 **Reste** : le verdict WebKit (Mac) ; deux conséquences à faire trancher par Grégoire (§ 4 : le modèle « Hybride » de la vue simple s'affiche CUM ; § 5 : enregistrer la fiche d'une ancienne pratique sans réglage la fait passer à HYB) ; les listes de textes à relire (§ 6).
 **Arrêt du matin** : la mesure a déclenchait l'arrêt prévu au mandat ; tranché par Cowork à 8 h 00 (réglage DÉCLARÉ : sans réglage, CUM).
 
+## 0. Amendement du 28 nov., 8 h 40 (décidé par Grégoire à 8 h 36)
+
+Dans une cumulative, seuls les travaux certificatifs ou sommatifs entrent dans le cumul ; « toutes les productions comptent » était trop fort.
+
+**Fait.** Les textes 1, 4, 8 et 13 sont remplacés par ceux de l'amendement, à leur source, au fichier de textes validés et dans les bancs ; les dix autres n'ont pas bougé. Le survol du badge CUM du § 9 et la référence épinglée de la vue simple suivent le texte 8. La table de la règle gagne trois cas, tous CUM : des productions écartées pour tout le groupe (`configuration.productionsExclues`), pour chacun des deux types, et des évaluations formatives déclarées dans la pratique. Un essai fige que la règle ne reçoit que la pratique : elle ne lit ni les productions du cours, ni leurs évaluations, ni les productions écartées. La règle elle-même n'a pas changé d'une ligne (elle ignorait déjà ces réglages). Sentinelle neuve : 56 essais.
+
+**Mesure 1 : peut-on encore créer une production formative ?**
+
+- Le menu « Type » du formulaire d'une production n'offre aucun type formatif (fait, `index.html`, `#productionType` : examen, travail, quiz, laboratoire, présentation, entrevue, projet, stage, autre, portfolio, artefact, terminale).
+- Le seul geste qui nomme un type formatif est le bouton « + Ajouter une évaluation formative » de la vue par type (`js/productions.js`, `ajouterProductionAuType('examen-formatif')`). Ce bouton ne s'affiche que s'il existe déjà au moins une production formative, et il pose dans le menu une valeur que le menu n'offre pas. Inférence, non jouée au navigateur : le menu reste vide et aucune production formative n'est créée.
+- Le pack de démo n'en contient aucune (fait). Une production formative ne peut donc exister que dans un stock ancien ou importé.
+- Conclusion : le commentaire du registre (« les types …-formatif n'ont plus aucun écrivain ») tient. **Il n'existe aujourd'hui aucun moyen de déclarer un travail « formatif » en tant que tel.**
+
+Ce qui permet aujourd'hui de faire qu'un travail n'entre pas dans la note (faits, lus dans le code) : une pondération de 0 dans une pratique de type sommative (décision E1 du 28 oct.) ; la case « compte dans la note » décochée (`productionsExclues`) dans une pratique de type standards hors deux blocs ; une production marquée diagnostique, écartée de tous les calculs.
+
+**Mesure 2 : comment chaque calcul traite une production de type « …-formatif »**
+
+| Calcul | Traitement | Source |
+|---|---|---|
+| Cumulatif (type sommative) | Aucun filtre sur le type. Elle compte à sa pondération ; à 0, elle n'entre pas ; **sans pondération (champ vide), elle pèse 1**. `productionsExclues` n'y est pas lu (inférence : aucune occurrence dans le moteur sommatif). | `js/pratiques/pratique-sommative.js`, `_ponderationDe` |
+| Hybride (type standards) | Aucun filtre sur le type : elle entre dans le pool comme toute production, sauf si elle est décochée (`productionsExclues`, hors deux blocs). | `js/pratiques/pratique-registre.js`, `obtenirArtefactsIdsPoolStd` |
+| Autour des calculs | Les listes des deux blocs de la fiche et l'export des productions écartent les types « …-formatif » de ce qu'elles proposent ; la vue par type les range à part. | `js/pratiques-gestion.js`, `js/productions-import-export.js`, `js/productions-liste.js` |
+
+Donc une production formative restée dans un stock ancien **compte dans la note** des deux calculs, sauf pondération à 0 ou case décochée. C'est l'inverse de ce que dit maintenant le texte 1 (« un travail formatif n'entre pas dans la note »). Le texte décrit la pratique de l'enseignant·e ; l'application, elle, ne sait pas qu'un travail est formatif. Rapporté, non corrigé. Issue 2 (inscrire et continuer) : à rattacher par Cowork, la question de fond (comment déclare-t-on un travail formatif ?) revient à Grégoire.
+
+**Les textes 6, 10 et 12, laissés tels quels.** Mon avis, à pondérer (je peux pencher vers la critique pour avoir quelque chose à signaler) :
+
+- Texte 12, « CUM = cumulative (tout compte, sans reprise ; …) » : **encore trop fort**. « Tout compte » est précisément la formule que l'amendement retire.
+- Texte 6, « Cumul pondéré de toutes les évaluations, sans reprise », et texte 10, « le cumul pondéré de toutes tes évaluations, sans reprise » : ambigus plutôt que faux. « Évaluations » peut se lire « évaluations sommatives », mais l'application appelle aussi « évaluation » la correction d'un travail formatif.
+- Hors des trois : le texte 2 dit « D'autres productions peuvent rester obligatoires et compter toutes », ce qui reste juste (il parle d'un bloc). Le motif interne de la règle s'appelle `tout-compte` : un identifiant, jamais affiché, laissé.
+
 ## 1. Les mesures demandées avant d'écrire la règle
 
 ### a. Une pratique SANS réglage de jetons
@@ -203,9 +234,9 @@ Aucun ne montre le badge ni le nom de la famille (fait : aucune occurrence dans 
 
 ## 8. Les bancs
 
-**Vitest, suite complète, depuis `tests/` : 986 fichiers, 12 754 essais, tous verts.**
+**Vitest, suite complète, depuis `tests/` : 986 fichiers, 12 758 essais, tous verts (rejouée après l'amendement ; 12 754 au premier commit).**
 
-- Neuf : `tests/unit/sentinelle-familles-par-reglages-2026-11-28.test.js`, 52 essais. La table de la règle pour les deux types ; les PAN ; les lecteurs ; l'interdiction d'un second lecteur par type ; les 14 textes ; le tableau avant et après.
+- Neuf : `tests/unit/sentinelle-familles-par-reglages-2026-11-28.test.js`, 52 essais au premier commit, 56 après l'amendement (§ 0). La table de la règle pour les deux types ; les PAN ; les lecteurs ; l'interdiction d'un second lecteur par type ; les 14 textes ; le tableau avant et après.
 - Réécrits pour la règle neuve, aucun supprimé : `sentinelle-familles-cum-hyb-2026-11-27`, `sentinelle-sel-sans-pan-2026-11-21`, `sentinelle-sigles-sel-std-2026-11-21`, `sentinelle-den-reliquats-343`, `sentinelle-routage-representations-2026-06-04`, `sentinelle-renommage-selection-productions`, `sentinelle-comparateur-synthese-recap` (deux descriptions), `sentinelle-467-affichage-echappe` (21 → 19), le cliquet de complexité (`creerPratiqueV2` : 76 → 61, par l'extraction).
 - Harnais : `charger-script.js` et `bac-suivi.js` fournissent le VRAI lecteur de famille aux bancs qui montent la fiche ou l'assistant sans le registre.
 
@@ -257,7 +288,7 @@ Aucune porte terrain n'est due (règles de tête du skill `portes-terrain`) : le
 
 1. Ouvre `https://app.codexnumeris.org`, recharge, lis le numéro de version en bas de page : c'est celui de la release qui portera ce lot.
 2. Conception › Pratiques, ouvre la bibliothèque. La ligne de « Modèle cumulatif » dit « Cumulative · fourni avec l'application » ; celles des deux modèles « N meilleures » et « N plus récentes » disent « Hybride ».
-3. Ouvre une pratique de type « Cumulative ». Laisse la souris sur le badge CUM : la bulle dit « Cumulative : toutes les productions comptent, sans reprise. »
+3. Ouvre une pratique de type « Cumulative ». Laisse la souris sur le badge CUM : la bulle dit « Cumulative : toutes les évaluations sommatives comptent, sans reprise. »
 4. Dans cette fiche, coche « Activer le système de jetons ». Le badge passe à HYB sans recharger ; sa bulle dit « Hybride : cette pratique offre des jetons de reprise. » Décoche : il revient à CUM.
 5. Ouvre une pratique de type « Hybride », mets « Mode de sélection » sur « Toutes les productions » (ou « Tous les artefacts »), jetons décochés : le badge passe à CUM.
 6. Sur iPad, il n'y a pas de survol : la bulle ne s'y lit pas. Le badge, lui, doit changer de la même façon.

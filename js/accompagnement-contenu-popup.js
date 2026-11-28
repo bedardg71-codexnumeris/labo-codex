@@ -248,7 +248,7 @@ const AIDE_CONTEXTUELLE = {
                 type: 'liste',
                 titre: 'Les cinq pratiques',
                 items: [
-                    '<strong>Cumulative (CUM)</strong> — calcule une moyenne pondérée de toutes les productions, sans reprise.',
+                    '<strong>Cumulative (CUM)</strong> — calcule une moyenne pondérée de toutes les évaluations sommatives, sans reprise.',
                     '<strong>Hybride (HYB)</strong> — cumule encore, mais une note peut être révisée : la pratique retient certaines productions ou offre des reprises.',
                     '<strong>PAN par standards (STD)</strong> — donne un niveau par cible d’apprentissage du cours\u00a0; la note vient du meilleur niveau démontré pour chaque cible.',
                     '<strong>PAN par spécifications (SPE)</strong> — fonctionne par contrat\u00a0: chaque production est réussie ou non selon des critères prédéfinis\u00a0; c’est l’ensemble des cibles atteintes qui détermine la note.',

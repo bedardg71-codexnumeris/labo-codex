@@ -72,7 +72,11 @@ describe('A · la table de la règle', () => {
             ['clés retirées seules (remplacement, plafonnement, portfolio)', Object.assign(som(), { configuration: {
                 reprises: { type: 'remplacement' }, reglesSpeciales: [{ type: 'plafonnement' }], portfolio: { utiliser: true, nbArtefacts: 7 },
                 particularites: { doubleVerrou: true } } }), CUM],
-            ['le verrou sur une évaluation', Object.assign(som(J.refuses), { configuration: { reglesSpeciales: [{ type: 'double_verrou', actif: true }] } }), CUM]
+            ['le verrou sur une évaluation', Object.assign(som(J.refuses), { configuration: { reglesSpeciales: [{ type: 'double_verrou', actif: true }] } }), CUM],
+            // Amendement du 28 nov., 8 h 40 : ni l'un ni l'autre ne révise une note.
+            ['des productions écartées pour tout le groupe (`productionsExclues`)', Object.assign(som(J.refuses), { configuration: { productionsExclues: ['P2', 'P5'] } }), CUM],
+            ['des évaluations formatives déclarées dans la pratique', Object.assign(som(J.refuses), { configuration: { evaluations: [
+                { id: 1, nom: 'Exercice', type: 'exercice-formatif', ponderation: 0 }, { id: 2, nom: 'Examen', type: 'examen', ponderation: 100 }] } }), CUM]
         ];
         for (const [nom, pratique, attendu] of CAS) {
             it(nom, () => { expect(famille(pratique)).toMatchObject(Object.assign({ type: 'sommative', code: attendu === CUM ? 'SOM' : 'STD' }, attendu)); });
@@ -87,6 +91,8 @@ describe('A · la table de la règle', () => {
             ['« Toutes », un jeton de reprise', Object.assign(std(TOUT), { jetons: J.uneReprise }), HYB('reprise')],
             ['« Toutes », reprise ciblée seule', Object.assign(std(TOUT), { jetons: J.cibleeSeule }), HYB('reprise')],
             ['« Toutes », jetons désactivés avec un nombre non nul', Object.assign(std(TOUT), { jetons: J.eteintsAvecNombre }), CUM],
+            // Amendement du 28 nov., 8 h 40 : des productions écartées pour tout le groupe ne font pas un bloc retenu.
+            ['« Toutes », des productions écartées pour tout le groupe (`productionsExclues`)', std(TOUT, { productionsExclues: ['A3'] }), CUM],
             ['N meilleures', std({ methodeSelection: 'meilleurs', nombreARetenir: 7 }), HYB('retenu')],
             ['N plus récentes', std({ methodeSelection: 'recents', nombreARetenir: 5 }), HYB('retenu')],
             ['N plus récentes, ancien nom (`derniers`)', std({ methodeSelection: 'derniers', nombreARetenir: 5 }), HYB('retenu')],
@@ -101,6 +107,19 @@ describe('A · la table de la règle', () => {
         for (const [nom, pratique, attendu] of CAS) {
             it(nom, () => { expect(famille(pratique)).toMatchObject(Object.assign({ type: 'standards' }, attendu)); });
         }
+    });
+
+    it('des productions formatives dans le cours ne changent rien : la règle ne reçoit que la pratique, jamais les productions', () => {
+        expect(REG.familleDeduiteDeLaPratique.length).toBe(1);
+        const source = lire('js/pratiques/pratique-registre.js');
+        const debut = source.indexOf('// LA FAMILLE SE DÉDUIT DES RÉGLAGES');
+        const fin = source.indexOf('// ÉTAT DU REGISTRE');
+        expect(debut).toBeGreaterThan(-1);
+        expect(fin).toBeGreaterThan(debut);
+        const regle = source.slice(debut, fin).split('\n').filter(l => !/^\s*(\/\/|\*|\/\*)/.test(l)).join('\n');
+        // Elle ne lit ni les productions du cours, ni leurs évaluations, ni les productions écartées, ni un type formatif.
+        expect(regle).not.toMatch(/cle\('productions'\)|productionsExclues|formati|evaluationsSauvegardees|\.categorie\b/i);
+        expect(regle.split('db.getSync').length - 1).toBe(0);   // la bibliothèque se lit par `trouverPratiqueEnBibliotheque`, hors de la règle
     });
 
     it('les conséquences voulues du mandat, en deux lignes', () => {
@@ -119,7 +138,7 @@ describe('A · la table de la règle', () => {
     });
 
     it('le survol dit le motif, mot pour mot (textes 8 et 9)', () => {
-        expect(famille({ type: 'sommative' }).survol).toBe('Cumulative : toutes les productions comptent, sans reprise.');
+        expect(famille({ type: 'sommative' }).survol).toBe('Cumulative : toutes les évaluations sommatives comptent, sans reprise.');
         expect(famille({ type: 'standards' }).survol).toBe('Hybride : cette pratique retient certaines productions.');
         expect(famille({ type: 'sommative', jetons: J.uneReprise }).survol).toBe('Hybride : cette pratique offre des jetons de reprise.');
         expect(famille(Object.assign(std({}), { jetons: J.uneReprise })).survol)
@@ -130,7 +149,7 @@ describe('A · la table de la règle', () => {
         expect(REG.genererBadgeFamilleDeduiteHTML(famille({ type: 'sommative', jetons: J.uneReprise })))
             .toBe('<span class="badge-type-pratique badge-type-std" title="Hybride : cette pratique offre des jetons de reprise.">HYB</span>');
         expect(REG.genererBadgeFamilleDeduiteHTML(famille(std(TOUT))))
-            .toBe('<span class="badge-type-pratique badge-type-som" title="Cumulative : toutes les productions comptent, sans reprise.">CUM</span>');
+            .toBe('<span class="badge-type-pratique badge-type-som" title="Cumulative : toutes les évaluations sommatives comptent, sans reprise.">CUM</span>');
         expect(REG.genererBadgeFamilleDeduiteHTML(null)).toBe('');
     });
 
@@ -198,7 +217,7 @@ describe('C · les lecteurs passent par la famille déduite', () => {
 
     it('la fiche : le badge et sa bulle', () => {
         expect(G.genererBadgeTypePratique(sommativeAReprises)).toBe('<span class="badge-type-pratique badge-type-std" title="Hybride : cette pratique offre des jetons de reprise.">HYB</span>');
-        expect(G.genererBadgeTypePratique(standardsToutes)).toBe('<span class="badge-type-pratique badge-type-som" title="Cumulative : toutes les productions comptent, sans reprise.">CUM</span>');
+        expect(G.genererBadgeTypePratique(standardsToutes)).toBe('<span class="badge-type-pratique badge-type-som" title="Cumulative : toutes les évaluations sommatives comptent, sans reprise.">CUM</span>');
         expect(G.genererBadgeTypePratique({ type: 'specifications' })).toContain('title="PAN – Spécifications — ');
         expect(G.genererBadgeTypePratique({ type: 'specifications' })).toMatch(/>SPE<\/span>$/);
         expect(G.genererBadgeTypePratique({ type: 'inconnu' })).toBe('');

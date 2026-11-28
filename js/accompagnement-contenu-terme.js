@@ -463,7 +463,7 @@ const GLOSSAIRE = {
         terme: 'CUM — Cumulative',
         categorie: 'Pratiques de notation',
         etape: 'transversal',
-        definition: 'Pratique de notation habituelle, souvent appelée sommative ou traditionnelle : la note est le cumul pondéré des résultats. Toutes les productions comptent, celles du début autant que celles de la fin, chacune selon sa pondération, et aucune note n\'est révisée. Dès qu\'une reprise est offerte, la pratique devient hybride.',
+        definition: 'Pratique de notation habituelle, souvent appelée sommative ou traditionnelle : la note est le cumul pondéré des résultats. Toutes les évaluations sommatives comptent, celles du début autant que celles de la fin, chacune selon sa pondération, et aucune note n\'est révisée. Un travail formatif n\'entre pas dans la note, et cela ne change pas la famille. Dès qu\'une reprise est offerte, la pratique devient hybride.',
         voir: 'Conception › Pratiques'
     },
 

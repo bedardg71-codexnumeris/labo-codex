@@ -77,7 +77,7 @@ describe('B · les libellés hors registre', () => {
         expect(html).toMatch(/<option value="sommative">Cumulative<\/option>/);
         expect(html).toMatch(/<option value="standards">Hybride<\/option>/);
         // ↻ 28 nov. 2026 (familles par réglages, textes 4 et 5 de Grégoire).
-        expect(html).toContain('<strong>CUM</strong> (Cumulative) : toutes les productions comptent, chacune à sa pondération, sans reprise.');
+        expect(html).toContain('<strong>CUM</strong> (Cumulative) : toutes les évaluations sommatives comptent, chacune à sa pondération, sans reprise.');
         expect(html).toContain('<strong>HYB</strong> (Hybride) : un cumul où une note peut être révisée, en retenant certaines productions ou en offrant des reprises.');
         expect(html).toContain('<strong>Hybride</strong>&nbsp;: la note retient les résultats');
         expect(html).toMatch(/<option value="hybride"[^>]*>Deux blocs \(N meilleures \+ Obligatoires\)<\/option>/);
@@ -90,7 +90,7 @@ describe('B · les libellés hors registre', () => {
         expect(src).toContain("'sommative': { nom: 'Cumulative', anglais: 'Traditional Grading', resume: 'Cumul pondéré de toutes les évaluations, sans reprise' }");
         expect(src).toContain("'standards': { nom: 'Hybride', resume: 'Un cumul où une note peut être révisée' }");
         const registre = lire('js/pratiques/pratique-registre.js');
-        expect(registre).toContain("'tout-compte': 'Cumulative : toutes les productions comptent, sans reprise.',");
+        expect(registre).toContain("'tout-compte': 'Cumulative : toutes les évaluations sommatives comptent, sans reprise.',");
         expect(registre).toContain("'retenu': 'Hybride : cette pratique retient certaines productions.',");
     });
     it('la vue simple : le modèle « Hybride » et ses messages', () => {
