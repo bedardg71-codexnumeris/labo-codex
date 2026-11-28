@@ -113,7 +113,21 @@ Rattacher un devis à un cours déjà créé demanderait :
 
 ## Le parcours joué à l'écran, sur l'aperçu Netlify
 
-Voir la section « Captures » en fin de fichier.
+Aperçu : https://deploy-preview-67--codexnumeris-051225.netlify.app (commit `7f370e5`). Joué par moi sous Chromium (pas Safari), les deux lots à la suite : 4EF0 et 01FB numérisés à l'écran, puis trois cours créés. La base est lue à chaque étape.
+
+| Ce qui est joué | Mesuré | Capture (`captures-2026-11-28-cours-depuis-un-devis/`) |
+|---|---|---|
+| Le code et le nom tapés ; la liste sur « Aucun » | | `1-code-et-nom-la-liste-sur-aucun.jpg` |
+| 4EF0 choisi | les six champs de la fiche sont vides | `2-4EF0-les-propositions-rien-dans-les-champs.jpg` |
+| Le numéro confirmé ; « Autre » sur l'énoncé ; la seconde pondération ; la discipline choisie dans le menu ; un élément gardé, un reformulé, un retiré, un ajouté | après « Autre », le champ de l'énoncé est vide et rien d'autre n'a bougé ; le bilan dit « 3 propositions sont restées sans réponse » | `3-4EF0-confirme-autre-elements-trois-sans-reponse.jpg` |
+| « Créer le cours », puis sa fiche rouverte | numéro `4EF0`, énoncé tapé, pondération `1-3-3`, 60 heures, trois lignes d'éléments (le gardé, le reformulé, l'ajouté), `devisCode` `4EF0` ; les trois éléments sans réponse et le retiré n'y sont pas | `4-4EF0-la-fiche-creee-et-son-lien.jpg` |
+| 01FB : ni pondération, ni heures, ni discipline ; le numéro laissé sans réponse | deux propositions seulement, aucun repère ; le cours créé a un numéro de compétence vide, l'énoncé confirmé, ses deux éléments, `devisCode` `01FB` | `5-01FB-ni-ponderation-ni-heures-ni-discipline-le-numero-sans-reponse.jpg` |
+| « Aucun » | le formulaire d'aujourd'hui ; le cours créé ne porte pas de `devisCode` | `6-aucun-le-formulaire-d-aujourd-hui.jpg` |
+| Le lien de la fiche | le devis 4EF0 s'ouvre dans « Apporter mon matériel », avec ses 17 critères | `7-le-lien-ouvre-le-devis-intact.jpg` |
+
+**Le devis rangé est identique avant et après** : la réserve lue après les deux numérisations et relue après les trois cours créés est la même, octet pour octet.
+
+Une chose vue dans ce jeu : le cours 01FB a reçu 45 heures sans que je les tape. C'est la fiche qui les propose depuis la pondération tapée (« 2-1-3 »), comme avant le lot ; le devis n'y est pour rien.
 
 ## Ce qui remonte à Grégoire
 
