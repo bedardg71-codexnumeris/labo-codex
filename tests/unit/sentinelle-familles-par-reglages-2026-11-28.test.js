@@ -362,8 +362,8 @@ describe('E · les quatorze textes de Grégoire, chacun à sa source', () => {
     /** La source, apostrophes désescapées (les textes vivent dans des chaînes JS entre apostrophes). */
     const source = (f) => lire(f).replace(/\\'/g, '\'');
 
-    it('le fichier validé porte R1 à R14 (seize textes : R9 en a trois), plus A1 et C1 pour les bancs du renommage', () => {
-        expect(sections.map(s => s.repere)).toEqual(['R1', 'R2', 'R3', 'R4', 'R5', 'R6', 'R7', 'R8', 'R9', 'R10', 'R11', 'R12', 'R13', 'R14', 'C1', 'A1']);
+    it('le fichier validé porte R1 à R14 (seize textes : R9 en a trois), plus A1, C1, V1 et V3 pour les bancs du renommage', () => {
+        expect(sections.map(s => s.repere)).toEqual(['R1', 'R2', 'R3', 'R4', 'R5', 'R6', 'R7', 'R8', 'R9', 'R10', 'R11', 'R12', 'R13', 'R14', 'C1', 'A1', 'V1', 'V3']);
         expect(sections.filter(s => /^R/.test(s.repere)).flatMap(s => s.textes)).toHaveLength(16);
     });
     it('chaque texte se lit à sa source, mot pour mot', () => {

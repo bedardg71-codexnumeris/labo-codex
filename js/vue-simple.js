@@ -42,7 +42,7 @@
         // Cartes 2 et 3 : ACCEPTÉES par Grégoire, mot pour mot (22 nov. 2026, 9 h 12) — « Par standards » trouvable en vue simple.
         cartes: [
             { ecran: 'classe', titre: 'Ta classe', texte: 'Colle ta liste d’étudiant·es : DA, nom, prénom.', lien: 'Coller ma liste' },
-            { ecran: 'pratique', titre: 'Ta pratique', texte: 'Choisis un modèle : par standards, par spécifications ou hybride. Tu règles ensuite ce qui construit la note.', lien: 'Choisir un modèle' },
+            { ecran: 'pratique', titre: 'Ta pratique', texte: 'Choisis un modèle : par standards, par spécifications ou cumulative par niveaux. Tu règles ensuite ce qui construit la note.', lien: 'Choisir un modèle' },
             { ecran: 'resultats', titre: 'Tes résultats', texte: 'Inscris un niveau, ou acceptable / non acceptable, dans un tableau : tes étudiant·es en lignes, tes cibles ou tes productions en colonnes.', lien: 'Ouvrir le tableau' },
             { ecran: 'note', titre: 'Ta note finale', texte: 'Vois la note de chaque étudiant·e et exporte-les en CSV, prêtes pour ton relevé.', lien: 'Voir les notes' }
         ],
@@ -106,7 +106,9 @@
         pratiqueTitre: 'Ta pratique',
         pratiqueIntro: 'Choisis un modèle. Tu régleras ensuite la règle qui construit la note.',
         modeles: [
-            { famille: 'standards', modele: 'STD-n-meilleurs', titre: 'Hybride', texte: 'Chaque production reçoit un niveau. La note se construit à partir des niveaux que la règle retient.', lien: 'Choisir ce modèle' },
+            // 28 nov. 2026 (décision de Grégoire, 8 h 40) : ce modèle s'appelle « Cumulative par niveaux ». Il installe la même pratique
+            // (toutes les productions, jetons refusés) : sa famille déduite est la cumulative. Une pratique déjà installée garde son nom.
+            { famille: 'standards', modele: 'STD-n-meilleurs', titre: 'Cumulative par niveaux', texte: 'Chaque production reçoit un niveau. La note se construit à partir des niveaux que la règle retient.', lien: 'Choisir ce modèle' },
             { famille: 'specifications', modele: 'SPE-simple', titre: 'Par spécifications', texte: 'Chaque production est acceptable ou non acceptable. La note dépend du nombre de productions acceptables.', lien: 'Choisir les spécifications' },
             // « Par standards », À L'ESSAI (21 nov. 2026 ; décision de Grégoire, 14 h 19). Mots PROPOSÉS
             // (TEXTES-2026-11-21-par-standards-vue-simple.md). La famille se reconnaît à son type (`cibles`), jamais à son nom.

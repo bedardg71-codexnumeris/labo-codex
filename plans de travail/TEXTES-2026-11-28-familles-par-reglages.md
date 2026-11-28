@@ -6,7 +6,10 @@
 > **Amendement du 28 nov., 8 h 40 (décidé par Grégoire à 8 h 36)** : dans une cumulative, seuls les travaux certificatifs ou
 > sommatifs entrent dans le cumul ; « toutes les productions comptent » était trop fort. Les textes R1, R4, R8 et R13 sont
 > ceux de l'amendement ; les dix autres n'ont pas bougé.
-> **Ce fichier REMPLACE, pour les repères A1 et C1 seulement**, les citations de `TEXTES-2026-11-27-familles-cum-hyb.md`,
+> **Second amendement du 28 nov., 8 h 45 (décision de Grégoire, 8 h 40)** : le modèle « Hybride » de la vue simple s'appelle
+> « Cumulative par niveaux » (repères V1 et V3, qui remplacent ceux du 27 nov.). Le nom est de Grégoire ; la phrase V1 est
+> sa conséquence mécanique (le nom du modèle dans la liste), PROPOSÉE.
+> **Ce fichier REMPLACE, pour les repères A1 et C1 seulement** (et V1, V3 depuis le second amendement), les citations de `TEXTES-2026-11-27-familles-cum-hyb.md`,
 > qui reste intact (mêmes noms de repères). Les repères R1 à R14 portent le numéro du texte dans le mandat.
 > **Relu par** `tests/unit/sentinelle-familles-par-reglages-2026-11-28.test.js` (les quatorze textes, chacun à sa source) et
 > `sentinelle-renommage-selection-productions.test.js` (A1). Chaque ligne `> …` d'une section est un texte posé tel quel.
@@ -78,3 +81,11 @@
 
 > Hybride
 > Ta note se construit par cumul, mais une note peut être révisée : ta règle retient certaines productions, ou tes élèves ont des jetons de reprise. D'autres productions peuvent compter d'office.
+
+## V1 · js/vue-simple.js · la carte « Ta pratique » de l'accueil (étape 2)
+
+> Choisis un modèle : par standards, par spécifications ou cumulative par niveaux. Tu règles ensuite ce qui construit la note.
+
+## V3 · js/vue-simple.js · le titre du modèle, donc le nom de la pratique créée
+
+> Cumulative par niveaux

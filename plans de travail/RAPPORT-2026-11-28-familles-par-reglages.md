@@ -3,7 +3,7 @@
 **Branche** : `claude/famille-pratique-reglages-fzu7ax` (le mandat nommait `lot/familles-par-reglages-2026-11-28` ; la session cloud était assignée à cette branche-ci, signalé à l'ouverture). **Base** : `lot/renommage-second-lot-2026-11-28`, `6cff76e`.
 **Fait** : la fonction unique au registre, tous les lecteurs branchés, les 14 textes posés, la sentinelle neuve (52 essais), 10 bancs existants réécrits, 10 break-tests rouges, Vitest vert en entier.
 **Pas fait, par mandat** : aucune fusion vers `main`, aucun bump de version, aucun changelog. Les jetons anti-cache `?v=` des 13 fichiers `js/` modifiés sont montés dans `index.html` (le hook de pré-commit l'exige ; `version.json` n'est pas touché).
-**Reste** : le verdict WebKit (Mac) ; deux conséquences à faire trancher par Grégoire (§ 4 : le modèle « Hybride » de la vue simple s'affiche CUM ; § 5 : enregistrer la fiche d'une ancienne pratique sans réglage la fait passer à HYB) ; les listes de textes à relire (§ 6).
+**Reste** : le verdict WebKit (Mac) ; **B du second amendement, non codé** (§ 0 bis : la démo n'offre des jetons que par le défaut du moteur, arrêt demandé par le mandat) ; les listes de textes à relire (§ 6 et § 0 bis). Les deux conséquences renvoyées au premier rapport ont été tranchées : le modèle de la vue simple est renommé (fait) ; la fiche d'une ancienne pratique sans réglage attend B.
 **Arrêt du matin** : la mesure a déclenchait l'arrêt prévu au mandat ; tranché par Cowork à 8 h 00 (réglage DÉCLARÉ : sans réglage, CUM).
 
 ## 0. Amendement du 28 nov., 8 h 40 (décidé par Grégoire à 8 h 36)
@@ -36,6 +36,78 @@ Donc une production formative restée dans un stock ancien **compte dans la note
 - Texte 12, « CUM = cumulative (tout compte, sans reprise ; …) » : **encore trop fort**. « Tout compte » est précisément la formule que l'amendement retire.
 - Texte 6, « Cumul pondéré de toutes les évaluations, sans reprise », et texte 10, « le cumul pondéré de toutes tes évaluations, sans reprise » : ambigus plutôt que faux. « Évaluations » peut se lire « évaluations sommatives », mais l'application appelle aussi « évaluation » la correction d'un travail formatif.
 - Hors des trois : le texte 2 dit « D'autres productions peuvent rester obligatoires et compter toutes », ce qui reste juste (il parle d'un bloc). Le motif interne de la règle s'appelle `tout-compte` : un identifiant, jamais affiché, laissé.
+
+## 0 bis. Second amendement du 28 nov., 8 h 45 (décisions de Grégoire, 8 h 40 et 8 h 42)
+
+### A. Le modèle « Hybride » de la vue simple s'appelle « Cumulative par niveaux » : FAIT
+
+- `js/vue-simple.js` : le titre du modèle (donc le nom de la pratique qu'il crée) et la carte « Ta pratique » de l'accueil, qui énumère les modèles (« Choisis un modèle : par standards, par spécifications ou cumulative par niveaux. … »). Cette seconde phrase est la conséquence mécanique du nom ; elle est PROPOSÉE, à relire.
+- Ce que le modèle installe n'a pas bougé : même gabarit (`STD-n-meilleurs`), « Toutes les productions », jetons refusés, même calcul.
+- **Source ou stock : source seulement.** Une pratique déjà installée depuis ce modèle garde le nom qu'elle porte (« Hybride » depuis le 27 nov., « Par sélection de productions » du 21 au 27 nov., « Par standards » du 13 au 21 nov.). Ce nom se voit : en vue simple, à l'accueil (l'état de l'étape « Ta pratique ») et au bandeau du tableau, à côté du badge ; en vue étendue, dans le menu et la bibliothèque des pratiques, au titre de la fiche, au Comparateur. Rien n'est renommé chez personne.
+
+**Les noms côte à côte, à l'écran « Ta pratique » (je ne tranche pas) :**
+
+| Carte | Titre |
+|---|---|
+| 1 | Cumulative par niveaux |
+| 2 | Par spécifications |
+| 3 | Par standards (à l'essai) |
+
+Deux titres commencent par « Par », le premier non. Aucun ne s'appelle « Cumulative » tout court : pas de collision. L'écart est de forme.
+
+**Trois textes de la vue simple disent encore « hybride », et je ne les ai PAS changés** : ils ne nomment pas le modèle, ils nomment la famille des pratiques que la vue simple sait suivre (le type standards, qu'on peut y régler sur « N meilleures » : une vraie hybride).
+
+- `groupeMotAutres` : « Un groupe dont la pratique n'est ni par standards, ni par spécifications, ni hybride se suit en vue étendue. »
+- `pratiqueAutre` : « La pratique de ce groupe n'est ni par standards, ni par spécifications, ni hybride : elle se règle en vue étendue. »
+- `tableau.autreFamille` : « Le tableau sert aux pratiques par standards, par spécifications et hybrides. La pratique de ce groupe se suit en vue étendue. »
+
+Ils sont maintenant incomplets : une « Cumulative par niveaux » y est servie sans y être nommée. À faire relire.
+
+**La description de la carte, proposée (non posée).** Le texte actuel : « Chaque production reçoit un niveau. La note se construit à partir des niveaux que la règle retient. » « Que la règle retient » parle d'une sélection, alors que le modèle arrive sur « Toutes ». Proposition : « Chaque production reçoit un niveau. La note est le cumul de tous ces niveaux ; tu peux ensuite ne retenir que les meilleurs ou les plus récents. »
+
+**Bancs.** Vitest vert (12 758). Sous Chromium : `vue-simple.spec.js`, 60 verts sur 61 au passage joué, le rouge étant un texte attendu que j'ai corrigé ensuite (la carte de l'accueil) ; non rejoué après cette correction. Écrans épinglés : sept fragments de la référence WebKit repris à la main (le nom, partout où il s'affiche) ; mesuré sous Chromium, ces sept fragments sont les seuls écarts dus au lot.
+
+### B. Sans déclaration, pas de jetons, pour les anciennes pratiques aussi : NON CODÉ, arrêt au point 2
+
+Rien n'est écrit pour B. Les quatre mesures demandées :
+
+**Point 1 — les jetons déjà accordés : ils tiendraient.** Lu dans le code, non joué.
+
+- La note : aucun calcul de note ne lit la configuration des jetons (hors du moteur des jetons, `obtenirConfigJetons` a huit lecteurs, tous des gestes ou des affichages : l'écran d'évaluation, l'import des travaux, la Liste). Une originale remplacée par une reprise sort de la note par les champs de l'évaluation elle-même (`remplaceeParId`, `repriseDeId`). **Aucune note ne changerait.**
+- Comptés : `compterJetonsUtilises` lit les évaluations, pas la configuration.
+- Affichés : les badges « Reprise » et « Délai » de l'écran d'évaluation et le bloc « Gestion des jetons » du profil lisent les évaluations. Chez l'élève, rien ne change : `jetonsDeclares` rend déjà « aucun » pour une pratique sans réglage.
+- Retirables : la corbeille de chaque badge (`retirerJetonDepuisSidebar`) ne lit pas la configuration.
+- Une réserve : le panneau « Jetons » des options de l'évaluation afficherait « Système de jetons désactivé » au lieu de ses cases. Un jeton déjà accordé ne s'y verrait plus ; il resterait visible et retirable par son badge. C'est déjà ce que vit une pratique dont on décoche les jetons après en avoir accordé.
+
+**Point 2 — la démo : ÇA TOURNE MAL, c'est le motif de l'arrêt.**
+
+Faits : les trois pratiques de la démo n'ont aucun réglage de jetons, le pack ne porte aucun ancien réglage du trimestre (`configurationJetons`), et l'activation de la démo n'en pose pas. La démo n'offre donc des jetons QUE par le défaut du moteur. Et elle s'en sert : son corpus contient une reprise accordée (`jetonRepriseApplique`, avec son originale remplacée) et une reprise ciblée.
+
+Ce qui disparaîtrait de la démo sous la règle B, pour ses trois groupes :
+
+1. Le panneau « Jetons » de l'écran d'évaluation (cases « délai » et « reprise », compteurs) : remplacé par « Système de jetons désactivé ».
+2. À l'import des travaux : la case « Cette copie est une reprise : appliquer un jeton de reprise… » et la proposition de reprise devant un doublon.
+3. Tout geste d'accorder un délai ou une reprise : refusé (`verifierDisponibiliteJeton`).
+
+La reprise déjà présente dans le corpus resterait comptée, affichée par son badge et retirable (point 1). Les parcours assistés ne nomment aucun jeton (mesuré : aucune occurrence dans `js/parcours-*.js`) ; la visite guidée de la démo dit seulement que la Liste montre « sa note et ses jetons », ce qui resterait vrai.
+
+Conséquence pour lundi : un testeur qui explore les jetons dans la démo n'y trouverait plus rien à accorder, tant qu'il n'a pas coché « Activer le système de jetons » dans la fiche de la pratique. Le texte 3 dit par ailleurs « Les jetons de reprise y sont possibles aussi » des PAN : les deux PAN de la démo n'en offriraient plus.
+
+**Les voies que je vois, sans trancher** (la première touche un fichier interdit, la décision revient à Grégoire) :
+
+- (i) donner un réglage de jetons explicite aux pratiques de la démo, dans `js/pack-demo-10.js` : c'est le fichier à ne pas toucher, et la pratique « Hybride (démo) » y gagnerait le motif « retient et offre des reprises » ;
+- (ii) poser ce réglage à l'activation de la démo, hors du pack ;
+- (iii) accepter que la démo n'offre plus de jetons ;
+- (iv) coder B en exceptant la démo, ce qui ferait deux moteurs.
+
+**Point 3 — la pratique codée et l'ancien réglage du trimestre.**
+
+- L'ancien réglage du trimestre (`modalitesEvaluation.configurationJetons`) est lu AVANT le défaut, par le moteur comme par `jetonsDeclares` : sous B, il continuerait de valoir, tel quel. Il n'a plus d'écrivain (commentaire du 29 oct.) : il n'existe que dans un stock ancien.
+- La pratique codée sans entrée de bibliothèque (« Cumulative habituelle » désignée directement) n'a pas de bloc à elle : elle suit l'ancien réglage du trimestre s'il existe, sinon elle tombe aujourd'hui sur le défaut (2 / 2 / 2). Sous B, sans ancien réglage, elle n'offrirait plus de jetons, et rien dans l'application ne permettrait de les lui rendre : elle n'a pas de fiche. Il faudrait l'adopter comme pratique de bibliothèque. À dire à Grégoire avant de coder.
+
+**Point 4 — les bancs du 29 oct. à réécrire** (repérés, non touchés) : `tests/integration/jetons-par-defaut-29-oct.spec.js` (deux essais : « sans réglage, la case s'affiche cochée » ; « Jeton de reprise est proposé sans réglage ») ; côté Vitest, `sentinelle-853-delai-sur-reprise` et `sentinelle-wizard-golden-creation-319`, plus ceux que le rouge désignera. Je n'ai pas compté les bancs de navigateur qui accordent un jeton dans la démo sans réglage : une trentaine de fichiers parlent de jetons.
+
+**Source ou stock, pour B tel que décidé** : ni l'un ni l'autre n'est écrit, c'est le comportement du moteur qui change. Mais l'effet tombe sur le stock : toute pratique sans réglage, chez tous, perd les jetons que le défaut lui prêtait, sans qu'aucune donnée ne bouge. Les jetons déjà accordés restent.
 
 ## 1. Les mesures demandées avant d'écrire la règle
 
@@ -293,7 +365,7 @@ Aucune porte terrain n'est due (règles de tête du skill `portes-terrain`) : le
 5. Ouvre une pratique de type « Hybride », mets « Mode de sélection » sur « Toutes les productions » (ou « Tous les artefacts »), jetons décochés : le badge passe à CUM.
 6. Sur iPad, il n'y a pas de survol : la bulle ne s'y lit pas. Le badge, lui, doit changer de la même façon.
 7. Dans l'assistant, choisis la famille hybride puis, à « Construction de la note », « Toutes les productions » : le récapitulatif doit dire « Cumulative », en orange.
-8. En vue simple, choisis le modèle « Hybride » et va au tableau : le badge dit CUM à côté du nom « Hybride ». C'est attendu par la règle ; c'est à Grégoire de dire si ça lui convient.
+8. En vue simple, à « Ta pratique », la première carte s'appelle « Cumulative par niveaux ». Choisis-la et va au tableau : le badge dit CUM à côté du nom « Cumulative par niveaux ». Une pratique installée avant garde son ancien nom (« Hybride ») à côté du même badge CUM.
 
 ## 10. Fichiers du lot
 

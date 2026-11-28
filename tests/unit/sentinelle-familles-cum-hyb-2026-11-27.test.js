@@ -95,8 +95,10 @@ describe('B · les libellés hors registre', () => {
     });
     it('la vue simple : le modèle « Hybride » et ses messages', () => {
         const src = lire('js/vue-simple.js');
-        expect(src).toContain("titre: 'Hybride', texte: 'Chaque production reçoit un niveau.");
-        expect(src).toContain('Choisis un modèle : par standards, par spécifications ou hybride. Tu règles ensuite ce qui construit la note.');
+        // ↻ 28 nov. 2026 (décision de Grégoire, 8 h 40) : le modèle s'appelle « Cumulative par niveaux » (il installe « Toutes
+        // les productions », jetons refusés : sa famille déduite est la cumulative).
+        expect(src).toContain("titre: 'Cumulative par niveaux', texte: 'Chaque production reçoit un niveau.");
+        expect(src).toContain('Choisis un modèle : par standards, par spécifications ou cumulative par niveaux. Tu règles ensuite ce qui construit la note.');
         expect(src).toContain('Le tableau sert aux pratiques par standards, par spécifications et hybrides.');
     });
 });

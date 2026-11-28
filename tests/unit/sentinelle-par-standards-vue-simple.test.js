@@ -81,7 +81,8 @@ describe('V2. Les cartes des modèles', () => {
 
     it('les deux cartes actuelles sont celles d\'avant, mot pour mot, dans le même ordre', () => {
         // ↻ 27 nov. 2026 (trois familles, texte 16) : le titre du modèle devient « Hybride » ; le texte dessous ne change pas.
-        expect(cartes).toContain(`            { famille: 'standards', modele: 'STD-n-meilleurs', titre: 'Hybride', texte: 'Chaque production reçoit un niveau. La note se construit à partir des niveaux que la règle retient.', lien: 'Choisir ce modèle' },
+        // ↻ 28 nov. 2026 (décision de Grégoire, 8 h 40) : « Cumulative par niveaux » ; le texte dessous ne change toujours pas.
+        expect(cartes).toContain(`            { famille: 'standards', modele: 'STD-n-meilleurs', titre: 'Cumulative par niveaux', texte: 'Chaque production reçoit un niveau. La note se construit à partir des niveaux que la règle retient.', lien: 'Choisir ce modèle' },
             { famille: 'specifications', modele: 'SPE-simple', titre: 'Par spécifications', texte: 'Chaque production est acceptable ou non acceptable. La note dépend du nombre de productions acceptables.', lien: 'Choisir les spécifications' },`);
     });
 

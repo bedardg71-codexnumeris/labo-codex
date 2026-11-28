@@ -36,7 +36,7 @@ const REMPLACES_27 = ['V1', 'V2', 'V3', 'V5', 'V6', 'T1', 'A1', 'A2', 'A3', 'A6'
 // ↻ 28 nov. 2026 (familles par réglages, texte 11 accepté par Grégoire à 7 h 18) : le fichier du 28 nov. REMPLACE, pour A1
 // seulement, la citation du 27 nov., qui reste intacte.
 const REGLAGES_28 = sectionsDe(lire('plans de travail/TEXTES-2026-11-28-familles-par-reglages.md'));
-const REMPLACES_28 = ['A1'];
+const REMPLACES_28 = ['A1', 'V1', 'V3'];   // V1, V3 : le modèle de la vue simple, « Cumulative par niveaux » (8 h 40)
 const section = (repere) => (REMPLACES_28.includes(repere) && REGLAGES_28.find((s) => s.repere === repere))
     || (REMPLACES_27.includes(repere) && FAMILLES_27.find((s) => s.repere === repere))
     || (REMPLACES_22.includes(repere) && PORTE_STD.find((s) => s.repere === repere))
