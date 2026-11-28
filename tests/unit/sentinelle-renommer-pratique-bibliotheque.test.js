@@ -17,7 +17,7 @@ import { describe, it, expect } from 'vitest';
 import { chargerScript } from './_helpers/charger-script.js';
 
 const win = chargerScript('js/pratiques-bibliotheque.js');
-const { cibleRenommagePratique: cibler, jugerNomPratique: juger, MODELES_PRATIQUES_PREDEFINIS: MODELES } = win;
+const { cibleRenommagePratique: cibler, jugerNomPratique: juger, poserNomDeLaPratique: poser, MODELES_PRATIQUES_PREDEFINIS: MODELES } = win;
 
 // La relation unique, recopiée de `BibliothequeUI.lieeAExemplaire` (js/bibliotheque-ui.js) : le geste lui passe la vraie.
 const liee = (item, ex) => !!item && !!ex && !!ex.id && (item.id === ex.id || item.idOriginal === ex.id);
@@ -158,5 +158,38 @@ describe('jugerNomPratique — ce que le nom saisi fait écrire', () => {
     it('une cible refusée n’écrit rien, quel que soit le nom', () => {
         const fournie = viser('bibliotheque', ID_MODELE, [], [modele({ estGabarit: true })]);
         expect(juger('Nom neuf', fournie, [])).toMatchObject({ ecrireRangee: false, ecrireJumelle: false });
+    });
+});
+
+// ↻ 28 nov. 2026, 8 h 00 (décision de Cowork) : le geste renomme la pratique EN ENTIER. `config.nom` est la seconde
+// copie du nom, lue avant `nom` par le moteur (`construireConfigComplete` : `config.nom || pratiqueData.nom`).
+describe('poserNomDeLaPratique — le nom s’écrit en entier', () => {
+    it('une pratique qui porte `config.nom` : les deux copies prennent le nouveau nom, rien d’autre ne bouge', () => {
+        const p = pratique('p1', 'Ancien nom', { config: { id: 'p1', nom: 'Ancien nom', echelle: { niveaux: [1] } }, description: 'D' });
+        const avant = JSON.parse(JSON.stringify(p));
+        expect(poser(p, 'Nouveau nom')).toBe(p);
+        expect(p.nom).toBe('Nouveau nom');
+        expect(p.config.nom).toBe('Nouveau nom');
+        expect({ ...p, nom: avant.nom, config: { ...p.config, nom: avant.config.nom } }).toEqual(avant);
+        // Ce que le moteur lira : la même règle que `construireConfigComplete`.
+        expect(p.config.nom || p.nom).toBe('Nouveau nom');
+    });
+
+    it('la seconde copie suit même quand elle différait déjà de `nom` (le stock laissé par l’ancien écrivain)', () => {
+        const p = pratique('p1', 'Nom déjà changé par la fiche', { config: { nom: 'Très vieux nom' } });
+        poser(p, 'Nouveau nom');
+        expect([p.nom, p.config.nom]).toEqual(['Nouveau nom', 'Nouveau nom']);
+    });
+
+    it('sans seconde copie, aucune n’est créée : ni `config`, ni `config.nom`, ni rien dans `configuration`', () => {
+        const sansConfig = pratique('p1', 'Ancien nom');
+        poser(sansConfig, 'Nouveau nom');
+        expect(sansConfig).toEqual(pratique('p1', 'Nouveau nom'));
+        const configSansNom = pratique('p2', 'Ancien nom', { config: { echelle: {} } });
+        poser(configSansNom, 'Nouveau nom');
+        expect(configSansNom.config).toEqual({ echelle: {} });
+        const m = modele();
+        poser(m, 'Nouveau nom');
+        expect(m.configuration).toEqual(modele().configuration);
     });
 });

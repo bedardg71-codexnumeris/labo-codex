@@ -213,6 +213,98 @@ test('RÈGLE c — l’écrivain de l’exemplaire, appelé directement, refuse 
     }
 });
 
+// ↻ 28 nov. 2026, 8 h 00 (décision de Cowork) — LE NOM S'ÉCRIT EN ENTIER. Une pratique née de « Dupliquer » porte son nom
+// deux fois (`nom` et `config.nom`), et le moteur lit la seconde d'abord. Le banc passe par la vraie duplication
+// (`dupliquerPratique`), active la copie, la renomme par le geste, puis lit les trois écrans de l'enseignant·e.
+// BREAK-TEST : retirer la ligne `config.nom = nom` de `poserNomDeLaPratique` (rapport, § 4).
+for (const cote of ['trimestre', 'bibliotheque']) {
+    test(`la seconde copie du nom (config.nom) suit, geste parti de la colonne ${cote} : le récit du calcul, le CSV des résultats et l’échelle d’Évaluer montrent le nouveau nom`, async ({ page }) => {
+        test.setTimeout(120000);
+        await ouvrir(page);
+        const id = await page.evaluate(async () => {
+            fermerModalBibliothequePratiques();
+            const avant = new Set((db.getSync(cle('pratiquesConfigurables'), []) || []).map(p => p.id));
+            await dupliquerPratique(obtenirIdPratiqueActive(), { nom: 'Copie Banc Dryade' });
+            let copie = null;
+            await db.modifier(cle('pratiquesConfigurables'), (lues) => {   // security-ok: fixture du banc, aucune source externe
+                copie = lues.find(p => !avant.has(p.id));
+                delete copie.isDemo;   // une copie de l'enseignant·e : dans la démo, une pratique de la démo ne se renomme pas
+                return lues;
+            }, []);
+            // Son exemplaire, tel quel (même id, même `config`), pour que les deux côtés portent la seconde copie.
+            await db.set('bibliothequePratiques', [JSON.parse(JSON.stringify(copie))]);   // security-ok: fixture littérale écrite par le banc, aucune source externe
+            await PratiqueManager.changerPratiqueActive(copie.id);
+            // Évaluer lit la pratique du COURS (`getPratiqueCours`), pas celle du groupe-cours.
+            const cours = db.getSync('cours', []) || [];
+            const actif = cours.find(c => c.id === getCoursActifId());
+            if (actif) { actif.pratiqueId = copie.id; db.setSync('cours', cours); }   // security-ok: fixture du banc
+            await afficherListePratiquesMateriel();
+            window.__succes = [];   // la duplication a dit son propre succès
+            return copie.id;
+        });
+        const ecrans = () => page.evaluate(() => {
+            const da = obtenirEtudiantsCoursActif()[0].da;
+            const details = calculerDetailsNoteFinale(da);
+            const contexte = { pratiqueNom: obtenirPratiqueParId(obtenirIdPratiqueActive()).obtenirNom() };
+            chargerEchellePerformance();
+            return {
+                recit: details.recit && details.recit.pratiqueNom,
+                detailsNom: details.pratiqueNom,
+                csv: contexte.pratiqueNom,
+                evaluer: Array.from(document.querySelectorAll('#selectEchelle1 option')).map(o => o.textContent).filter(t => /Pratique active/.test(t))
+            };
+        });
+        const copiesDuNom = (cleStockage) => page.evaluate(({ k, id }) => {
+            const p = (db.getSync(k === 'trimestre' ? cle('pratiquesConfigurables') : 'bibliothequePratiques', []) || []).find(x => x.id === id);
+            return [p.nom, p.config.nom];
+        }, { k: cleStockage, id });
+        // Avant le geste : la seconde copie existe, et les trois écrans la lisent.
+        expect(await copiesDuNom('trimestre')).toEqual(['Copie Banc Dryade', 'Copie Banc Dryade']);
+        const avant = await ecrans();
+        expect(avant.recit).toBe('Copie Banc Dryade');
+        expect(avant.csv).toBe('Copie Banc Dryade');
+        expect(avant.evaluer.length, 'Évaluer offre l’échelle de la pratique active').toBe(1);
+        expect(avant.evaluer[0]).toContain('Copie Banc Dryade (Pratique active)');
+
+        await page.locator('#conception-pratiques-notation button[data-action="afficherBibliothequePratiques"]').click();
+        await ouvrirRenommer(page, cote, 'Copie Banc Dryade');
+        await saisirEtRenommer(page, 'Pratique Banc Naïade');
+        await attendreRepos(page);
+
+        expect(await page.evaluate(() => window.__succes)).toEqual([T.faitLesDeux]);
+        expect(await copiesDuNom('trimestre'), 'trimestre : nom et config.nom').toEqual(['Pratique Banc Naïade', 'Pratique Banc Naïade']);
+        expect(await copiesDuNom('bibliotheque'), 'exemplaire : nom et config.nom').toEqual(['Pratique Banc Naïade', 'Pratique Banc Naïade']);
+        const apres = await ecrans();
+        expect(apres.recit, 'le récit du calcul').toBe('Pratique Banc Naïade');
+        expect(apres.detailsNom).toBe('Pratique Banc Naïade');
+        expect(apres.csv, 'la colonne « Pratique (nom) » du CSV').toBe('Pratique Banc Naïade');
+        expect(apres.evaluer[0], 'le libellé de l’échelle dans Évaluer').toContain('Pratique Banc Naïade (Pratique active)');
+    });
+}
+
+test('la fiche écrit aussi la seconde copie du nom (même écrivain) ; une pratique sans config.nom n’en reçoit pas', async ({ page }) => {
+    test.setTimeout(90000);
+    await ouvrir(page, { trimestre: [
+        fictive('BANC_C1', 'Pratique Sirène', { config: { id: 'BANC_C1', nom: 'Pratique Sirène' } }),
+        fictive('BANC_C2', 'Pratique Triton'),
+        fictive('BANC_C3', 'Pratique Kelpie', { config: { id: 'BANC_C3', nom: 'Pratique Kelpie' } })
+    ] });
+    await page.evaluate(async () => { fermerModalBibliothequePratiques(); await chargerPratiquePourModif('BANC_C1'); });
+    await attendreRepos(page);
+    await page.locator('#mat-pratique-nom').fill('Pratique Ondin');
+    await page.locator('#mat-pratique-nom').dispatchEvent('change');
+    await attendreRepos(page);
+    await page.evaluate(() => window.renommerPratiqueDepuisBibliotheque('BANC_C2', 'trimestre').catch(() => {}) && undefined);
+    await saisirEtRenommer(page, 'Pratique Selkie');
+    await attendreRepos(page);
+    expect(await page.evaluate(() => (db.getSync(cle('pratiquesConfigurables'), []) || []).filter(p => /^BANC_C/.test(p.id))
+        .map(p => [p.id, p.nom, p.config ? p.config.nom : 'sans config']))).toEqual([
+        ['BANC_C1', 'Pratique Ondin', 'Pratique Ondin'],
+        ['BANC_C2', 'Pratique Selkie', 'sans config'],
+        ['BANC_C3', 'Pratique Kelpie', 'Pratique Kelpie']   // non renommée : non touchée
+    ]);
+});
+
 test('nom vide : refusé, la fenêtre reste ; nom inchangé : rien n’est écrit ; Annuler : rien', async ({ page }) => {
     test.setTimeout(90000);
     await ouvrir(page, { trimestre: [fictive('BANC_V1', 'Pratique Gnome')], biblio: [fictive('BANC_V1', 'Pratique Gnome')] });

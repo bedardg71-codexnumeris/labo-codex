@@ -1215,11 +1215,15 @@ async function ecrireNomPratiqueDuTrimestre(pratiqueId, nouveauNom) {
         const index = configurations.findIndex(p => p.id === pratiqueId);
         if (index === -1) return undefined;
 
-        configurations[index].nom = nouveauNom;
+        // Le nom en entier : `nom`, et la seconde copie que le moteur lit avant lui quand elle existe (`config.nom`).
+        poserNomDeLaPratique(configurations[index], nouveauNom);
         ecrit = true;
         return configurations;
     }, [], { geste: 'Modifier la pratique' });
-    return ecrit && resultat !== undefined;
+    const fait = ecrit && resultat !== undefined;
+    // L'instance de la pratique active est gardée en mémoire avec son nom : elle se reconstruit à la prochaine lecture.
+    if (fait && window.invaliderCachePratique) window.invaliderCachePratique();
+    return fait;
 }
 
 /** L'une des deux écritures du geste ; un échec rend `false` (le témoin ou la console l'ont déjà dit). */

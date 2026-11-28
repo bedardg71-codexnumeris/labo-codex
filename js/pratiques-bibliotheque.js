@@ -597,6 +597,24 @@ function jugerNomPratique(nomSaisi, cible, autres) {
 }
 
 /**
+ * LE NOM D'UNE PRATIQUE S'ÉCRIT EN ENTIER (28 nov. 2026, décision de Cowork). Une pratique née de « Dupliquer » ou d'une
+ * maquette (js/pratiques.js, `dupliquerPratique`) porte son nom DEUX fois : `nom`, et `config.nom` dans la configuration
+ * résolue qu'elle embarque. Le moteur lit la seconde AVANT la première (`construireConfigComplete`,
+ * js/pratiques/pratique-registre.js : `config.nom || pratiqueData.nom` ; js/evaluation-chargement.js,
+ * `_resoudreEchellePratique`). C'est le seul emplacement lu avant `nom` (mesuré le 28 nov. 2026). Renommer sans elle
+ * laissait l'ancien nom au récit du calcul, au CSV des résultats finaux et au libellé de l'échelle dans Évaluer.
+ * Seule une copie qui EXISTE est mise à jour : rien n'est créé, et une pratique qu'on ne renomme pas n'est pas touchée.
+ * Mute `pratique` et la rend. Les deux écrivains du nom (trimestre, exemplaire) passent par ici.
+ */
+function poserNomDeLaPratique(pratique, nom) {
+    if (!pratique) return pratique;
+    pratique.nom = nom;
+    const config = pratique.config;
+    if (config && typeof config === 'object' && Object.prototype.hasOwnProperty.call(config, 'nom')) config.nom = nom;
+    return pratique;
+}
+
+/**
  * Renommer une pratique depuis la bibliothèque (28 nov. 2026) — l'écriture du nom d'un EXEMPLAIRE, dans la file.
  * La garde du modèle fourni est rejouée ICI, sur la copie fraîchement lue : la copie rangée, intacte, d'un modèle
  * fourni n'est jamais réécrite (la renommer la ferait passer pour modifiée et masquerait le modèle).
@@ -612,7 +630,7 @@ async function renommerExemplairePratique(configId, nouveauNom) {
         if (index === -1) return undefined;
         if (estModeleFourniIntact(bibliotheque[index])) return undefined;
         if (bibliotheque[index].nom === nom) return undefined;
-        bibliotheque[index] = { ...bibliotheque[index], nom, dateModification: new Date().toISOString() };
+        bibliotheque[index] = poserNomDeLaPratique({ ...bibliotheque[index], dateModification: new Date().toISOString() }, nom);
         ecrit = true;
         return bibliotheque;
     }, []);
@@ -901,6 +919,7 @@ window.obtenirToutesLesPratiquesBibliothequeSync = obtenirToutesLesPratiquesBibl
 window.estModeleFourniIntact = estModeleFourniIntact;
 window.cibleRenommagePratique = cibleRenommagePratique;
 window.jugerNomPratique = jugerNomPratique;
+window.poserNomDeLaPratique = poserNomDeLaPratique;
 window.renommerExemplairePratique = renommerExemplairePratique;
 window.obtenirPratiquesParType = obtenirPratiquesParType;
 window.obtenirPratiquesParDiscipline = obtenirPratiquesParDiscipline;
