@@ -387,3 +387,87 @@ describe('Mémos · les mots lus par l\'enseignant sont ceux du fichier TEXTES',
     });
 });
 
+// AMENDEMENT DU 28 NOV. (10 h 25) — la palette « Nœuds » : version compacte, hauteur bornée, « Mémo » au pied.
+// Les gestes et les mesures à l'écran sont au banc Playwright `planif-palette-compacte.spec.js`.
+describe('Palette « Nœuds » · la hauteur disponible, et ce qui tient la garantie', () => {
+    const { carte } = monter();
+    const html = lire('index.html');
+    const css = lire('styles.css');
+    const sourceCarte = lire('js/planification-carte.js');
+    const fichier = lire('plans de travail/TEXTES-2026-11-28-memos-canevas.md');
+    const repere = (r) => tranche(fichier, '\n## ' + r + ' ·', '\n## ', { longueurMin: 20 }).split('\n').filter((l) => l.startsWith('> ')).map((l) => l.slice(2));
+
+    it('la borne va du haut de la palette au bas de ce qu\'on VOIT, moins la marge', () => {
+        // iPad couché, page descendue : la zone finit à 720, la fenêtre à 740 ; palette à 116.
+        expect(carte.hauteurDisponiblePalette(116, 720, 740)).toBe(720 - 116 - 12);
+        // Page en haut : le canevas dépasse sous la fenêtre, c'est la fenêtre qui borne.
+        expect(carte.hauteurDisponiblePalette(296, 900, 740)).toBe(740 - 296 - 12);
+        // Valeurs fractionnaires (une animation en cours) : jamais arrondie vers le haut.
+        expect(carte.hauteurDisponiblePalette(129.08, 720, 740)).toBe(578);
+    });
+
+    it('descendue presque hors de vue, elle garde un minimum utilisable plutôt qu\'une hauteur nulle ou négative', () => {
+        expect(carte.hauteurDisponiblePalette(700, 720, 740)).toBe(200);
+        expect(carte.hauteurDisponiblePalette(900, 720, 740)).toBe(200);
+    });
+
+    it('trois étages : l\'en-tête, la liste qui défile, et « Mémo » au pied, HORS de la liste', () => {
+        const palette = tranche(html, '<div id="planif-palette" class="planif-palette-flottante">', '<!-- #444 (10 août 2026)', { longueurMin: 3000 });
+        const liste = tranche(palette, '<div class="planif-palette-contenu">', '<div class="planif-palette-memo-zone">', { longueurMin: 2000 });
+        expect((liste.match(/class="planif-palette-btn"/g) || []).length, 'les dix-huit nœuds sont dans la liste').toBe(18);
+        expect((liste.match(/<div class="planif-palette-categorie"/g) || []).length).toBe(6);
+        // Entre le dernier nœud et la zone « Mémo », la liste est REFERMÉE : groupe, catégorie, contenu.
+        const fin = tranche(liste, 'data-type="cloture"', undefined, { longueurMin: 50 });
+        expect((fin.match(/<\/div>/g) || []).length, 'groupe, catégorie et liste fermés avant « Mémo »').toBe(3);
+        expect(position(palette, 'id="planif-palette-version"')).toBeLessThan(position(palette, '<div class="planif-palette-contenu">'));
+    });
+
+    it('le style : seule la liste défile, sans entraîner le canevas ; le masquage de la palette tient toujours', () => {
+        const regle = (selecteur) => tranche(css, '\n' + selecteur + ' {', '\n}', { longueurMin: 20 });
+        expect(regle('#planif-palette > .planif-palette-contenu')).toMatch(/overflow-y: auto;[\s\S]*overscroll-behavior: contain;/);
+        expect(regle('#planif-palette > .planif-palette-contenu')).toMatch(/min-height: 0;/);
+        // `display: flex` sur l'id l'emporterait sur `.planif-palette-masquee { display: none }` : il est gardé par :not().
+        expect(css).toContain('#planif-palette:not(.planif-palette-masquee) {');
+        expect(css).not.toMatch(/\n#planif-palette \{[^}]*display: flex/);
+        expect(regle('.planif-palette-compacte .planif-palette-groupe')).toMatch(/grid-template-columns: repeat\(2, minmax\(0, 1fr\)\);/);
+        // Un nom entier : il peut passer à la ligne, il n'est ni coupé ni abrégé.
+        const bouton = regle('.planif-palette-compacte .planif-palette-btn');
+        expect(bouton).toMatch(/white-space: normal;/);
+        expect(bouton).not.toMatch(/ellipsis|overflow: hidden|word-break/);
+    });
+
+    it('la borne est recalculée quand la fenêtre, la zone, la page ou une animation la changent, et quand la palette bouge', () => {
+        const brancher = tranche(sourceCarte, 'function brancherPaletteNoeuds() {', '\n}\n', { longueurMin: 400 });
+        ["window.addEventListener('resize', borner", "window.addEventListener('scroll', borner", 'observateur.observe(zone)', 'observateur.observe(document.body)',
+            "document.addEventListener('transitionend', borner, true)"].forEach((m) => expect(brancher).toContain(m));
+        const deplacer = tranche(sourceCarte, 'function rendrePaletteFlottante(palette) {', 'function onUp(e2) {', { longueurMin: 400 });
+        expect(deplacer).toContain('bornerHauteurPaletteNoeuds();');
+        expect(tranche(sourceCarte, 'function appliquerAffichagePalettes() {', '\n}\n', { longueurMin: 200 })).toContain('bornerHauteurPaletteNoeuds();');
+    });
+
+    it('le bouton de version suit le modèle des palettes d\'annotation : mêmes mots, une préférence, l\'étendue par défaut', () => {
+        const modele = lire('js/travaux-outils.js');
+        const mots = tranche(modele, 'function _texteBoutonVersion(compacte) {', '\n    }', { longueurMin: 40 }).replace(/\\u00e0/g, 'à').replace(/\\u00e9/g, 'é');
+        expect(repere('M14')).toEqual(['Passer à la version compacte']);
+        expect(repere('M15')).toEqual(['Passer à la version étendue']);
+        expect(mots).toContain("'" + repere('M15')[0] + "'");
+        expect(mots).toContain("'" + repere('M14')[0] + "'");
+        const appliquer = tranche(sourceCarte, 'function appliquerVersionPaletteNoeuds() {', '\n}\n', { longueurMin: 200 });
+        expect(appliquer).toContain("compacte ? '" + repere('M15')[0] + "' : '" + repere('M14')[0] + "'");
+        const bouton = tranche(html, 'id="planif-palette-version"', '>', { longueurMin: 40 });
+        expect(bouton).toContain('title="' + repere('M14')[0] + '"');
+        expect(bouton).toContain('data-action="planificationCarte.basculerVersionPaletteNoeuds"');
+        // L'étendue par défaut : seule une préférence à `true` rend la compacte.
+        expect(tranche(sourceCarte, 'function paletteNoeudsCompacte() {', '\n}\n', { longueurMin: 60 })).toContain("obtenirPreference(PREF_PALETTE_NOEUDS_COMPACTE) === true");
+    });
+
+    it('M13 · la corbeille dit qu\'elle prend aussi un mémo, à l\'infobulle comme au lecteur d\'écran', () => {
+        const corbeille = tranche(html, '<div id="planif-corbeille"', '>', { longueurMin: 40 });
+        const [infobulle, nom] = repere('M13');
+        expect(infobulle).toBe('Glisse un bloc ou un mémo ici pour le supprimer');
+        expect(corbeille).toContain('title="' + infobulle + '"');
+        expect(corbeille).toContain('aria-label="' + nom + '"');
+        expect(html).not.toContain('Glisse un bloc ici pour le supprimer');
+    });
+});
+

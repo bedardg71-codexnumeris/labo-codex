@@ -4,13 +4,15 @@ Branche `claude/memos-canevas-r21btn`, partie de `main` à `574bb60` (la 1.260.0
 
 **Fait** : les six gestes, sur la branche et joués sur l'aperçu (section 5). Suite Vitest complète verte (986 fichiers) ; `planif-memos-canevas.spec.js` vert sous Chromium (15 essais).
 
-**Reste** : tes mots (`TEXTES-2026-11-28-memos-canevas.md`, douze textes de travail) ; tes gestes sur l'iPad (section 6) ; le verdict Playwright WebKit du Mac (ici, Chromium seulement) ; le feu vert pour le bump et la fusion.
+**Reste** : tes trois gestes sur l'iPad pour la palette (section 9) ; le verdict Playwright WebKit du Mac (ici, Chromium seulement) ; le feu vert pour le bump et la fusion.
 
 **Source ou stock** : rien du stock existant n'est touché. Une carte enregistrée avant ce lot s'ouvre et se réenregistre à l'identique, octet pour octet (mesuré). Le seul risque de stock est à l'envers, et il est réel : **une version d'AVANT ce lot qui ouvre une carte avec mémos les efface au premier enregistrement** (section 4).
 
 **Écart d'ouverture** : le mandat nommait `lot/memos-canevas` ; cette session du nuage ne peut pousser que sur `claude/memos-canevas-r21btn`. Même base, même contenu.
 
-**Non fait** : la session coordonnatrice me renvoie à `claude/coordination-2026-11-28.md`. Ce fichier n'existe ni dans mon arbre, ni sur `main`, ni sur aucune branche distante (cherché trois fois, après `fetch`, sur toutes les branches distantes). Je n'ai donc rien pu y lire ni y écrire.
+**Coordination** : `claude/coordination-2026-11-28.md` vit dans le Projet claude.ai, pas dans le dépôt (précisé par l'amendement de 10 h 25) : rien à y écrire d'ici, ce rapport suffit.
+
+**Amendement du 28 nov., 10 h 25** (section 9) : tes six gestes sur l'iPad sont conformes ; la palette « Nœuds » reçoit une version compacte et une hauteur bornée, « Mémo » passe au pied de la palette, la corbeille dit qu'elle prend aussi un mémo. Les douze mots des mémos sont acceptés tels quels.
 
 ## 1. Ce que j'ai tranché
 
@@ -131,3 +133,70 @@ Et un regard : le jaune du mémo par-dessus tes blocs, en mode clair et en mode 
 - `je-regarde-cours-2026-11-19.spec.js` (1180 × 820) a rougi **une fois sur quatre** avec le lot, sur une attente de valeur de champ, puis trois fois vert ; vert une fois sur une sur `main`. Je le crois instable plutôt que cassé par le lot, sans pouvoir le prouver sur si peu de passages. À surveiller au verdict du Mac.
 - L'infobulle de la corbeille dit « Glisse un bloc ici pour le supprimer » ; un mémo s'y dépose aussi. C'est un mot : il est au fichier TEXTES, à toi de voir.
 - `planif-barre-lot3.spec.js` comptait onze commandes dans la barre ; elle en a douze. Mis à jour : c'est mon lot.
+
+## 9. Amendement : la palette compacte (28 nov., 10 h 25)
+
+**Le constat de Grégoire, mesuré ici.** Sur un iPad couché, la zone du canevas fait 616 px de haut et la palette en faisait 852 : « Mémo » tombait 230 px sous le bord, coupé. Debout, elle tenait de justesse.
+
+### Ce que j'ai trouvé dans la palette d'annotation, et ce que j'ai repris
+
+`js/travaux-outils.js` (consigne du 2 nov. 2026, `VERSIONS_PALETTES`) : les quatre palettes d'« Annoter et évaluer » qui ont deux versions portent **un bouton dans leur en-tête**. Son infobulle dit ce qu'il fera (« Passer à la version compacte », « Passer à la version étendue »), son icône montre l'autre version, le choix est une **préférence** du navigateur, donc de l'appareil, et le défaut est l'**étendue**. La palette reçoit une classe, et le bouton revient à la forme longue par le même geste.
+
+Repris tel quel : le bouton dans l'en-tête, les deux infobulles **lettre pour lettre**, les deux icônes, la préférence (`planifPaletteNoeudsCompacte`), l'étendue par défaut, la classe (`planif-palette-compacte`). Une sentinelle compare mes mots à ceux de `travaux-outils.js`. Non repris : la palette d'annotation régénère son contenu en changeant de version ; ici la classe suffit, les mêmes boutons se rangent autrement.
+
+### Ce qui est fait
+
+- **La version compacte** : les nœuds d'une famille côte à côte, sur deux colonnes. La palette passe de 175 à 268 px de large. Titres, couleurs et repli des familles : inchangés (mesuré). Les dix-huit noms sont les mêmes, dans le même ordre, entiers : à cette largeur aucun ne passe sur deux lignes, « Pratique autonome » compris ; si un nom devait un jour dépasser, il irait à la ligne, il ne serait pas coupé.
+- **La garantie, dans les deux versions** : la palette a trois étages. L'en-tête (la prise du déplacement), la liste des nœuds, et « Mémo » au pied. **Seule la liste défile.** La hauteur de la palette est bornée à ce qu'on VOIT du canevas sous elle : le bas de la zone, ou le bas de la fenêtre quand la page n'est pas descendue jusqu'au bout, moins 12 px. « Mémo » ne défile pas : il est toujours là, sans rien replier ni faire défiler.
+- **La borne suit** : la fenêtre, la rotation, le plein écran, le défilement de la page, le déplacement de la palette, son affichage. Et la fin d'une animation : l'en-tête de l'application se resserre quand la page défile et décale la palette de 13 px sans changer aucune taille (trouvé au banc, 4,6 px de dépassement avant correctif).
+- **Au doigt, un nœud de la palette fait 44 px** dans les deux versions. Il en faisait 22 : c'est neuf, et c'est le prix de la demande. La liste étendue est donc plus haute qu'avant sur l'iPad (1 152 px) et y défile toujours.
+- **La palette se déplace par sa barre comme avant**, position de départ inchangée (12, 12 ; mesuré). Descendue, elle se raccourcit au lieu de sortir de l'écran.
+- **La corbeille** : « Glisse un bloc ou un mémo ici pour le supprimer », à l'infobulle et, par cohérence, dans son nom pour le lecteur d'écran.
+- `TEXTES-2026-11-28-memos-canevas.md` : M13 (la corbeille), M14 et M15 (le bouton de version, mots repris, pas neufs). M1 à M12 marqués acceptés.
+
+### Les mesures, à la taille d'un iPad
+
+Chromium en contexte tactile, toutes les familles dépliées. « Couché » : 1180 × 740, soit 820 moins les barres de Safari (**supposé** : je n'ai pas la hauteur exacte que Safari laisse ; à 820 pleins la palette a plus de place, pas moins). « Debout » : 820 × 1106.
+
+| | Liste entière | Liste visible | La palette dépasse ? | « Mémo » se touche ? |
+|---|---|---|---|---|
+| Couché, étendue | 1 152 px | 486 px, défile | non | oui |
+| Couché, compacte | 776 px | 486 px, défile | non | oui |
+| Debout, étendue | 1 152 px | 802 px, défile | non | oui |
+| Debout, compacte | 776 px | 776 px, **tient entière** | non | oui |
+
+**À dire sans l'arrondir** : couché, même la version compacte défile encore (il manque 290 px). Elle montre quatre familles sur six d'un coup d'œil (capture `palette-couche-compacte`). Ce qui rend « Mémo » atteignable, ce n'est pas la compacte, c'est le pied fixe. La compacte, elle, fait tenir toute la palette quand l'iPad est debout.
+
+### Glisser un nœud, faire défiler la liste : comment je les départage
+
+Je ne les départage pas moi-même, et je n'ai écrit aucun code de geste. Le glisser d'un nœud depuis la palette est le glisser-déposer NATIF du navigateur (`draggable`), inchangé par ce lot. C'est donc le système qui tranche, par le temps :
+
+- le doigt **glisse tout de suite** : la liste défile ;
+- le doigt **reste posé un instant, puis glisse** : le nœud se soulève et part vers le canevas ;
+- le doigt **touche et relâche** : le nœud se pose à côté du dernier posé.
+
+*Fait mesuré* (Chromium, toucher émulé) : un doigt posé SUR un nœud et remonté de 250 px fait défiler la liste, ne pose aucun nœud, ne déplace ni la palette, ni le canevas, ni la page. *Fait mesuré* (souris) : un nœud de chaque colonne, glissé, se pose là où on le lâche. *Inférence, non mesurée* : l'appui prolongé qui soulève le nœud sur l'iPad. Chromium ne rejoue pas le glisser natif au doigt : c'est ton premier geste d'essai.
+
+### Vérifié
+
+- Vitest : suite complète verte (986 fichiers) ; sept essais de plus dans `sentinelle-memos-canevas`.
+- Playwright Chromium : `planif-palette-compacte.spec.js`, onze essais, verts deux fois de suite. Neuf mutations (borne retirée, borne sur la zone seule, liste qui ne défile pas, une colonne, cibles de 22 px, bouton qui laisse partir la palette, préférence non retenue, borne non suivie au déplacement, ancien mot de la corbeille) : le banc rougit à chacune.
+- Les douze specs qui se servent de la palette ou de la corbeille (110 essais) : 109 verts ; le seul rouge est `planif-corbeille-fixe-1070`, déjà rouge sur `main` sous Chromium (section 8).
+- Captures : `captures-2026-11-28-memos-canevas/`, fichiers `palette-…`.
+
+### Tes gestes d'essai sur l'iPad
+
+Sur l'aperçu, dans la démo, à la carte d'alignement. iPad couché d'abord.
+
+1. Sans rien replier, regarde le bas de la palette « Nœuds ». **Attendu** : « Mémo » est visible, sous un filet. Touche-le : un mémo se pose.
+2. Glisse le doigt vers le haut sur la liste des nœuds, en partant d'un nœud. **Attendu** : la liste défile jusqu'à « Clôture » ; aucun bloc ne se pose ; ni la carte ni la page ne bougent ; « Mémo » reste en place.
+3. Touche le petit bouton à droite du mot « Nœuds », dans l'en-tête de la palette. **Attendu** : les nœuds passent sur deux colonnes, tous les noms entiers. Puis pose un nœud de CHAQUE colonne par un glisser : laisse le doigt posé un instant sur « Factuelle » (colonne de gauche), glisse-le sur le canevas, lâche ; refais-le avec « Conceptuelle » (colonne de droite). **Attendu** : chaque bloc se pose là où tu lâches. Si le nœud ne se soulève pas, ou si c'est la liste qui part, dis-moi lequel des deux.
+
+Et une fois l'iPad debout, en version compacte : **attendu**, toute la palette tient, sans défiler.
+
+### Ce que je n'ai pas pu vérifier
+
+- Le glisser natif d'un nœud au doigt (geste 3), dans les deux versions.
+- La hauteur réelle que Safari laisse sur ton iPad : la borne se calcule sur la fenêtre telle que le navigateur la donne, elle ne dépend pas de mon 740.
+- WebKit, comme pour le reste du lot.
+

@@ -8991,6 +8991,7 @@ function initialiser() {
     }
 
     brancherMemos();
+    brancherPaletteNoeuds();
     appliquerZoom();
 
     // Zoom molette
@@ -9129,6 +9130,7 @@ function initialiser() {
                     if (e2.pointerId !== pointerId) return;
                     palette.style.left = (startLeft + e2.clientX - startX) + 'px';
                     palette.style.top = (startTop + e2.clientY - startY) + 'px';
+                    bornerHauteurPaletteNoeuds();   // déplacée, sa hauteur disponible change
                 }
                 function onUp(e2) {
                     if (e2.pointerId !== pointerId) return;
@@ -10197,6 +10199,103 @@ function appliquerAffichagePalettes() {
                             : 'Afficher la palette « ' + def.nom + ' »';
         btn.setAttribute('aria-label', btn.title);
     });
+    bornerHauteurPaletteNoeuds();   // masquée, elle n'avait pas de boîte à mesurer
+}
+
+/* === PALETTE « NŒUDS » : VERSION COMPACTE ET HAUTEUR BORNÉE (amendement du 28 nov. 2026) ===
+
+   Constat de Grégoire sur l'iPad couché : la palette est plus haute que l'écran. Le défaut
+   précède les mémos (« Enseignement explicite » était déjà coupée), mais « Mémo », rangé au
+   bas, le rendait bloquant.
+
+   ▣ DEUX RÉPONSES, INDÉPENDANTES.
+   1. La version COMPACTE, sur le modèle des palettes d'« Annoter et évaluer »
+      (travaux-outils.js, `VERSIONS_PALETTES`) : un bouton dans l'en-tête, dont le title dit
+      ce qu'il fera ; une préférence par navigateur ; l'étendue par défaut ; une classe sur
+      la palette. Ici la classe suffit : les nœuds d'une famille se rangent sur deux
+      colonnes (styles.css), le contenu n'est pas régénéré.
+   2. La GARANTIE, quelle que soit la version : la palette ne dépasse jamais la hauteur
+      disponible. Sa hauteur est bornée à ce qu'on VOIT du canevas sous elle ; au-delà, la
+      liste des nœuds défile à l'intérieur, et « Mémo », au pied, hors de la zone qui
+      défile, reste toujours atteignable. */
+var PREF_PALETTE_NOEUDS_COMPACTE = 'planifPaletteNoeudsCompacte';
+var PALETTE_NOEUDS_HAUTEUR_MIN = 200;   // px : l'en-tête, deux ou trois nœuds et « Mémo »
+var PALETTE_NOEUDS_MARGE_BAS = 12;      // px : la même marge qu'en haut et à gauche
+
+function paletteNoeudsCompacte() {
+    try {
+        return typeof obtenirPreference === 'function' && obtenirPreference(PREF_PALETTE_NOEUDS_COMPACTE) === true;
+    } catch (e) {
+        return false;
+    }
+}
+
+/** La palette porte la version choisie, et son bouton dit l'autre. Rien n'est écrit. */
+function appliquerVersionPaletteNoeuds() {
+    var palette = document.getElementById('planif-palette');
+    if (!palette) return;
+    var compacte = paletteNoeudsCompacte();
+    palette.classList.toggle('planif-palette-compacte', compacte);
+    var bouton = document.getElementById('planif-palette-version');
+    if (bouton) {
+        // Les mots des palettes d'annotation, repris tels quels.
+        bouton.title = compacte ? 'Passer à la version étendue' : 'Passer à la version compacte';
+        bouton.setAttribute('aria-label', bouton.title);
+    }
+    bornerHauteurPaletteNoeuds();
+}
+
+/** Le geste du bouton : l'autre version, retenue en préférence (par navigateur, donc par appareil). */
+function basculerVersionPaletteNoeuds() {
+    try {
+        if (typeof definirPreference === 'function') definirPreference(PREF_PALETTE_NOEUDS_COMPACTE, !paletteNoeudsCompacte());
+    } catch (e) {
+        console.warn('[Planification] Version de la palette non enregistrée :', e);
+    }
+    appliquerVersionPaletteNoeuds();
+}
+
+/**
+ * La hauteur que la palette peut prendre : du haut de la palette au bas de ce qu'on VOIT
+ * du canevas (le bas de la zone, ou celui de la fenêtre si la page n'est pas descendue
+ * jusqu'au bout), moins une marge. Pure, pour le banc.
+ */
+function hauteurDisponiblePalette(hautPalette, basZone, basFenetre) {
+    var bas = Math.min(basZone, basFenetre);
+    return Math.max(PALETTE_NOEUDS_HAUTEUR_MIN, Math.floor(bas - hautPalette - PALETTE_NOEUDS_MARGE_BAS));
+}
+
+function bornerHauteurPaletteNoeuds() {
+    var palette = document.getElementById('planif-palette');
+    var zone = document.getElementById('planif-zone-wrapper');
+    if (!palette || !zone || typeof palette.getBoundingClientRect !== 'function') return;
+    var p = palette.getBoundingClientRect();
+    if (!p.width && !p.height) return;   // masquée : rien à mesurer, on y reviendra à l'affichage
+    palette.style.maxHeight = hauteurDisponiblePalette(p.top, zone.getBoundingClientRect().bottom, window.innerHeight) + 'px';
+}
+
+/** Branchée une fois, à l'initialisation : la borne suit la fenêtre, la zone et le défilement de la page. */
+function brancherPaletteNoeuds() {
+    var bouton = document.getElementById('planif-palette-version');
+    // Dans la barre de la palette, un appui démarre son déplacement (et capture le pointeur) :
+    // le bouton garde le sien, sans quoi il ne recevrait jamais son clic.
+    if (bouton) bouton.addEventListener('pointerdown', function(e) { e.stopPropagation(); });
+    var borner = throttleRAF(bornerHauteurPaletteNoeuds);
+    window.addEventListener('resize', borner, { passive: true });
+    window.addEventListener('scroll', borner, { passive: true });
+    // La zone change de taille (plein écran, rotation) ; et ce qui est AU-DESSUS d'elle aussi (un
+    // bandeau qui paraît ou part la décale sans la redimensionner) : c'est la hauteur du corps qui le dit.
+    var zone = document.getElementById('planif-zone-wrapper');
+    if (zone && typeof ResizeObserver === 'function') {
+        var observateur = new ResizeObserver(function() { borner(); });
+        observateur.observe(zone);
+        observateur.observe(document.body);
+    }
+    // Une animation au-dessus du canevas (l'en-tête qui se resserre quand la page défile) déplace la
+    // palette SANS changer aucune taille : seule sa fin le dit. Mesuré le 28 nov. : 13 px, plus que la marge.
+    document.addEventListener('transitionend', borner, true);
+    document.addEventListener('animationend', borner, true);
+    appliquerVersionPaletteNoeuds();
 }
 
 function basculerDetailLecon(leconId) {
@@ -12676,6 +12775,9 @@ window.planificationCarte = {
     // Mémos : la palette en pose un, la barre d'outils les masque ou les montre (data-action).
     creerMemo: function() { return window.planificationMemos.creer(); },
     basculerMemos: function() { window.planificationMemos.basculerVisibilite(); },
+    // Palette « Nœuds » (amendement du 28 nov.) : la version compacte, et la borne de hauteur (pure, pour le banc).
+    basculerVersionPaletteNoeuds: basculerVersionPaletteNoeuds,
+    hauteurDisponiblePalette: hauteurDisponiblePalette,
     zoomerAuNiveau: zoomerAuNiveau,
     // Pour la Bibliothèque (lot 3) : elle porte désormais la gestion des cartes.
     dupliquerCarte: dupliquerCarte,

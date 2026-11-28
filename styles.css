@@ -23555,11 +23555,85 @@ body.planif-plein-ecran-actif #planif-guide-panel {
     .planif-memo-texte { padding-bottom: 22px; }
 }
 
-/* Dans la palette : à l'écart des blocs, sous un filet. */
+/* Dans la palette : à l'écart des blocs, sous un filet — et AU PIED, hors de la zone qui défile. */
 .planif-palette-memo-zone {
-    margin-top: 4px;
-    padding: 6px 4px 2px;
+    flex: 0 0 auto;
+    padding: 6px 10px 8px;
     border-top: 1px dashed var(--planif-couleur-bordure, rgba(106, 172, 184, 0.35));
+}
+
+/* === PALETTE « NŒUDS » : HAUTEUR BORNÉE ET VERSION COMPACTE (amendement du 28 nov. 2026) ===
+   Constat de Grégoire sur l'iPad couché : la palette dépassait l'écran, et « Mémo », au bas, était
+   hors de portée.
+
+   1. LA GARANTIE, dans les deux versions : trois étages — l'en-tête (la prise du déplacement), la
+      liste des nœuds, « Mémo ». Seule la liste défile. La borne (`max-height`) est posée par
+      `bornerHauteurPaletteNoeuds` à ce qu'on voit du canevas ; la valeur d'ici vaut avant le JS.
+      `:not(.planif-palette-masquee)` : `display: flex` sur l'id l'emporterait sinon sur le masquage. */
+#planif-palette:not(.planif-palette-masquee) {
+    display: flex;
+    flex-direction: column;
+    max-height: calc(100% - 24px);
+}
+#planif-palette > .planif-palette-barre { flex: 0 0 auto; gap: 6px; }
+#planif-palette > .planif-palette-contenu {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    /* Au bout de la liste, le doigt n'entraîne ni le canevas ni la page. */
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* 2. LE BOUTON DE VERSION, dans l'en-tête : même dessin que celui des palettes d'annotation. */
+.planif-palette-version {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    padding: 0;
+    border: 1px solid transparent;
+    border-radius: 5px;
+    background: transparent;
+    color: var(--texte-secondaire, #8aa4b0);
+    cursor: pointer;
+    touch-action: manipulation;          /* dans une barre en `touch-action: none`, il garde son toucher */
+}
+.planif-palette-version:hover { border-color: var(--planif-couleur-bordure); color: var(--texte-principal, #d0e0e4); }
+.planif-palette-version:focus-visible { outline: 2px solid var(--planif-couleur-selection, #6aacb8); outline-offset: 1px; }
+/* Le bouton montre l'AUTRE version, celle où il mène. */
+.planif-palette-version .planif-version-vers-etendue { display: none; }
+.planif-palette-compacte .planif-palette-version .planif-version-vers-compacte { display: none; }
+.planif-palette-compacte .planif-palette-version .planif-version-vers-etendue { display: inline; }
+
+/* 3. LA VERSION COMPACTE : les nœuds d'une famille côte à côte, sur deux colonnes. Un peu de
+      largeur contre beaucoup de hauteur. Titres, couleurs et repli des familles inchangés. Les noms
+      restent ENTIERS : un nom trop long pour sa colonne passe sur deux lignes, jamais coupé. */
+#planif-palette.planif-palette-compacte {
+    width: 268px;
+    max-width: 268px;
+}
+.planif-palette-compacte .planif-palette-groupe {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 3px;
+}
+.planif-palette-compacte .planif-palette-btn {
+    white-space: normal;
+    text-align: left;
+    line-height: 1.2;
+    min-width: 0;
+    hyphens: none;
+}
+
+/* 4. AU DOIGT (iPad) : un nœud de la palette est une cible de 44 px, dans les deux versions —
+      il faisait 22 px. Et le bouton de version, 44 × 44. */
+@media (pointer: coarse) {
+    #planif-palette .planif-palette-btn { min-height: 44px; }
+    .planif-palette-version { width: 44px; height: 44px; }
+    #planif-palette > .planif-palette-barre { padding-top: 0; padding-bottom: 0; padding-right: 2px; min-height: 44px; }
 }
 .planif-palette-memo {
     display: flex;
