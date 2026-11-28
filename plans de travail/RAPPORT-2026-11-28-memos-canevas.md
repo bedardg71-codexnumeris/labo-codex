@@ -146,7 +146,7 @@ Repris tel quel : le bouton dans l'en-tête, les deux infobulles **lettre pour l
 
 ### Ce qui est fait
 
-- **La version compacte** : les nœuds d'une famille côte à côte, sur deux colonnes. La palette passe de 175 à 268 px de large. Titres, couleurs et repli des familles : inchangés (mesuré). Les dix-huit noms sont les mêmes, dans le même ordre, entiers : à cette largeur aucun ne passe sur deux lignes, « Pratique autonome » compris ; si un nom devait un jour dépasser, il irait à la ligne, il ne serait pas coupé.
+- **La version compacte** : les nœuds d'une famille côte à côte, sur deux colonnes. La palette passe de 175 à 268 px de large. Titres, couleurs et repli des familles : inchangés (mesuré). Les dix-huit noms sont les mêmes, dans le même ordre, entiers. Sur l'aperçu, avec la police de l'application, un seul passe sur deux lignes : « Pratique autonome » (capture `palette-couche-compacte-memo-pose`) ; aucun n'est coupé ni abrégé. (Au banc local, où la police de l'application n'est pas chargée, tous tiennent sur une ligne : c'est l'aperçu qui fait foi.)
 - **La garantie, dans les deux versions** : la palette a trois étages. L'en-tête (la prise du déplacement), la liste des nœuds, et « Mémo » au pied. **Seule la liste défile.** La hauteur de la palette est bornée à ce qu'on VOIT du canevas sous elle : le bas de la zone, ou le bas de la fenêtre quand la page n'est pas descendue jusqu'au bout, moins 12 px. « Mémo » ne défile pas : il est toujours là, sans rien replier ni faire défiler.
 - **La borne suit** : la fenêtre, la rotation, le plein écran, le défilement de la page, le déplacement de la palette, son affichage. Et la fin d'une animation : l'en-tête de l'application se resserre quand la page défile et décale la palette de 13 px sans changer aucune taille (trouvé au banc, 4,6 px de dépassement avant correctif).
 - **Au doigt, un nœud de la palette fait 44 px** dans les deux versions. Il en faisait 22 : c'est neuf, et c'est le prix de la demande. La liste étendue est donc plus haute qu'avant sur l'iPad (1 152 px) et y défile toujours.
@@ -182,7 +182,7 @@ Je ne les départage pas moi-même, et je n'ai écrit aucun code de geste. Le gl
 - Vitest : suite complète verte (986 fichiers) ; sept essais de plus dans `sentinelle-memos-canevas`.
 - Playwright Chromium : `planif-palette-compacte.spec.js`, onze essais, verts deux fois de suite. Neuf mutations (borne retirée, borne sur la zone seule, liste qui ne défile pas, une colonne, cibles de 22 px, bouton qui laisse partir la palette, préférence non retenue, borne non suivie au déplacement, ancien mot de la corbeille) : le banc rougit à chacune.
 - Les douze specs qui se servent de la palette ou de la corbeille (110 essais) : 109 verts ; le seul rouge est `planif-corbeille-fixe-1070`, déjà rouge sur `main` sous Chromium (section 8).
-- Captures : `captures-2026-11-28-memos-canevas/`, fichiers `palette-…`.
+- Captures prises sur l'aperçu Netlify du commit `4d65de68b`, iPad couché et debout, toutes les familles dépliées : `captures-2026-11-28-memos-canevas/`, huit fichiers `palette-…` (étendue, étendue liste défilée, compacte, compacte avec un mémo posé sans rien replier). Mesures identiques à celles du banc local ; la palette s'arrête 12 px au-dessus du bas du canevas dans les quatre cas.
 
 ### Tes gestes d'essai sur l'iPad
 
