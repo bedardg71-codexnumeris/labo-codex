@@ -242,14 +242,15 @@ const AIDE_CONTEXTUELLE = {
         sections: [
             {
                 type: 'texte',
-                contenu: 'Quatre pratiques sont disponibles. Choisis celle qui correspond à ta philosophie d’enseignement — tu peux toujours la changer.'
+                contenu: 'Cinq pratiques sont disponibles. Choisis celle qui correspond à ta philosophie d’enseignement — tu peux toujours la changer.'
             },
             {
                 type: 'liste',
-                titre: 'Les quatre pratiques',
+                titre: 'Les cinq pratiques',
                 items: [
-                    '<strong>Cumulative (CUM)</strong> — calcule une moyenne pondérée traditionnelle.',
-                    '<strong>PAN par standards (STD)</strong> — retient les meilleures démonstrations de compétence\u00a0; l’étudiant·e progresse en montrant sa maîtrise, pas en accumulant des points.',
+                    '<strong>Cumulative (CUM)</strong> — calcule une moyenne pondérée habituelle.',
+                    '<strong>Hybride (HYB)</strong> — donne des niveaux (ex. I-D-M-E)\u00a0; la note retient certaines productions.',
+                    '<strong>PAN par standards (STD)</strong> — donne un niveau par cible d’apprentissage du cours\u00a0; la note vient du meilleur niveau démontré pour chaque cible.',
                     '<strong>PAN par spécifications (SPE)</strong> — fonctionne par contrat\u00a0: chaque production est réussie ou non selon des critères prédéfinis\u00a0; c’est l’ensemble des cibles atteintes qui détermine la note.',
                     '<strong>Dénotation (DEN)</strong> — retire la note chiffrée des travaux au profit d’une rétroaction qualitative sur des cibles et critères explicites ; la note certificative (RREC) est posée par jugement à la fin.',
                 ]
@@ -1159,7 +1160,7 @@ const AIDE_CONTEXTUELLE = {
                 titre: 'Quand chacune travaille',
                 items: [
                     "Pratique alternative de notation\u00a0: la PLAGE travaille tout le temps — c’est ce que voit ton étudiant·e. La valeur ponctuelle sert au moment du bulletin.",
-                    "Sommative traditionnelle\u00a0: la VALEUR PONCTUELLE travaille tout le temps — c’est la note. La plage sert en arrière-plan, pour situer le niveau atteint.",
+                    "Cumulative habituelle\u00a0: la VALEUR PONCTUELLE travaille tout le temps — c’est la note. La plage sert en arrière-plan, pour situer le niveau atteint.",
                     "Les deux ne servent pas au même moment, mais les deux servent. Rien ne t’empêche de changer de pratique en cours de trimestre\u00a0: c’est pourquoi l’application demande les deux dès le départ."
                 ]
             }
@@ -1625,14 +1626,14 @@ const AIDE_CONTEXTUELLE = {
         sections: [
             {
                 type: 'texte',
-                contenu: "L'assistant te guide en 8 étapes pour configurer une pratique de notation alignée avec tes intentions pédagogiques : type d'évaluation, sommative ou portfolio, règles de reprise, jetons, calcul de la note finale."
+                contenu: "L'assistant te guide en 8 étapes pour configurer une pratique de notation alignée avec tes intentions pédagogiques : type d'évaluation, cumulative ou portfolio, règles de reprise, jetons, calcul de la note finale."
             },
             {
                 type: 'liste',
                 titre: "Les 8 étapes",
                 items: [
                     "<strong>1. Informations de base</strong> — nom et description de la pratique.",
-                    "<strong>2. Type d'évaluation</strong> — sommative classique, portfolio de progression, ou variante.",
+                    "<strong>2. Type d'évaluation</strong> — cumulative habituelle, portfolio de progression, ou variante.",
                     "<strong>3. Règles de remplacement</strong> — comment les nouvelles évaluations affectent les anciennes.",
                     "<strong>4. Système de jetons</strong> — délai, reprise (optionnel).",
                     "<strong>5. Échelle de performance</strong> — niveaux et leur poids dans la note.",

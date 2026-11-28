@@ -652,7 +652,7 @@ function lireEchelleNoteGlobale(da) {
             return {
                 echelle: null,
                 raison: 'note-chiffree',
-                message: 'La pratique sommative établit la note globale comme un pourcentage '
+                message: 'La pratique cumulative établit la note globale comme un pourcentage '
                     + 'pondéré. Elle ne la situe dans aucune échelle de niveaux — c\'est une note, '
                     + 'pas un niveau atteint.'
             };

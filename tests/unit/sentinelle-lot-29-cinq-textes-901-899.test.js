@@ -41,9 +41,10 @@ describe('lot 29 · #901 — quatre phrases de l\'Aide disent ce que fait le cod
         expect(lire('js/pratiques/denotation-saisie-ui.js')).toMatch(/ciblesAtteintes/);
     });
 
-    it('C-6 · l\'indice P : « note courante », les quatre familles nommées', () => {
+    // ↻ 28 nov. 2026 (second lot du renommage, texte 21) : les cinq pratiques nommées, Cumulative en tête.
+    it('C-6 · l\'indice P : « note courante », les cinq pratiques nommées', () => {
         const src = mots(lire('js/guides-pedagogiques.js'));
-        expect(src).toContain("<p>L'indice P est la note courante de l'étudiant·e, calculée selon la pratique de notation active (Standards, Spécifications, Dénotation ou Sommative). Il ne représente <em>pas</em> la note finale du trimestre");
+        expect(src).toContain("<p>L'indice P est la note courante de l'étudiant·e, calculée selon la pratique de notation active (Cumulative, Hybride, Standards, Spécifications ou Dénotation). Il ne représente <em>pas</em> la note finale du trimestre");
         expect(src).not.toContain('PAN – Standards, Sommative, ou une pratique personnalisée');
     });
 

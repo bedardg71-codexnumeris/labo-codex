@@ -87,8 +87,12 @@ describe('B · les bulles G1, G2 et l\'assistant (A1, A2, A3)', () => {
     });
     it('G5 : la bulle de « Type de pratique », mot pour mot', () => {
         const bulle = lire('js/accompagnement-contenu-hover.js').replace(/\\'/g, '\'');
-        expect(bulle).toContain(`'cn-pratique-type':\n        '${texte('G5')[0]}'`);
-        expect(/HYB = ([^(]*)\(/.exec(texte('G5')[0])[1]).not.toMatch(INTERDIT);   // ↻ 27 nov. 2026 : le sigle HYB
+        // ↻ 28 nov. 2026 (second lot du renommage, texte 13, relu et accepté par Grégoire) : le texte du 27 nov., retouché d'un mot.
+        const AVANT_28 = '(moyenne pondérée traditionnelle, souvent dite sommative)';
+        expect(texte('G5')[0]).toContain(AVANT_28);
+        const g5 = texte('G5')[0].replace(AVANT_28, '(moyenne pondérée habituelle, souvent dite sommative)');
+        expect(bulle).toContain(`'cn-pratique-type':\n        '${g5}'`);
+        expect(/HYB = ([^(]*)\(/.exec(g5)[1]).not.toMatch(INTERDIT);   // ↻ 27 nov. 2026 : le sigle HYB
     });
     it('l\'assistant : le nom du récapitulatif, la carte de la voie rapide, le titre de la configuration', () => {
         const win = { addEventListener() {}, removeEventListener() {}, echapperHtml };
@@ -118,7 +122,9 @@ const ENDROITS = [
     ['js/etudiants.js', /pratique pédagogique choisie \(Cumulative, ([^,]*), ou autre\)/g, 1],   // ↻ 27 nov.
     ['js/comparateur-pratiques.js', /Pour certaines pratiques — surtout ([^—]*) —/g, 1],                      // la note de l'Exploration
     ['js/donnees-v2.js', /'pan-standards': '([^']*)'/g, 1],
-    ['js/profil-etudiant-sections-affichage.js', /indices\.pratique === 'PAN' \? '([^']*)'/g, 1],
+    // ↻ 28 nov. 2026 (second lot du renommage, texte 26) : la carte « Méthodologie de calcul » du profil ne dit plus « Hybride »
+    // pour toute pratique non cumulative ; elle lit le nom de la pratique active au registre (`obtenirNomTypePratique`).
+    ['js/pratiques/pratique-registre.js', /^\s*standards:\s*\{[^}]*nom: '([^']*)'/gm, 1],
     ['js/productions.js', /et facultative\. ([^,]*), elle entre dans le calcul/g, 1],                         // la bulle de la terminale
     ['js/pack-demo-10.js', /"id": "demo-std-litt",\s*"nom": "([^"]*)"/g, 1]                                  // la démo
 ];

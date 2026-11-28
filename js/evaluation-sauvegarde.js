@@ -579,8 +579,8 @@ function changerStatutRemise(num) {
 const AVIS_COPIE_NON_RECEVABLE = Object.freeze({
     titre: 'Travail non recevable',
     corps: 'Ton évaluation est gardée, mais la copie montre «\u00a0Non recevable\u00a0» au lieu de sa note et de ses niveaux, '
-        + 'jusque sur le PDF de l\'étudiant·e. Dans la note du cours, elle vaut ce que dit ta pratique\u00a0: 0 en sommative, '
-        + 'un travail non satisfaisant en spécifications, hors du portfolio en standards. Dans la complétion, elle compte '
+        + 'jusque sur le PDF de l\'étudiant·e. Dans la note du cours, elle vaut ce que dit ta pratique\u00a0: 0 en cumulative, '
+        + 'un travail non satisfaisant en spécifications, hors du portfolio en hybride. Dans la complétion, elle compte '
         + 'comme non remise. Retirer le statut fait tout revenir.',
     jeton: 'Un jeton de reprise peut être appliqué pour permettre une nouvelle remise.'
 });

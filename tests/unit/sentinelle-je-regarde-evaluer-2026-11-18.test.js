@@ -203,7 +203,11 @@ describe('2. les textes des dix bulles : ceux de la section D, mot pour mot', ()
         // Puis les mots des trois familles (27 nov. 2026, textes 26 à 28) : chacun doit trouver sa ligne.
         const r27 = retoucherLignes27(r22.lignes, aPlat, ['T26a', 'T26b', 'T27', 'T28a', 'T28b']);
         expect(r27.servies, 'chaque retouche du 27 nov. trouve sa ligne dans la consigne du 18').toEqual(['T26a', 'T26b', 'T27', 'T28a', 'T28b']);
-        const toutes = r27.lignes;
+        // Puis le mot du second lot du renommage (28 nov. 2026, texte 20, relu et accepté par Grégoire) : « traditionnelle »
+        // devient « habituelle ». Une ligne, et elle doit la trouver.
+        const AVANT_28 = aPlat("qu'elle soit traditionnelle ou alternative"), APRES_28 = aPlat("qu'elle soit habituelle ou alternative");
+        expect(r27.lignes.filter((l) => l.includes(AVANT_28)), 'la retouche du 28 nov. trouve sa ligne dans la consigne du 18').toHaveLength(1);
+        const toutes = r27.lignes.map((l) => l.replace(AVANT_28, APRES_28));
         // (C2 ajoute une ligne à la bulle 6 : on redécoupe d'après ce compte.)
         let i = 0;
         bulles.forEach((b, k) => { const n = marques[k] + (k === 5 ? 1 : 0); b.lignes = toutes.slice(i, i + n); i += n; });

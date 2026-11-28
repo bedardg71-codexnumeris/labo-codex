@@ -1,6 +1,6 @@
 /**
  * accompagnement-contenu-terme.js
- * Catalogue de contenu pour le mode `terme` (glossaire — 73 termes).
+ * Catalogue de contenu pour le mode `terme` (glossaire — 74 termes).
  * Source : docs/refonte-textes/glossaire-bloc6.md (19 avril 2026) ; le glossaire statique de l'Aide y est versé
  * le 28 oct. 2026 (#1152, lot 3) : le seul glossaire, celui que « En savoir plus » ouvre.
  *
@@ -463,7 +463,16 @@ const GLOSSAIRE = {
         terme: 'CUM — Cumulative',
         categorie: 'Pratiques de notation',
         etape: 'transversal',
-        definition: 'Pratique de notation traditionnelle, souvent appelée sommative : la note est le cumul pondéré des résultats. Chaque production contribue à la note finale selon sa pondération.',
+        definition: 'Pratique de notation habituelle, souvent appelée sommative ou traditionnelle : la note est le cumul pondéré des résultats. Chaque production contribue à la note finale selon sa pondération.',
+        voir: 'Conception › Pratiques'
+    },
+
+    'hyb-hybride': {
+        cle: 'hyb-hybride',
+        terme: 'HYB — Hybride',
+        categorie: 'Pratiques de notation',
+        etape: 'transversal',
+        definition: 'Pratique de notation qui donne des niveaux aux productions (ex. I-D-M-E) et compose la note à partir de certaines d\'entre elles, selon sa configuration : les meilleures, les plus récentes, ou deux blocs dont l\'un compte en entier. Un niveau n\'est pas définitif : il peut être révisé en cours d\'apprentissage.',
         voir: 'Conception › Pratiques'
     },
 
@@ -472,7 +481,7 @@ const GLOSSAIRE = {
         terme: 'STD — PAN par standards',
         categorie: 'Pratiques de notation',
         etape: 'transversal',
-        definition: 'Pratique alternative de notation qui compose la note à partir des démonstrations de compétence que retient sa configuration. L\'étudiant·e progresse en montrant sa maîtrise, pas en accumulant des points. Le résultat le plus récent ou le meilleur peut remplacer les précédents, selon la configuration.',
+        definition: 'Pratique alternative de notation qui donne un niveau par cible d\'apprentissage du cours. La note vient du meilleur niveau démontré pour chaque cible. L\'étudiant·e progresse en montrant sa maîtrise, pas en accumulant des points.',
         voir: 'Conception › Pratiques'
     },
 
@@ -606,7 +615,7 @@ const GLOSSAIRE = {
         terme: 'Notes finalisées',
         categorie: 'Pratiques de notation',
         etape: 'transversal',
-        definition: 'Une case de la pratique de notation, à cocher quand les notes sont arrêtées. Les PDF de rétroaction titrent alors « Note finale », à la place de « Note actuelle du cours » (pratique sommative) ou de « Note provisoire » (pratique alternative), et ne listent plus les « Artefacts à venir ». En mode « Deux blocs », une production obligatoire non remise compte alors pour zéro ; avant, elle est laissée de côté.',
+        definition: 'Une case de la pratique de notation, à cocher quand les notes sont arrêtées. Les PDF de rétroaction titrent alors « Note finale », à la place de « Note actuelle du cours » (pratique cumulative) ou de « Note provisoire » (pratique alternative), et ne listent plus les « Artefacts à venir ». En mode « Deux blocs », une production obligatoire non remise compte alors pour zéro ; avant, elle est laissée de côté.',
         voir: 'Conception › Pratiques'
     },
 

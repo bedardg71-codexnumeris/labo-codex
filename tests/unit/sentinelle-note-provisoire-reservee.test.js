@@ -236,15 +236,16 @@ describe('#1207 — en sommative, « Note actuelle du cours » ; en pratique alt
     });
 
     describe('« Notes finalisées » : le réglage et le glossaire disent les deux titres', () => {
+        // ↻ 28 nov. 2026 (second lot du renommage, textes 8 et 25) : « (pratique sommative) » → « (pratique cumulative) ».
         it('le réglage, mot pour mot', () => {
             const html = lire('index.html');
-            expect(html).toContain('Active le titre « Note finale » sur les PDF de rétroaction, à la place de « Note actuelle du cours » (pratique sommative) ou de « Note provisoire » (pratique alternative), et retire la liste « Artefacts à venir ». À activer en fin de session, quand les notes sont arrêtées.');
+            expect(html).toContain('Active le titre « Note finale » sur les PDF de rétroaction, à la place de « Note actuelle du cours » (pratique cumulative) ou de « Note provisoire » (pratique alternative), et retire la liste « Artefacts à venir ». À activer en fin de session, quand les notes sont arrêtées.');
             expect(html).not.toContain('(au lieu de « Note provisoire »)');
         });
         it('le glossaire, mot pour mot, et le reste inchangé', () => {
             // ↻ 27 nov. 2026 (trois familles) : le mode à deux blocs s'appelle « Deux blocs » au menu ; le glossaire le cite ainsi.
             const terme = lire('js/accompagnement-contenu-terme.js');
-            expect(terme).toContain('Une case de la pratique de notation, à cocher quand les notes sont arrêtées. Les PDF de rétroaction titrent alors « Note finale », à la place de « Note actuelle du cours » (pratique sommative) ou de « Note provisoire » (pratique alternative), et ne listent plus les « Artefacts à venir ». En mode « Deux blocs », une production obligatoire non remise compte alors pour zéro');
+            expect(terme).toContain('Une case de la pratique de notation, à cocher quand les notes sont arrêtées. Les PDF de rétroaction titrent alors « Note finale », à la place de « Note actuelle du cours » (pratique cumulative) ou de « Note provisoire » (pratique alternative), et ne listent plus les « Artefacts à venir ». En mode « Deux blocs », une production obligatoire non remise compte alors pour zéro');
             expect(terme).not.toContain('« Note finale » au lieu de « Note provisoire »');
         });
     });

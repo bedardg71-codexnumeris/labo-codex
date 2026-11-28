@@ -658,7 +658,7 @@ describe('N7 · le niveau de la note globale : la règle des évaluations, et el
         const spe = monter(jeuSPE()).win.lireNiveauNoteGlobale(DA.SPE, 70);
         const den = monter(jeuDEN()).win.lireNiveauNoteGlobale(DA.DEN, 78);
         noter('N7-4', { som, spe, den });
-        expect(som).toEqual({ niveau: null, raison: 'note-chiffree', survol: 'La pratique sommative établit la note globale comme un pourcentage pondéré. Elle ne la situe dans aucune échelle de niveaux — c\'est une note, pas un niveau atteint.' });
+        expect(som).toEqual({ niveau: null, raison: 'note-chiffree', survol: 'La pratique cumulative établit la note globale comme un pourcentage pondéré. Elle ne la situe dans aucune échelle de niveaux — c\'est une note, pas un niveau atteint.' });
         expect(spe).toEqual({ niveau: null, raison: 'pratique-sans-methode', survol: '' });
         expect(den.niveau).toBeNull(); expect(den.raison).toBe('note-chiffree');
         // Et même une SPE qui PORTE une échelle de niveaux n'en reçoit pas un en passant (décision de didactique, pas de refactor).

@@ -194,7 +194,7 @@ function basculerBanniereBienvenue() {
  */
 const TACHES = [
     // Mène à Conception › Pratiques et y ouvre l'assistant (décision de Cowork, 7 nov. 2026).
-    { action: 'ouvrirWizardPratique', icone: 'ico-acc-data-sheet', titre: 'Adopter ta pratique', desc: 'Construction de la note du cours, sommative ou alternative.', chemin: 'Conception › Pratiques' },
+    { action: 'ouvrirWizardPratique', icone: 'ico-acc-data-sheet', titre: 'Adopter ta pratique', desc: 'Construction de la note du cours, cumulative ou alternative.', chemin: 'Conception › Pratiques' },
     { param: 'conception|conception-carte', icone: 'ico-acc-puzzle', titre: 'Planifier ton cours', desc: 'Alignement constructif des objectifs, leçons et évaluations.', chemin: 'Conception › Alignement' },
     { param: 'suivi|suivi-saisie', icone: 'ico-acc-people', titre: 'Saisir les présences', desc: 'Absences, retards et notes de séance.', chemin: 'Suivi › Présences' },
     { param: 'evaluations|evaluations-importer', icone: 'ico-acc-downloading', titre: 'Importer des copies', desc: 'Fichiers PDF ou images des travaux d’étudiant·es.', chemin: 'Évaluation › Préparer' },

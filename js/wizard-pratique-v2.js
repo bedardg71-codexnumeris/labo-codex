@@ -52,7 +52,7 @@ function grillesDuWizard() {
 // (genererRecapitulatif) ET par l'écran « Partir d'un modèle » (#319 Lot 2 a7,
 // badge famille). Un seul endroit à éditer, pas de microcopy dupliqué.
 const TYPE_BADGES = {
-    'sommative': { code: 'CUM', classe: 'som', label: 'Cumulative', description: 'Ta note finale est le cumul pondéré de tes évaluations. C\'est la méthode traditionnelle, souvent appelée sommative.' },
+    'sommative': { code: 'CUM', classe: 'som', label: 'Cumulative', description: 'Ta note finale est le cumul pondéré de tes évaluations. C\'est la méthode habituelle, souvent appelée sommative.' },
     // 21 nov. 2026 (« le sigle suit le nom », décision de Grégoire) : `code` est ici le SIGLE AFFICHÉ (badge du
     // récapitulatif, ligne de « Partir d'un modèle ») ; le code interne vit au registre. `classe` porte la couleur de la
     // famille au récapitulatif : sarcelle pour « Hybride », bleu pour « Par standards ».

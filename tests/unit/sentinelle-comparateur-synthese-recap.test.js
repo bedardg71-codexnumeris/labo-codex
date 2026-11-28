@@ -30,7 +30,9 @@ const RETOUCHES_27_NOV = [
     ['que ta règle retient, pas de la moyenne de toutes.', "que ta règle retient ; d'autres peuvent compter d'office."],
     ['Ex\u00a0: Sommative', 'Ex\u00a0: Cumulative'], ['Ex\u00a0: Par sélection de productions', 'Ex\u00a0: Hybride'],
     ['Configuration – Par sélection de productions</h4>', 'Configuration – Hybride</h4>'],
-    ['Hybride (N meilleures + Obligatoires)', 'Deux blocs (N meilleures + Obligatoires)']
+    ['Hybride (N meilleures + Obligatoires)', 'Deux blocs (N meilleures + Obligatoires)'],
+    // ↻ 28 nov. 2026 (second lot du renommage, texte 9) : la seule retouche du jour au récapitulatif.
+    ["C'est la méthode traditionnelle, souvent appelée sommative.", "C'est la méthode habituelle, souvent appelée sommative."]
 ];
 const AVANT = Object.fromEntries(Object.entries(JSON.parse(readFileSync(path.join(__dirname, 'fixtures', 'recap-familles-avant.json'), 'utf8')))
     .map(([nom, html]) => [nom, RETOUCHES_27_NOV.reduce((t, [avant, apres]) => t.split(avant).join(apres), html)]));

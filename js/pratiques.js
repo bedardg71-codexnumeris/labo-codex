@@ -322,7 +322,7 @@ function mettreAJourUIPratiqueDefaut() {
     // Mettre à jour le texte de l'indicateur
     const nomPratiqueSpan = document.getElementById('nomPratiqueDefaut');
     if (nomPratiqueSpan) {
-        const nomPratique = pratiqueDefaut === 'sommative' ? 'Cumulative traditionnelle' : 'PAN-Standards';
+        const nomPratique = pratiqueDefaut === 'sommative' ? 'Cumulative habituelle' : 'PAN-Standards';
         nomPratiqueSpan.textContent = nomPratique;
     }
 }

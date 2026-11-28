@@ -35,11 +35,16 @@ const indexHtml = 'file://' + path.join(path.resolve(__dirname, '..', '..'), 'in
 
 const SEL = '#modalBibliothequePratiques';
 const MENTION = 'fourni avec l\'application';
-const ID_MODELE = 'SOM-litterature';   // « Modèle sommatif »
+const ID_MODELE = 'SOM-litterature';
+// ↻ 28 nov. 2026 (second lot du renommage) : le modèle s'appelle « Modèle cumulatif » ; `copie: 'ancienne'` sème la copie
+// rangée sous l'ancienne paire (celle de l'iPad de Grégoire), que la garde tient pour intacte et que la lecture affiche au
+// nom courant, sans rien écrire.
+const NOM = 'Modèle cumulatif';
+const ANCIENNE = { nom: 'Modèle sommatif', description: 'Pour débuter avec une pratique sommative' };
 
 /**
- * Démo, Conception › Pratiques, puis le décor : `copie` = 'identique' | 'differente' | null (la copie du modèle dans
- * `bibliothequePratiques`) ; `homonyme` = une pratique du trimestre nommée « Modèle sommatif », sans parenté.
+ * Démo, Conception › Pratiques, puis le décor : `copie` = 'identique' | 'ancienne' | 'differente' | null (la copie du modèle
+ * dans `bibliothequePratiques`) ; `homonyme` = une pratique du trimestre nommée comme le modèle, sans parenté.
  */
 async function ouvrir(page, { copie = null, homonyme = false, dossier = false, modeleAdopte = false, extraBiblio = [] } = {}) {
     const dialogues = [];
@@ -53,7 +58,7 @@ async function ouvrir(page, { copie = null, homonyme = false, dossier = false, m
     await attendreRepos(page);
     await page.evaluate(() => naviguerVers('conception', 'pratiques-notation'));
     await attendreRepos(page);
-    await page.evaluate(async ({ copie, homonyme, dossier, modeleAdopte, extraBiblio, idModele }) => {
+    await page.evaluate(async ({ copie, homonyme, dossier, modeleAdopte, extraBiblio, idModele, nom, ancienne }) => {
         // La fenêtre du codex (#1007) a ses propres bancs : ici, on compte seulement qu'elle a été appelée.
         window.__codex = 0;
         Codex.proposerAvantSuppression = async () => { window.__codex++; return true; };
@@ -69,6 +74,7 @@ async function ouvrir(page, { copie = null, homonyme = false, dossier = false, m
             if (copie === 'differente') {
                 modele.configuration.evaluations = [{ id: 1, nom: 'Travail unique', type: 'travail', ponderation: 100 }];
             }
+            if (copie === 'ancienne') Object.assign(modele, ancienne);
             biblio.push(modele);
         }
         await db.set('bibliothequePratiques', biblio.concat(extraBiblio));   // security-ok: fixture littérale écrite par le banc, aucune source externe
@@ -79,12 +85,12 @@ async function ouvrir(page, { copie = null, homonyme = false, dossier = false, m
                 { dansBibliotheque: true, dateAjout: '2026-10-01T12:00:00.000Z' }));
         }
         if (homonyme) {
-            trimestre.push({ id: 'pratique_banc_homonyme', nom: 'Modèle sommatif', type: 'sommative', pratiques: ['SOM'],
+            trimestre.push({ id: 'pratique_banc_homonyme', nom, type: 'sommative', pratiques: ['SOM'],
                 dansBibliotheque: true, configuration: {} });
         }
         await db.set(cle('pratiquesConfigurables'), trimestre);   // security-ok: fixture littérale écrite par le banc, aucune source externe
         if (dossier) window.repertoiresBibliotheque.creer('Dossier fictif', 'pratiques');
-    }, { copie, homonyme, dossier, modeleAdopte, extraBiblio, idModele: ID_MODELE });
+    }, { copie, homonyme, dossier, modeleAdopte, extraBiblio, idModele: ID_MODELE, nom: NOM, ancienne: ANCIENNE });
     await page.locator('#conception-pratiques-notation button[data-action="afficherBibliothequePratiques"]').click();
     await expect(page.locator(SEL + ' .biblio2-fenetre')).toBeVisible();
     return dialogues;
@@ -95,12 +101,13 @@ const rangeeBiblio = (page, nom) => page.locator(SEL + ' .biblio2-panneau--bibli
 const groupeDoublon = (page, nom) => page.locator(SEL + ' .biblio-doublon-groupe', { hasText: '« ' + nom + ' »' });
 const idsBibliotheque = (page) => page.evaluate(() => (db.getSync('bibliothequePratiques', []) || []).map(p => p.id));
 
-for (const cas of ['identique', null]) {
-    test(`modèle fourni ${cas ? 'avec sa copie identique (le cas du 22 nov.)' : 'pur, sans copie'} : ni ⋮ ni « Supprimer », la mention ; pas de groupe « Homonymes » ; la fonction refuse et n'efface rien`, async ({ page }) => {
+const LIBELLES_CAS = { identique: 'avec sa copie identique (le cas du 22 nov.)', ancienne: 'avec sa copie rangée sous l’ancienne paire nom et description (le cas du 28 nov.)' };
+for (const cas of ['identique', 'ancienne', null]) {
+    test(`modèle fourni ${cas ? LIBELLES_CAS[cas] : 'pur, sans copie'} : ni ⋮ ni « Supprimer », la mention ; pas de groupe « Homonymes » ; la fonction refuse et n'efface rien`, async ({ page }) => {
         test.setTimeout(90000);
         const dialogues = await ouvrir(page, { copie: cas, homonyme: true });
 
-        const r = rangeeBiblio(page, 'Modèle sommatif');
+        const r = rangeeBiblio(page, NOM);
         await expect(r).toHaveCount(1);
         await expect(r.locator('.biblio2-rangee-meta')).toHaveText('Cumulative · ' + MENTION);
         await expect(r.locator('.biblio2-kebab'), 'aucun ⋮ : il n’aurait rien à offrir').toHaveCount(0);
@@ -108,7 +115,7 @@ for (const cas of ['identique', null]) {
         await expect(page.locator(SEL + ' .biblio2-panneau--bibliotheque').getByRole('menuitem', { name: 'Supprimer de ma bibliothèque' })).toHaveCount(0);
 
         // Le bloc « Homonymes » ne met plus en regard la pratique du trimestre et le modèle fourni.
-        await expect(groupeDoublon(page, 'Modèle sommatif')).toHaveCount(0);
+        await expect(groupeDoublon(page, NOM)).toHaveCount(0);
         await expect(page.locator(SEL + ' .biblio-doublon-action[data-param="' + ID_MODELE + '"]')).toHaveCount(0);
 
         // Garde de la fonction (appelée directement) : pas de question, rien d'effacé, le message existant.
@@ -117,6 +124,12 @@ for (const cas of ['identique', null]) {
         await page.evaluate((id) => window.supprimerPratiqueDeBibliothequePartagee(id), ID_MODELE);
         await attendreRepos(page);
         expect(await idsBibliotheque(page), 'aucune donnée effacée').toEqual(avant);
+        if (cas === 'ancienne') {
+            // L'affichage est une lecture : la copie rangée garde son ancienne paire, rien n'est réécrit.
+            await expect(rangeeBiblio(page, ANCIENNE.nom)).toHaveCount(0);
+            expect(await page.evaluate(() => (db.getSync('bibliothequePratiques', []) || []).map(p => ({ nom: p.nom, description: p.description }))),
+                'la copie rangée n’est pas réécrite').toEqual([ANCIENNE]);
+        }
         expect(dialogues, 'aucune question de suppression').toEqual([]);
         expect(await page.evaluate(() => window.__codex), 'la fenêtre du codex ne s’ouvre pas').toBe(0);
         expect(await page.evaluate(() => window.__infos)).toEqual([
@@ -128,7 +141,7 @@ for (const cas of ['identique', null]) {
 test('modèle fourni, avec un dossier : le ⋮ garde « Classer dans », sans « Supprimer » ni séparateur', async ({ page }) => {
     test.setTimeout(90000);
     await ouvrir(page, { copie: 'identique', dossier: true });
-    const r = rangeeBiblio(page, 'Modèle sommatif');
+    const r = rangeeBiblio(page, NOM);
     await r.locator('.biblio2-kebab').click();
     const menu = page.locator(SEL + ' .biblio-menu-popover.actif');
     await expect(menu.locator('.biblio-menu-item')).toHaveText(['Classer dans : Dossier fictif']);
@@ -139,18 +152,18 @@ test('copie DIFFÉRENTE du modèle : « Supprimer » reste offert, et le geste f
     test.setTimeout(90000);
     const dialogues = await ouvrir(page, { copie: 'differente', homonyme: true });
 
-    const r = rangeeBiblio(page, 'Modèle sommatif');
+    const r = rangeeBiblio(page, NOM);
     await expect(r.locator('.biblio2-rangee-meta')).toHaveText(/^Cumulative · par Gabarit Labo Codex/);
-    await expect(groupeDoublon(page, 'Modèle sommatif').locator('.biblio-doublon-action[data-param="' + ID_MODELE + '"]', { hasText: 'Supprimer' })).toHaveCount(1);
+    await expect(groupeDoublon(page, NOM).locator('.biblio-doublon-action[data-param="' + ID_MODELE + '"]', { hasText: 'Supprimer' })).toHaveCount(1);
     await r.locator('.biblio2-kebab').click();
     await page.locator(SEL + ' .biblio-menu-popover.actif').getByRole('menuitem', { name: 'Supprimer de ma bibliothèque' }).click();
     await attendreRepos(page);
 
-    expect(dialogues).toEqual(['Supprimer définitivement la pratique « Modèle sommatif » de la bibliothèque ?\n\nCette action est irréversible.']);
+    expect(dialogues).toEqual(['Supprimer définitivement la pratique « ' + NOM + ' » de la bibliothèque ?\n\nCette action est irréversible.']);
     expect(await page.evaluate(() => window.__codex)).toBe(1);
     expect(await idsBibliotheque(page), 'la copie différente est effacée, comme avant').toEqual([]);
     // Le prédéfini reprend sa place : il est, lui, intact.
-    await expect(rangeeBiblio(page, 'Modèle sommatif').locator('.biblio2-rangee-meta')).toHaveText('Cumulative · ' + MENTION);
+    await expect(rangeeBiblio(page, NOM).locator('.biblio2-rangee-meta')).toHaveText('Cumulative · ' + MENTION);
 });
 
 test('une pratique qui appartient à l’enseignant·e : « Supprimer » et la suppression, inchangés', async ({ page }) => {
@@ -174,7 +187,7 @@ test('deux pratiques de même nom DANS CE TRIMESTRE (dont le modèle adopté tel
     test.setTimeout(90000);
     await ouvrir(page, { homonyme: true, modeleAdopte: true });
 
-    const groupe = groupeDoublon(page, 'Modèle sommatif');
+    const groupe = groupeDoublon(page, NOM);
     await expect(groupe).toHaveCount(1);
     await expect(groupe.locator('.biblio-doublon-exemplaire')).toHaveCount(2);
     await expect(groupe.locator('.biblio-doublon-lieu')).toHaveText(['Dans ce trimestre', 'Dans ce trimestre']);

@@ -75,7 +75,7 @@ describe('#687 · A — les cinq entrées disciplinaires ne reviennent pas', () 
         // côté de la copie de l'utilisateur : deux entrées pour une pratique.
         const som = Object.values(biblio.MODELES_PRATIQUES_PREDEFINIS).find(m => m.id === 'SOM-litterature');
         expect(som).toBeDefined();
-        expect(som.nom).toBe('Modèle sommatif');
+        expect(som.nom).toBe('Modèle cumulatif');   // ↻ 28 nov. 2026 (second lot du renommage) : le nom change, l'id reste
     });
 
     it('A.d ni le nom NI LA DESCRIPTION ne renvoient à une matière — #691', () => {
@@ -87,7 +87,7 @@ describe('#687 · A — les cinq entrées disciplinaires ne reviennent pas', () 
         const som = Object.values(biblio.MODELES_PRATIQUES_PREDEFINIS).find(m => m.id === 'SOM-litterature');
         expect(som.nom.toLowerCase()).not.toMatch(/littérature/);
         expect(som.description.toLowerCase()).not.toMatch(/littérature/);
-        expect(som.description).toBe('Pour débuter avec une pratique sommative');
+        expect(som.description).toBe('Pour débuter avec une pratique cumulative');   // ↻ 28 nov. 2026
         expect(som.discipline).toBe('Général');
     });
 

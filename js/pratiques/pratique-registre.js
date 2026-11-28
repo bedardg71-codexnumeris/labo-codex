@@ -84,14 +84,17 @@ function normaliserIdPratique(id) {
 //   sigle de leur pratique (STD, SPE, DEN). `famille` prend trois valeurs : « Cumulative », « Hybride », « PAN ». Le code,
 //   les ids et les couleurs ne changent pas. Un seul lecteur affiche `famille` : le repli de `_nomPratique` du Comparateur
 //   (une pratique sans nom), mesuré le 27 nov.
+// `nom` (second lot du renommage, 28 nov. 2026) : le nom de la pratique, tel que l'écran de l'enseignant·e le dit quand
+//   il nomme la pratique active (carte « Méthodologie de calcul » du profil). Lu par `obtenirNomTypePratique`, hors de
+//   `obtenirRepresentationPratique` (dont un banc fige le retour).
 const REPRESENTATIONS_PRATIQUES = {
-    sommative:      { code: 'SOM', sigle: 'CUM', couleurVar: '--som-orange', famille: 'Cumulative' },
-    standards:      { code: 'STD', sigle: 'HYB', couleurVar: '--sel-sarcelle', famille: 'Hybride' },  // « Hybride » (27 nov. 2026)
-    specifications: { code: 'SPE', sigle: 'SPE', couleurVar: '--spe-vert',   famille: 'PAN' },
-    denotation:     { code: 'DEN', sigle: 'DEN', couleurVar: '--den-violet', famille: 'PAN' }, // PRÉN académiquement (voir note ci-dessus)
+    sommative:      { code: 'SOM', sigle: 'CUM', couleurVar: '--som-orange', famille: 'Cumulative', nom: 'Cumulative' },
+    standards:      { code: 'STD', sigle: 'HYB', couleurVar: '--sel-sarcelle', famille: 'Hybride', nom: 'Hybride' },  // « Hybride » (27 nov. 2026)
+    specifications: { code: 'SPE', sigle: 'SPE', couleurVar: '--spe-vert',   famille: 'PAN', nom: 'PAN par spécifications' },
+    denotation:     { code: 'DEN', sigle: 'DEN', couleurVar: '--den-violet', famille: 'PAN', nom: 'Dénotation' }, // PRÉN académiquement (voir note ci-dessus)
     // La pratique « Par standards » (lot 1, 21 nov. 2026) : un niveau par cible d'apprentissage, une famille de code à
     // elle. Sous le code « STD », douze branchements l'enverraient au moteur du portfolio (plan du 20 nov., § 2).
-    cibles:         { code: 'CIB', sigle: 'STD', couleurVar: '--std-bleu',   famille: 'PAN' }
+    cibles:         { code: 'CIB', sigle: 'STD', couleurVar: '--std-bleu',   famille: 'PAN', nom: 'PAN par standards' }
 };
 
 /** Le sigle AFFICHÉ d'un code interne de famille (`pratiques[0]`, `obtenirCode()`) ; un code inconnu passe tel quel. */
@@ -156,6 +159,17 @@ function obtenirCouleurPratique(id) {
 /** Libellé de famille (« Cumulative » / « Hybride » / « PAN »). @param {string} id @returns {string} */
 function obtenirLabelFamillePratique(id) {
     return obtenirRepresentationPratique(id).famille;
+}
+
+/**
+ * Nom de la pratique (« Cumulative », « Hybride », « PAN par standards », « PAN par spécifications », « Dénotation »),
+ * 28 nov. 2026. STRICT : un type inconnu, ou aucun, rend null — jamais le nom du défaut, qui nommerait une pratique
+ * qui n'est pas la sienne. @param {?string} id @returns {?string}
+ */
+function obtenirNomTypePratique(id) {
+    if (!id) return null;
+    const idNorm = normaliserIdPratique(id);
+    return Object.prototype.hasOwnProperty.call(REPRESENTATIONS_PRATIQUES, idNorm) ? REPRESENTATIONS_PRATIQUES[idNorm].nom : null;
 }
 
 /**
@@ -1474,6 +1488,7 @@ window.obtenirSiglePratique = obtenirSiglePratique;   // 21 nov. 2026 : le sigle
 window.sigleDuCode = sigleDuCode;
 window.obtenirCouleurPratique = obtenirCouleurPratique;
 window.obtenirLabelFamillePratique = obtenirLabelFamillePratique;
+window.obtenirNomTypePratique = obtenirNomTypePratique;   // 28 nov. 2026 : le nom de la pratique active (profil)
 window.genererBadgePratiqueHTML = genererBadgePratiqueHTML;
 window.listerPratiquesDisponibles = listerPratiquesDisponibles;
 window.pratiqueEstDisponible = pratiqueEstDisponible;

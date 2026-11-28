@@ -156,10 +156,10 @@ const PRATIQUE_PAN_STANDARDS_CINQ_NIVEAUX = {
 
 const PRATIQUE_SOMMATIVE_TRADITIONNELLE = {
     id: 'sommative-traditionnelle',
-    nom: 'Cumulative traditionnelle',
+    nom: 'Cumulative habituelle',
     auteur: 'Labo Codex',
     etablissement: 'Cégep',
-    description: 'Moyenne pondérée traditionnelle avec critères fixes',
+    description: 'Moyenne pondérée habituelle avec critères fixes',
     discipline: 'Général',
     version: '1.0',
     date_creation: '2025-11-25',

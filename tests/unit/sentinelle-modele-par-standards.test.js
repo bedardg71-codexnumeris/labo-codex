@@ -75,7 +75,15 @@ describe('M1 · les cinq modèles prédéfinis ne bougent pas', () => {
         expect(Object.keys(modeles)).toEqual(IDS_MODELES);
     });
     it('la configuration, octet pour octet (empreinte de main à 1.253.0)', () => {
-        expect(createHash('sha256').update(JSON.stringify(modeles)).digest('hex')).toBe(EMPREINTE_MODELES);
+        // ↻ 28 nov. 2026 (second lot du renommage) : « Modèle sommatif » devient « Modèle cumulatif », description comprise.
+        // L'empreinte se prend sur les modèles où CETTE paire est remise à l'ancienne : elle ne bouge pas, donc rien d'autre
+        // n'a changé. La paire neuve se vérifie à part.
+        const avant28 = clone(modeles);
+        expect({ nom: avant28['SOM-litterature'].nom, description: avant28['SOM-litterature'].description })
+            .toEqual({ nom: 'Modèle cumulatif', description: 'Pour débuter avec une pratique cumulative' });
+        avant28['SOM-litterature'].nom = 'Modèle sommatif';
+        avant28['SOM-litterature'].description = 'Pour débuter avec une pratique sommative';
+        expect(createHash('sha256').update(JSON.stringify(avant28)).digest('hex')).toBe(EMPREINTE_MODELES);
     });
     it('aucun modèle prédéfini n\'est de la famille « cibles », aucun ne porte d\'ensemble de cibles', () => {
         for (const m of Object.values(modeles)) {
@@ -124,12 +132,13 @@ describe('M3 · la liste « Choisis un modèle »', () => {
     });
     it('les cinq autres cartes sont celles d\'avant, et aucune ne porte la marque', () => {
         // ↻ 27 nov. 2026 (trois familles) : les sigles HYB et CUM ; « Modèle sommatif » garde son nom (rapport du lot).
+        // ↻ 28 nov. 2026 (second lot du renommage) : il s'appelle « Modèle cumulatif », description comprise.
         const { win, M } = monter();
         const autres = win.obtenirOptionsModeles().filter(o => o.value !== M.id);
         expect(autres).toEqual([
             { value: 'STD-n-recents', label: 'N plus récentes <span class="wizard-v2-modele-famille">HYB · Général</span>', description: 'Garde les 5 évaluations les plus récentes, valorise l&#39;état actuel' },
             { value: 'STD-n-meilleurs', label: 'N meilleures évaluations <span class="wizard-v2-modele-famille">HYB · Général</span>', description: 'Garde les 7 meilleures évaluations sur 10, valorise la progression' },
-            { value: 'SOM-litterature', label: 'Modèle sommatif <span class="wizard-v2-modele-famille">CUM · Général</span>', description: 'Pour débuter avec une pratique sommative' },
+            { value: 'SOM-litterature', label: 'Modèle cumulatif <span class="wizard-v2-modele-famille">CUM · Général</span>', description: 'Pour débuter avec une pratique cumulative' },
             { value: 'SPE-simple', label: 'Modèle simple <span class="wizard-v2-modele-famille">SPE · Général</span>', description: 'Pour débuter avec PAN – Spécifications' },
             { value: 'DEN-base', label: 'Modèle de base <span class="wizard-v2-modele-famille">DEN · Général</span>', description: win.MODELES_PRATIQUES_PREDEFINIS['DEN-base'].description.replace(/'/g, '&#39;') }
         ]);
@@ -276,7 +285,7 @@ describe('M7 · changer d\'avis retire les réglages posés d\'office', () => {
         expect(a.win.wizardState.echelleDeDepart).toBeNull();
         expect(r).not.toHaveProperty('echelleId');
         expect(r).not.toHaveProperty('niveauSansDonnee');
-        expect(r.nom).toBe('Modèle sommatif');
+        expect(r.nom).toBe('Modèle cumulatif');   // ↻ 28 nov. 2026 (second lot du renommage)
         expect(r._gabaritSource.id).toBe('SOM-litterature');
     });
     it('« Décrire ma pratique » : idem, et le nom du modèle ne reste pas dans le champ', () => {

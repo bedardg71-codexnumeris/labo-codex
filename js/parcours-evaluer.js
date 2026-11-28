@@ -1441,7 +1441,7 @@
                 "Chaque carte est une pratique toute prête, décrite en une ligne",
                 "Le code à côté du nom dit sa famille : CUM pour la cumulative, HYB pour l'hybride, STD pour les standards ; les autres codes désignent d'autres pratiques",
                 "L'exemple prend « N meilleures évaluations », une pratique hybride : chaque production reçoit un niveau de maîtrise et la note retient les 7 meilleures évaluations sur 10",
-                "Avec ta classe, tu choisiras la tienne, qu'elle soit traditionnelle ou alternative"
+                "Avec ta classe, tu choisiras la tienne, qu'elle soit habituelle ou alternative"
             ],
             consignes: ["Touche « N meilleures évaluations », puis « Suivant → »"],
             devient: {

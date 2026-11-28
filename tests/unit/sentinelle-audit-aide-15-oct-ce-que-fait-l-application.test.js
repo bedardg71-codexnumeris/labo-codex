@@ -409,7 +409,7 @@ describe('Une copie non recevable dans la note, famille par famille (décisions 
         expect(perf).toContain('window.noteRetenueParLeCalcul(evaluation) * ponderation');
         // E4 (28 oct. 2026) : la reprise remplace l'originale quand elle entre elle-même dans la note (`originaleEstRemplacee`).
         expect(corps(lire('js/pratiques/pratique-registre.js'), 'evaluationEntreDansLaNote')).toContain('if (evaluation.remplaceeParId && originaleEstRemplacee(evaluation, evaluations)) return false;');
-        expect(CARTE).toContain('<li>en sommative, elle vaut 0, sauf si une reprise la remplace ;</li>');
+        expect(CARTE).toContain('<li>en cumulative, elle vaut 0, sauf si une reprise la remplace ;</li>');   // ↻ 28 nov. 2026 (second lot du renommage)
         expect(CARTE, 'la clause des meilleures productions ne joue jamais en sommative').not.toMatch(/meilleures productions/);
     });
 
@@ -427,7 +427,8 @@ describe('Une copie non recevable dans la note, famille par famille (décisions 
         const hybride = corps(ACTIONS, '_selectionnerArtefactsHybride');
         expect(hybride).toContain('const denominateurObl = estFinale ? nombreObligatoiresTotal : evalsObligatoires.length;');
         expect(hybride).toMatch(/const nombreObligatoiresTotal = productionsNonPortfolio\s*\.filter\(p => p\.categorie === 'obligatoire' && p\.id !== terminalId\)\.length;/);
-        expect(CARTE).toContain("<li>en standards, elle sort du portfolio : la compétence n'est jugée qu'à la reprise. Exceptions : une terminale non recevable vaut 0, et, en mode hybride une fois les notes finales cochées, une obligatoire non recevable aussi, comme une obligatoire non remise ;</li>");
+        // ↻ 28 nov. 2026 (second lot du renommage) : « en standards » → « en hybride », « en mode hybride » → « à deux blocs ».
+        expect(CARTE).toContain("<li>en hybride, elle sort du portfolio : la compétence n'est jugée qu'à la reprise. Exceptions : une terminale non recevable vaut 0, et, à deux blocs une fois les notes finales cochées, une obligatoire non recevable aussi, comme une obligatoire non remise ;</li>");
     });
 
     it('dénotation : la note est le jugement saisi, aucune copie n\'y entre par calcul', () => {

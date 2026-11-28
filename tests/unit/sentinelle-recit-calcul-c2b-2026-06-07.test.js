@@ -63,7 +63,7 @@ describe('C2-b · récit de calcul SOM (traçabilité additive)', () => {
 
     it('CONTRAT : recit rempli, sorts dans l\'énumération, detail en texte', () => {
         expect(recit.famille).toBe('SOM');
-        expect(recit.pratiqueNom).toBe('Cumulative traditionnelle');   // ↻ 27 nov. 2026 : trois familles
+        expect(recit.pratiqueNom).toBe('Cumulative habituelle');   // ↻ 27 nov. 2026 : trois familles ; ↻ 28 nov. 2026 : « habituelle »
         expect(recit.resultats.length).toBe(4); // 2 comptées + 1 à pondération 0 (E1) + 1 remplacée
         recit.resultats.forEach(r => {
             expect(SORTS_VALIDES).toContain(r.sort);

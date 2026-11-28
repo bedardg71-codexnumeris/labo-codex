@@ -106,8 +106,8 @@ const MODELES_PRATIQUES_PREDEFINIS = {
         // d'une personne, servis comme un défaut à tout le monde.
         // ⮕ Le patron est `SPE-simple` : court, générique, fait pour DÉMARRER,
         // pas pour reproduire la pratique de quelqu'un.
-        nom: 'Modèle sommatif',
-        description: 'Pour débuter avec une pratique sommative',
+        nom: 'Modèle cumulatif',
+        description: 'Pour débuter avec une pratique cumulative',
         type: 'sommative',
         auteur: 'Gabarit Labo Codex',
         discipline: 'Général',
@@ -213,6 +213,21 @@ const MODELES_PRATIQUES_PREDEFINIS = {
 };
 
 /**
+ * Second lot du renommage des pratiques (décision de Grégoire, 28 nov. 2026) — LES NOMS QU'UN MODÈLE FOURNI A PORTÉS,
+ * écrits ici et nulle part ailleurs. « Modèle sommatif » est devenu « Modèle cumulatif », description comprise. Motif :
+ * une copie rangée avant ce jour (celle de l'iPad de Grégoire, id SOM-litterature, 22 nov.) porte l'ancienne paire ;
+ * sans cette liste, `estModeleFourniIntact` la dirait modifiée et la bibliothèque rouvrirait « Supprimer » sur une ligne
+ * qui revient à la lecture (le bug du 22 nov.).
+ * ⚠ Une PAIRE, nom ET description ensemble, et seulement celles qu'un modèle a réellement portées : pas de tolérance
+ * générale sur le nom. Une copie renommée par l'utilisateur·trice reste une copie modifiée.
+ */
+const FORMES_ANTERIEURES_DES_MODELES = Object.freeze({
+    'SOM-litterature': Object.freeze([
+        Object.freeze({ nom: 'Modèle sommatif', description: 'Pour débuter avec une pratique sommative' })   // jusqu'au 28 nov. 2026
+    ])
+});
+
+/**
  * Obtenir toutes les configurations de la bibliothèque (incluant gabarits prédéfinis)
  * @param {boolean} inclureGabarits - Inclure les gabarits prédéfinis (true par défaut)
  * @returns {Promise<Array>} Tableau de toutes les configurations disponibles
@@ -226,6 +241,7 @@ async function obtenirToutesLesPratiquesBibliotheque(inclureGabarits = true) {
         console.error('[Bibliothèque Pratiques] Erreur lecture:', e);
         bibliotheque = [];
     }
+    bibliotheque = bibliotheque.map(formeAffichableDuModeleFourni);
 
     // Ajouter les gabarits prédéfinis s'ils ne sont pas déjà présents
     if (inclureGabarits) {
@@ -258,6 +274,7 @@ function obtenirToutesLesPratiquesBibliothequeSync(inclureGabarits = true) {
     } catch (e) {
         bibliotheque = [];
     }
+    bibliotheque = bibliotheque.map(formeAffichableDuModeleFourni);
 
     // Ajouter les gabarits prédéfinis
     if (inclureGabarits) {
@@ -303,6 +320,9 @@ function formeCanonique(valeur) {
  * suppression définitive, et la ligne toujours là.
  * ⚠ Une copie qui diffère (une version modifiée, ou une version d'avant un changement du modèle) n'est PAS
  * reconnue : la supprimer change quelque chose, et ce geste reste à décider (rapport du lot).
+ * ↻ 28 nov. 2026 (second lot du renommage) : SEULE exception, le nom et la description qu'un modèle a portés, en
+ * paire, listés dans `FORMES_ANTERIEURES_DES_MODELES`. Un renommage du modèle ne rend pas « modifiée » la copie
+ * rangée avant lui ; tout autre écart, le nom compris, la rend modifiée comme avant.
  * @param {Object} pratique
  * @returns {boolean}
  */
@@ -313,9 +333,38 @@ function estModeleFourniIntact(pratique) {
     const champs = new Set(Object.keys(modele).concat(Object.keys(pratique)));
     for (const champ of champs) {
         if (CHAMPS_DE_TENUE.indexOf(champ) !== -1) continue;
+        if (champ === 'nom' || champ === 'description') continue;   // la paire se juge ensemble, juste après
         if (formeCanonique(pratique[champ]) !== formeCanonique(modele[champ])) return false;
     }
-    return true;
+    return porteUnePaireDuModele(pratique, modele);
+}
+
+/**
+ * Second lot du renommage (28 nov. 2026) — le nom et la description d'une copie sont ceux du modèle, aujourd'hui ou
+ * dans une forme qu'il a portée (`FORMES_ANTERIEURES_DES_MODELES`), les deux ensemble.
+ */
+function porteUnePaireDuModele(pratique, modele) {
+    const memePaire = (forme) => formeCanonique(pratique.nom) === formeCanonique(forme.nom)
+        && formeCanonique(pratique.description) === formeCanonique(forme.description);
+    if (memePaire(modele)) return true;
+    const anterieures = Object.prototype.hasOwnProperty.call(FORMES_ANTERIEURES_DES_MODELES, modele.id)
+        ? FORMES_ANTERIEURES_DES_MODELES[modele.id] : [];
+    return anterieures.some(memePaire);
+}
+
+/**
+ * Second lot du renommage (28 nov. 2026) — une copie rangée, reconnue intacte, se LIT avec le nom et la description
+ * courants de son modèle : la bibliothèque ne montre pas « Modèle sommatif » à côté d'un modèle qui s'appelle
+ * « Modèle cumulatif ». LECTURE SEULEMENT : un nouvel objet, rien n'est écrit dans `bibliothequePratiques` (écrire dans
+ * les données de quelqu'un remonte à Grégoire). Toute autre entrée passe telle quelle.
+ * @param {Object} pratique - une entrée lue dans la bibliothèque
+ * @returns {Object}
+ */
+function formeAffichableDuModeleFourni(pratique) {
+    if (!estModeleFourniIntact(pratique)) return pratique;
+    const modele = MODELES_PRATIQUES_PREDEFINIS[pratique.id];
+    if (pratique.nom === modele.nom && pratique.description === modele.description) return pratique;
+    return { ...pratique, nom: modele.nom, description: modele.description };
 }
 
 /**

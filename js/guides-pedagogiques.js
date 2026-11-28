@@ -137,7 +137,7 @@
 <p>L'indice C se calcule à partir des productions attendues dans le trimestre. Une production est « complétée » dès qu'elle est remise, indépendamment de la note obtenue. Les productions à venir ne pénalisent pas C tant que leur date d'échéance n'est pas passée.</p>
 <p>Calcul : <code>C = productions remises / productions attendues échues</code></p>
 <h4>P — Performance</h4>
-<p>L'indice P est la note courante de l'étudiant·e, calculée selon la pratique de notation active (Standards, Spécifications, Dénotation ou Sommative). Il ne représente <em>pas</em> la note finale du trimestre, mais une projection courante basée sur les productions déjà évaluées.</p>
+<p>L'indice P est la note courante de l'étudiant·e, calculée selon la pratique de notation active (Cumulative, Hybride, Standards, Spécifications ou Dénotation). Il ne représente <em>pas</em> la note finale du trimestre, mais une projection courante basée sur les productions déjà évaluées.</p>
 <div class="guide-pedagogique-astuce">Les trois indices sont indépendants. Un·e étudiant·e peut avoir A élevé (toujours présent·e) mais C faible (ne remet pas ses travaux), ou C élevé (remet tout) mais P faible (résultats faibles). Lire les trois ensemble donne un portrait riche que la seule note ne donne pas.</div>`
                 },
                 {

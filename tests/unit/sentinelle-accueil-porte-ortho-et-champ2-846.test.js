@@ -126,7 +126,7 @@ const TACHES = ['Adopter ta pratique', 'Planifier ton cours', 'Saisir les prése
     'Organiser tes rencontres'];
 // 19 oct. 2026 : les descriptions des huit tâches, dans l'ordre des titres (relecture de Grégoire avec Cowork).
 const DESCRIPTIONS_TACHES = [
-    'Construction de la note du cours, sommative ou alternative.',
+    'Construction de la note du cours, cumulative ou alternative.',   // ↻ 28 nov. 2026 (second lot du renommage)
     'Alignement constructif des objectifs, leçons et évaluations.',
     'Absences, retards et notes de séance.',
     'Fichiers PDF ou images des travaux d’étudiant·es.',

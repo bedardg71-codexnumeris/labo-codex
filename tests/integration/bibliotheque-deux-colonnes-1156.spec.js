@@ -531,7 +531,7 @@ test('pratiques : chaque rangée du trimestre porte « Garder dans ma bibliothè
     await expect(rangee(page, 'pratiques', 'trimestre', 'Hybride (démo)').locator('.biblio2-rangee-meta')).toHaveText(/^Hybride( · par .+)?$/);   // ↻ 21 nov. 2026, 7 h 44 : le nom de famille, sans « PAN »
     // ↻ lot modele-fourni-non-supprimable (22 nov. 2026) : un modèle fourni, intact, dit « fourni avec l'application » à la
     // place de son auteur (mots validés par Grégoire le 22 nov. 2026 ; banc : modele-fourni-non-supprimable.spec.js).
-    await expect(rangee(page, 'pratiques', 'bibliotheque', 'Modèle sommatif').locator('.biblio2-rangee-meta')).toHaveText('Cumulative · fourni avec l\'application');
+    await expect(rangee(page, 'pratiques', 'bibliotheque', 'Modèle cumulatif').locator('.biblio2-rangee-meta')).toHaveText('Cumulative · fourni avec l\'application');
     await expect(rangee(page, 'pratiques', 'bibliotheque', 'Modèle de base').locator('.biblio2-rangee-meta')).toHaveText('PAN-Dénotation · fourni avec l\'application');
     const fen = page.locator(FAMILLES.pratiques.sel);
     await expect(fen.locator('.badge-type-pratique')).toHaveCount(0);
@@ -543,16 +543,16 @@ test('pratiques : chaque rangée du trimestre porte « Garder dans ma bibliothè
     // ← Utiliser dans ce trimestre : même id ; « Aussi » d'un côté, « Déjà » de l'autre ; la fenêtre reste
     // ouverte à la même position de défilement (consigne du lot 1, § 1.7 ; avant, elle se fermait).
     const fenetre = page.locator(FAMILLES.pratiques.sel + ' .biblio2-fenetre');
-    const rb = () => rangee(page, 'pratiques', 'bibliotheque', 'Modèle sommatif');
+    const rb = () => rangee(page, 'pratiques', 'bibliotheque', 'Modèle cumulatif');
     await rb().scrollIntoViewIfNeeded();
     const defilement = await fenetre.evaluate(f => f.scrollTop);
     expect(defilement, 'la fenêtre défile').toBeGreaterThan(0);
     await rb().locator('.biblio2-passage').click();
-    await expect(rangee(page, 'pratiques', 'trimestre', 'Modèle sommatif')).toHaveCount(1);
+    await expect(rangee(page, 'pratiques', 'trimestre', 'Modèle cumulatif')).toHaveCount(1);
     await expect(fenetre).toBeVisible();
     expect(Math.abs((await fenetre.evaluate(f => f.scrollTop)) - defilement)).toBeLessThanOrEqual(2);
-    await expect(rangee(page, 'pratiques', 'trimestre', 'Modèle sommatif').locator('.biblio2-etat')).toHaveText('✓ Aussi dans ta bibliothèque');
-    await expect(rangee(page, 'pratiques', 'trimestre', 'Modèle sommatif').locator('.biblio2-passage')).toHaveCount(0);
+    await expect(rangee(page, 'pratiques', 'trimestre', 'Modèle cumulatif').locator('.biblio2-etat')).toHaveText('✓ Aussi dans ta bibliothèque');
+    await expect(rangee(page, 'pratiques', 'trimestre', 'Modèle cumulatif').locator('.biblio2-passage')).toHaveCount(0);
     await expect(rb().locator('.biblio2-etat')).toHaveText('✓ Déjà dans ce trimestre');
     await expect(rb().locator('.biblio2-passage')).toHaveCount(0);
     expect(await page.evaluate(() => (db.getSync(cle('pratiquesConfigurables'), []) || []).some(p => p.id === 'SOM-litterature' && p.dansBibliotheque !== false))).toBe(true);
@@ -634,17 +634,17 @@ test('pratiques : ⋮, les libellés et leurs actions ; la phrase dans la confir
 
     // « Supprimer définitivement », pour de vrai : un gabarit ramené (son exemplaire reste dans la
     // bibliothèque) porte la phrase ; une pratique de la démo, sans exemplaire, non.
-    await rangee(page, 'pratiques', 'bibliotheque', 'Modèle sommatif').locator('.biblio2-passage').click();
-    await expect(rangee(page, 'pratiques', 'trimestre', 'Modèle sommatif')).toHaveCount(1);
-    for (const nom of ['Modèle sommatif', 'Hybride (démo)']) {
+    await rangee(page, 'pratiques', 'bibliotheque', 'Modèle cumulatif').locator('.biblio2-passage').click();
+    await expect(rangee(page, 'pratiques', 'trimestre', 'Modèle cumulatif')).toHaveCount(1);
+    for (const nom of ['Modèle cumulatif', 'Hybride (démo)']) {
         const r = rangee(page, 'pratiques', 'trimestre', nom);
         await r.locator('.biblio2-kebab').click();
         await r.getByRole('menuitem', { name: 'Supprimer définitivement' }).click();
         await expect(rangee(page, 'pratiques', 'trimestre', nom)).toHaveCount(0);
     }
-    await expect(rangee(page, 'pratiques', 'bibliotheque', 'Modèle sommatif').locator('.biblio2-passage')).toHaveCount(1);
+    await expect(rangee(page, 'pratiques', 'bibliotheque', 'Modèle cumulatif').locator('.biblio2-passage')).toHaveCount(1);
     expect(questions).toEqual([
-        `Supprimer définitivement la pratique «Modèle sommatif» ?\n\nCette action est irréversible.\n\n${PHRASE_EXEMPLAIRE}`,
+        `Supprimer définitivement la pratique «Modèle cumulatif» ?\n\nCette action est irréversible.\n\n${PHRASE_EXEMPLAIRE}`,
         'Supprimer définitivement la pratique «Hybride (démo)» ?\n\nCette action est irréversible.'
     ]);
 });
@@ -683,19 +683,19 @@ test('mesure : une pratique ramenée est un objet séparé ; une retirée absent
     test.setTimeout(90000);
     await ouvrirDemo(page, 'pratiques', 1440, 900);
     await ouvrirBibliotheque(page, 'pratiques');
-    await rangee(page, 'pratiques', 'bibliotheque', 'Modèle sommatif').locator('.biblio2-passage').click();
-    await expect(rangee(page, 'pratiques', 'trimestre', 'Modèle sommatif')).toHaveCount(1);
+    await rangee(page, 'pratiques', 'bibliotheque', 'Modèle cumulatif').locator('.biblio2-passage').click();
+    await expect(rangee(page, 'pratiques', 'trimestre', 'Modèle cumulatif')).toHaveCount(1);
     const mesure = await page.evaluate(async () => {
         await db.modifier(cle('pratiquesConfigurables'), (lues) => {
             const p = lues.find(x => x.id === 'SOM-litterature');
-            p.nom = 'Modèle sommatif modifié';
+            p.nom = 'Modèle cumulatif modifié';
             p.description = 'Description modifiée.';
             return lues;
         }, []);
         const ex = (await obtenirToutesLesPratiquesBibliotheque()).find(p => p.id === 'SOM-litterature');
         return [ex.nom, ex.description];
     });
-    expect(mesure[0]).toBe('Modèle sommatif');
+    expect(mesure[0]).toBe('Modèle cumulatif');
     expect(mesure[1]).not.toBe('Description modifiée.');
 
     // #1160, pour les pratiques (consigne du lot 3, § 3.1) : une pratique retirée qui n'est pas dans la
@@ -724,7 +724,7 @@ for (const famille of ['productions', 'pratiques']) {
         expect(Math.abs(bt.x - bb.x)).toBeLessThanOrEqual(2);
         expect(Math.abs(bt.width - bb.width)).toBeLessThanOrEqual(2);
 
-        const nomBiblio = famille === 'productions' ? 'Production fictive de la bibliothèque' : 'Modèle sommatif';
+        const nomBiblio = famille === 'productions' ? 'Production fictive de la bibliothèque' : 'Modèle cumulatif';
         expect(await texteVisible(rangee(page, famille, 'bibliotheque', nomBiblio).locator('.biblio2-passage'))).toBe('↑ Utiliser dans ce trimestre');
         if (famille === 'productions') {
             expect(await texteVisible(rangee(page, famille, 'trimestre', 'Artefact 1').locator('.biblio2-passage'))).toBe('Garder dans ma bibliothèque ↓');

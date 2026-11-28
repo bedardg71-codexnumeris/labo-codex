@@ -3617,13 +3617,13 @@ function _genererTexteRegleSelectionPortfolio(methodeSelectionRapport, nombreARe
     if (methodeSelectionRapport === 'hybride-categories') {
         const pondSel = configCategoriesRapport?.selection?.ponderation || 65;
         const pondObl = configCategoriesRapport?.obligatoires?.ponderation || 35;
-        return `Mode <strong>Hybride</strong> : les <strong>${nombreARetenirConfig} meilleures</strong> du pool Sélection (${formaterPourcentage(pondSel)}) + toutes les Obligatoires (${formaterPourcentage(pondObl)})`;
+        return `<strong>Deux blocs</strong> : les <strong>${nombreARetenirConfig} meilleures</strong> du bloc Sélection (${formaterPourcentage(pondSel)}) + toutes les Obligatoires (${formaterPourcentage(pondObl)})`;
     }
     const textes = {
         'meilleurs': `Les <strong>${nombreARetenirConfig} meilleures productions</strong> sont retenues pour le calcul de l'indice P (note maximale atteinte)`,
         'recents': `Les <strong>${nombreARetenirConfig} plus récentes productions</strong> sont retenues pour le calcul de l'indice P (niveau terminal actuel)`,
-        'recents-meilleurs': `Les <strong>${nombreARetenirConfig} plus récentes productions parmi les 50\u00a0% meilleures</strong> sont retenues pour le calcul de l'indice P (approche hybride)`,
-        'tous': `<strong>Toutes les productions</strong> sont retenues pour le calcul de l'indice P (calcul de type sommative)`
+        'recents-meilleurs': `Les <strong>${nombreARetenirConfig} plus récentes productions parmi les 50\u00a0% meilleures</strong> sont retenues pour le calcul de l'indice P (approche combinée)`,
+        'tous': `<strong>Toutes les productions</strong> sont retenues pour le calcul de l'indice P (calcul de type cumulatif)`
     };
     return textes[methodeSelectionRapport] || textes['meilleurs'];
 }
@@ -3863,6 +3863,18 @@ function _ligneCalculIndicePPanneau(note, differee) {
 }
 
 /** Lot 4, borné (21 nov. 2026, 13 h 30) : vrai quand la pratique du groupe-cours actif est « Par standards » (famille `cibles`). */
+/**
+ * Second lot du renommage (28 nov. 2026) — le nom de la pratique RÉELLEMENT active, lu au registre, pour la carte
+ * « Méthodologie de calcul ». Elle disait « Hybride » pour toute pratique non cumulative (`indices.pratique`, qui ne
+ * distingue que SOM et PAN). Aucune pratique résolue : « — », la marque d'une valeur inconnue. Le calcul n'est pas lu ici.
+ * @returns {string} texte sûr (noms du registre, jamais une donnée utilisateur)
+ */
+function _nomPratiqueActivePanneau() {
+    const type = (typeof obtenirTypePratiqueActive === 'function') ? obtenirTypePratiqueActive() : null;
+    const nom = (typeof obtenirNomTypePratique === 'function') ? obtenirNomTypePratique(type) : null;
+    return nom || '—';
+}
+
 function _pratiqueActiveParStandards() {
     return typeof obtenirTypePratiqueActive === 'function' && obtenirTypePratiqueActive() === 'cibles';
 }
@@ -3974,7 +3986,7 @@ function genererSectionPerformance(da) {
         <div id="details-calculs-performance-${da}" class="carte-info-toggle carte-info-note u-hide">
             <strong>Méthodologie de calcul</strong>
             <br><br>
-            <strong>Pratique de notation active :</strong> ${indices.pratique === 'PAN' ? 'Hybride' : 'Cumulative'}
+            <strong>Pratique de notation active :</strong> ${_nomPratiqueActivePanneau()}
             <br><br>
 ${noteLue ? `
             <strong>Règle de sélection :</strong> ${_genererTexteRegleSelectionPortfolio(noteLue.methodeCle, noteLue.nombreARetenir, noteLue.configCategories)}

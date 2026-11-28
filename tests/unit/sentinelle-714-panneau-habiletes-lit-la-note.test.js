@@ -254,7 +254,7 @@ describe('#714 — le panneau « Développement des habiletés » lit la note de
         // À la main : Sélection = A1 85, A3 78, A4 70, A5 90 → 2 meilleures : 90, 85. Obligatoire : A2 60.
         const b = monter(jeuSTD({ hybride: true }));
         const r = rendre(b, DA.STD);
-        expect(r.regle).toContain('les <strong>2 meilleures</strong> du pool Sélection (65 %)');   // #1137 : rendre() ramène l'insécable à une espace
+        expect(r.regle).toContain('<strong>Deux blocs</strong> : les <strong>2 meilleures</strong> du bloc Sélection (65 %)');   // #1137 : rendre() ramène l'insécable à une espace ; ↻ 28 nov. 2026 (second lot du renommage)
         expect(r.retenues).toBe('(les 2 meilleures sur 4 évaluées, et 1 obligatoire)');
         expect(r.liste).toBe('1. Artefact 5 → 90,0/100 • 2. Artefact 1 → 85,0/100 • 3. Artefact 2 → 60,0/100');
         expect(r.calculP).toBeNull();
@@ -346,3 +346,38 @@ describe('#714 — rendre le panneau n\'écrit rien', () => {
         expect(SOURCE_PANNEAU).not.toContain('_lireDetailsRapportPerformance');
     });
 });
+
+/* Second lot du renommage (28 nov. 2026, texte 26) — la ligne « Pratique de notation active » de la carte « Méthodologie de
+ * calcul » nomme la pratique RÉELLEMENT active, lue au registre (`obtenirNomTypePratique`). Elle disait « Hybride » pour
+ * toute pratique non cumulative (`indices.pratique`, qui ne distingue que SOM et PAN). Le calcul n'est pas touché. */
+describe('#714 · texte 26 (28 nov. 2026) — la carte nomme la pratique active', () => {
+    const ligne = (html) => { const m = html.match(/Pratique de notation active :<\/strong>\s*([^<\n]*)/); return m ? m[1].trim() : null; };
+    const avecType = (type) => {
+        const jeu = jeuSTD();
+        jeu.pratiques[0].type = type;
+        jeu.pratiques[0].configuration.type = type;
+        return jeu;
+    };
+    it.each([
+        ['sommative', 'Cumulative'], ['standards', 'Hybride'], ['cibles', 'PAN par standards'],
+        ['specifications', 'PAN par spécifications'], ['denotation', 'Dénotation']
+    ])('%s → « %s »', (type, nom) => {
+        expect(ligne(rendre(monter(avecType(type)), DA.STD).html)).toBe(nom);
+    });
+    it('la Cumulative du banc d’origine dit « Cumulative », pas « Hybride »', () => {
+        expect(ligne(rendre(monter(jeuSOM()), DA.SOM).html)).toBe('Cumulative');
+    });
+    it('une pratique d’un type que le registre ne connaît pas : « — », pas le nom de la pratique par défaut', () => {
+        expect(ligne(rendre(monter(avecType('type-inconnu-du-banc')), DA.STD).html)).toBe('—');
+    });
+    it('aucune pratique assignée : « — », jamais le nom d’une pratique qui n’est pas la sienne', () => {
+        const jeu = jeuSTD();
+        jeu.pratiqueId = null;
+        expect(ligne(rendre(monter(jeu), DA.STD).html)).toBe('—');
+    });
+});
+/* BREAK-TESTS du bloc « texte 26 » (28 nov. 2026), chaque mutation retirée ensuite (sha256 des deux fichiers identique) :
+ *   T1 profil-etudiant-sections-affichage.js — l'ancien ternaire `indices.pratique === 'PAN' ? 'Hybride' : 'Cumulative'`
+ *      rétabli → 4 rouges (cibles, spécifications, dénotation, aucune pratique).
+ *   T2 pratique-registre.js — `obtenirNomTypePratique` rend le nom du défaut pour un type inconnu → 1 rouge (le type inconnu).
+ */

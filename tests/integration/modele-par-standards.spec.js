@@ -57,7 +57,7 @@ test('la liste des modèles : les cinq d\'avant, dans leur ordre, puis « Modèl
     await jusquAuxModeles(page);
     const titres = await page.locator('.wizard-v2-radio-card .wizard-v2-card-title').allTextContents();
     expect(titres.map(t => t.replace(/\s+/g, ' ').trim())).toEqual([
-        'N plus récentes HYB · Général', 'N meilleures évaluations HYB · Général', 'Modèle sommatif CUM · Général',
+        'N plus récentes HYB · Général', 'N meilleures évaluations HYB · Général', 'Modèle cumulatif CUM · Général',
         'Modèle simple SPE · Général', 'Modèle de base DEN · Général', 'Modèle par standards STD · Général À l’essai']);
     const laCarte = carte(page, 'Modèle par standards');
     await expect(laCarte.locator('.etiquette-essai')).toHaveText('À l’essai');
@@ -161,10 +161,10 @@ test('un autre modèle saute toujours au récapitulatif ; revenir et changer d\'
     await expect(page.locator('#wizard-v2-titre')).toHaveText('Les cibles du cours');
     await page.locator('#wizard-v2-btn-precedent').click();
     await expect(page.locator('#wizard-v2-titre')).toHaveText('Choisis un modèle');
-    await carte(page, 'Modèle sommatif').click();
+    await carte(page, 'Modèle cumulatif').click();
     await suivant(page);
     await expect(page.locator('#wizard-v2-titre')).toHaveText('Récapitulatif');
-    await expect(page.locator('#wizard-v2-recap-nom')).toHaveValue('Modèle sommatif');
+    await expect(page.locator('#wizard-v2-recap-nom')).toHaveValue('Modèle cumulatif');
     await page.locator('#wizard-v2-btn-creer').click();
     await expect.poll(async () => (await lirePratiques(page)).length).toBe(1);
     const etat = await page.evaluate((T) => ({ p: window.db.getSync(T + '_pratiquesConfigurables', []), e: window.db.getSync(T + '_echellesTemplates', []), c: window.db.getSync(T + '_ensemblesCibles', null) }), T);

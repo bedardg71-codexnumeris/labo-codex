@@ -171,9 +171,10 @@ function formulaire() {
     return { document, poser, evaluationEnCours, panneau: document.getElementById('travaux-eval-droite') };
 }
 
+// ↻ 28 nov. 2026 (second lot du renommage, texte 34, relu et accepté par Grégoire) : « 0 en cumulative », « en hybride ».
 const AVIS = 'Travail non recevable Ton évaluation est gardée, mais la copie montre « Non recevable » au lieu de sa note et de ses niveaux, '
-    + 'jusque sur le PDF de l’étudiant·e. Dans la note du cours, elle vaut ce que dit ta pratique : 0 en sommative, un travail non '
-    + 'satisfaisant en spécifications, hors du portfolio en standards. Dans la complétion, elle compte comme non remise. Retirer le '
+    + 'jusque sur le PDF de l’étudiant·e. Dans la note du cours, elle vaut ce que dit ta pratique : 0 en cumulative, un travail non '
+    + 'satisfaisant en spécifications, hors du portfolio en hybride. Dans la complétion, elle compte comme non remise. Retirer le '
     + 'statut fait tout revenir.';
 const JETON = ' Un jeton de reprise peut être appliqué pour permettre une nouvelle remise.';
 const net = (s) => s.replace(/\s+/g, ' ').trim().replace(/'/g, '’');

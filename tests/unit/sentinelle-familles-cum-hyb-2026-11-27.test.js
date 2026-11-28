@@ -54,7 +54,7 @@ describe('B · les libellés hors registre', () => {
         const win = { addEventListener() {}, removeEventListener() {}, echapperHtml };
         chargerScript('js/wizard-pratique-v2.js', { db, cle: (k) => k, echapperHtml, normaliserIdPratique: (t) => t }, win);
         expect(win.TYPE_BADGES.sommative).toMatchObject({ code: 'CUM', classe: 'som', label: 'Cumulative',
-            description: 'Ta note finale est le cumul pondéré de tes évaluations. C\'est la méthode traditionnelle, souvent appelée sommative.' });
+            description: 'Ta note finale est le cumul pondéré de tes évaluations. C\'est la méthode habituelle, souvent appelée sommative.' });   // ↻ 28 nov. 2026
         expect(win.TYPE_BADGES.standards).toMatchObject({ code: 'HYB', classe: 'sel', label: 'Hybride',
             description: 'Tu évalues chaque production par niveaux (ex.\u00a0: I-D-M-E). La note se construit à partir des productions que ta règle retient ; d\'autres peuvent compter d\'office.' });
         const cartes = win.ETAPES_WIZARD['voie-rapide'].champs[0].options;   // les lignes 230 et 231 du mandat
@@ -76,7 +76,7 @@ describe('B · les libellés hors registre', () => {
         const html = lire('index.html');
         expect(html).toMatch(/<option value="sommative">Cumulative<\/option>/);
         expect(html).toMatch(/<option value="standards">Hybride<\/option>/);
-        expect(html).toContain('<strong>CUM</strong> (Cumulative) utilise une moyenne pondérée traditionnelle.');
+        expect(html).toContain('<strong>CUM</strong> (Cumulative) utilise une moyenne pondérée habituelle.');   // ↻ 28 nov. 2026 (second lot du renommage)
         expect(html).toContain('<strong>HYB</strong> (Hybride) : des niveaux (ex. I-D-M-E) ; la note retient certaines productions.');
         expect(html).toContain('<strong>Hybride</strong>&nbsp;: la note retient les résultats');
         expect(html).toMatch(/<option value="hybride"[^>]*>Deux blocs \(N meilleures \+ Obligatoires\)<\/option>/);
@@ -99,21 +99,30 @@ describe('B · les libellés hors registre', () => {
 
 describe('C · les pratiques fournies (source seulement)', () => {
     it('les gabarits prédéfinis, les noms des pratiques codées', () => {
-        expect(lire('js/pratiques/pratiques-predefines.js')).toMatch(/nom: 'Cumulative traditionnelle'/);
+        // ↻ 28 nov. 2026 (second lot du renommage) : « traditionnelle » → « habituelle ».
+        expect(lire('js/pratiques/pratiques-predefines.js')).toMatch(/nom: 'Cumulative habituelle'/);
         expect(lire('js/pratiques/pratiques-predefines.js')).toMatch(/nom: 'Cumulative avec remplacement'/);
         // ↻ release 1.260.0 (27 nov. 2026) : la pratique de la démo s'appelle « Hybride (démo) ». Source seulement : la version
         // du pack reste 21.3, une démo déjà installée garde son ancien nom jusqu'à « Remettre la démo à neuf ».
         expect(lire('js/pack-demo-10.js')).toMatch(/"id": "demo-std-litt",\s*"nom": "Hybride \(démo\)"/);
-        expect(lire('js/pratiques/pratique-sommative.js')).toContain('return "Cumulative traditionnelle";');
+        expect(lire('js/pratiques/pratique-sommative.js')).toContain('return "Cumulative habituelle";');
         expect(lire('js/pratiques/pratique-pan-standards.js')).toContain('return "Hybride";');
     });
-    it('« Modèle sommatif » GARDE son nom : `estModeleFourniIntact` compare le nom d\'une copie rangée à celui du modèle', () => {
-        // Mesuré le 27 nov. : renommer le modèle ferait « pas intacte » toute copie déjà rangée sous l\'id SOM-litterature
-        // (celle de l\'iPad de Grégoire, 22 nov.), et rouvrirait « Supprimer » sur une ligne qui revient. Arrêté, rapporté.
+    // ↻ 28 nov. 2026 (second lot du renommage, décision de Grégoire) : RÉÉCRITE, pas retirée. Le 27 nov., elle figeait
+    // « Modèle sommatif garde son nom » : renommer le modèle aurait fait « pas intacte » la copie rangée chez Grégoire
+    // (iPad, id SOM-litterature, 22 nov.) et rouvert « Supprimer » sur une ligne qui revient. La règle neuve : le modèle
+    // s'appelle « Modèle cumulatif », et la garde tient pour intacte la copie à l'ANCIENNE paire nom et description —
+    // elle seule : une copie renommée à la main reste modifiée. Le détail au banc sentinelle-modele-fourni-intact.
+    it('« Modèle cumulatif » : renommé, et la copie rangée à l\'ancienne paire reste intacte (pas une copie renommée)', () => {
         const win = chargerScript('js/pratiques-bibliotheque.js');
         const modele = win.MODELES_PRATIQUES_PREDEFINIS['SOM-litterature'];
-        expect(modele.nom).toBe('Modèle sommatif');
-        expect(win.estModeleFourniIntact(Object.assign(JSON.parse(JSON.stringify(modele)), { nom: 'Modèle cumulatif' }))).toBe(false);
+        expect(modele.nom).toBe('Modèle cumulatif');
+        expect(modele.description).toBe('Pour débuter avec une pratique cumulative');
+        const copie = (extra) => Object.assign(JSON.parse(JSON.stringify(modele)), extra);
+        expect(win.estModeleFourniIntact(copie({ nom: 'Modèle sommatif', description: 'Pour débuter avec une pratique sommative' })),
+            'l\'ancienne paire').toBe(true);
+        expect(win.estModeleFourniIntact(copie({ nom: 'Modèle sommatif' })), 'l\'ancien nom seul').toBe(false);
+        expect(win.estModeleFourniIntact(copie({ nom: 'Modèle cumulatif à moi' })), 'un nom à soi').toBe(false);
     });
 });
 
@@ -147,6 +156,8 @@ describe('D · « Par sélection de productions » ne s\'affiche plus', () => {
  *   B2 pratique-registre.js — la famille de `standards` redevient « PAN »  → 1 rouge (A famille)
  *   B3 wizard-pratique-v2.js — le mode redit « Hybride (N meilleures… »   → 1 rouge (B assistant)
  *   B4 pratiques-bibliotheque.js — « Modèle sommatif » renommé            → 1 rouge (C « Modèle sommatif » garde son nom)
+ *      ↻ 28 nov. 2026 : le test de C est réécrit pour la règle neuve (le renommage est fait) ; son break-test est au journal
+ *      de sentinelle-modele-fourni-intact.test.js.
  *   B5 index.html — un titre de l'Aide redit « Par sélection de… »        → 1 rouge (D)
  *   B6 parcours-evaluer.js — la bulle 2 de « Nous faisons » redit SEL     → 1 rouge dans sentinelle-parcours-evaluer-2026-11-09
  *      (la retouche T27 du module d'aide `familles-cum-hyb-2026-11-27.js`).

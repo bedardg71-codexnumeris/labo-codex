@@ -116,7 +116,7 @@ const TOOLTIPS = {
     'reglages-gc-nom-genere':
         'Nom généré à partir de ton trimestre, cours, groupe, horaire et profil. C\'est ce nom qui apparaît dans le sélecteur en haut de l\'écran.',
     'reglages-gc-pratique':
-        'Ta façon de calculer la note finale pour ce groupe : moyenne sommative traditionnelle ou pratique alternative (meilleurs résultats retenus dans un portfolio, par exemple).',
+        'Ta façon de calculer la note finale pour ce groupe : moyenne pondérée habituelle ou pratique alternative (meilleurs résultats retenus dans un portfolio, par exemple).',
 
     // --- Bibliothèque ---
 
@@ -313,7 +313,7 @@ const TOOLTIPS = {
     'cn-pratique-titre':
         'Assemblage final de ta pratique : type de notation, échelle, structure des évaluations et système de jetons. C\'est la recette complète de ta façon de construire la note.',
     'cn-pratique-type':
-        'CUM = cumulative (moyenne pondérée traditionnelle, souvent dite sommative), HYB = hybride (des niveaux ; la note retient certaines productions), STD = PAN par standards (un niveau par cible d\'apprentissage), SPE = PAN basée sur des spécifications (contrat), DEN = dénotation (pratiques réduisant ou éliminant la notation).',
+        'CUM = cumulative (moyenne pondérée habituelle, souvent dite sommative), HYB = hybride (des niveaux ; la note retient certaines productions), STD = PAN par standards (un niveau par cible d\'apprentissage), SPE = PAN basée sur des spécifications (contrat), DEN = dénotation (pratiques réduisant ou éliminant la notation).',
     'cn-pratique-echelle':
         'Échelle utilisée pour convertir les pourcentages en niveaux (ex. : I-D-M-E). Configurable dans Échelles.',
     'cn-pratique-jetons':

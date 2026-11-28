@@ -42,7 +42,7 @@ class PratiqueSommative {
     // ========================================================================
 
     obtenirNom() {
-        return "Cumulative traditionnelle";
+        return "Cumulative habituelle";
     }
 
     obtenirId() {
@@ -50,7 +50,7 @@ class PratiqueSommative {
     }
 
     obtenirDescription() {
-        return "Pratique sommative traditionnelle avec moyenne pondérée de toutes les évaluations. " +
+        return "Pratique cumulative habituelle avec moyenne pondérée de toutes les évaluations. " +
                "Approche centrée sur la note finale avec prise en compte des pondérations.";
     }
 
