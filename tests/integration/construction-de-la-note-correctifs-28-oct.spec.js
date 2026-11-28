@@ -28,6 +28,8 @@ const MONTER = `({ T, DA, notesFinales }) => {
     window.db.setSync('groupeCoursActif', { id: 'GCN1028', trimestreId: T });
     window.db.setSync(T + '_groupesCours', [{ id: 'GCN1028', trimestreId: T, coursId, groupeNum: '01', pratiqueId: 'som-n1028', actif: true }]);
     window.db.setSync(window.cle('pratiquesConfigurables'), [{ id: 'som-n1028', nom: 'Sommative témoin', type: 'sommative',   // security-ok: fixture littérale du banc
+        // ↻ 28 nov. 2026 (sans déclaration, pas de jetons) : la pratique témoin DÉCLARE ses jetons (les valeurs de l'ancien défaut).
+        jetons: { actif: true, delai: { nombre: 2, dureeJours: 2 }, reprise: { nombre: 2, maxParProduction: 1, archiverOriginale: true }, repriseCiblee: { actif: true, nombre: 2, plafondNote: null } },
         calcul_note: { methode: 'moyenne_ponderee' }, dansBibliotheque: true, configuration: notesFinales ? { notesFinales: true } : {} }]);
     window.db.setSync(window.cle('groupeEtudiants'), [{ da: DA, nom: 'Fictif', prenom: 'Élève', groupe: '01', coursId, groupeCoursId: 'GCN1028' }]);   // security-ok: fixture littérale du banc
     window.db.setSync(window.cle('productions'), [   // security-ok: fixture littérale du banc

@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { declarerJetonsDeLaPratiqueActive } from './harness/declarer-jetons.js';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { attendreApplication } from './harness/attendre-application.js';
@@ -68,6 +69,8 @@ async function demarrer(page) {
     await attendreApplication(page);
     await page.evaluate(() => activerModeDemo());
     await page.waitForTimeout(3000);
+    // ↻ 28 nov. 2026 (sans déclaration, pas de jetons) : la pratique de la démonstration déclare ses jetons, comme le pack le fera.
+    await declarerJetonsDeLaPratiqueActive(page);
 }
 
 /**

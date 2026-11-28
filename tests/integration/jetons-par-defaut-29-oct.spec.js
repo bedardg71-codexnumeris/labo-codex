@@ -76,13 +76,14 @@ test('le formulaire : sans réglage, la case s\'affiche DÉCOCHÉE ; avec le « 
     await page.evaluate(() => naviguerVers('conception', 'pratiques-notation'));
     await page.evaluate((id) => chargerPratiquePourModif(id), id);
     await expect(page.locator('#mat-jetons-actif')).not.toBeChecked();   // ↻ 28 nov. 2026 : cochée du 29 oct. au 28 nov.
-    await expect(page.locator('#mat-jetons-regles-ailleurs')).toBeHidden();
-    await expect(page.locator('#mat-jetons-actif')).toBeEnabled();
+    // ↻ 28 nov. 2026 : la note se juge à l'état que la fiche lui pose (`u-hide`), pas à sa visibilité à l'écran. La carte des
+    // jetons est un accordéon que la section replie après coup : « visible » dépendait du moment où l'on regardait.
+    await expect(page.locator('#mat-jetons-regles-ailleurs')).toHaveClass(/u-hide/);
 
     await poserReglage(page, id, { activer: false });
     await page.evaluate((id) => chargerPratiquePourModif(id), id);
     await expect(page.locator('#mat-jetons-actif')).not.toBeChecked();
-    await expect(page.locator('#mat-jetons-regles-ailleurs')).toBeVisible();
+    await expect(page.locator('#mat-jetons-regles-ailleurs')).not.toHaveClass(/u-hide/);
     await expect(page.locator('#mat-jetons-regles-ailleurs')).toHaveText(/ne peut pas les modifier\.\s*$/);
     expect(erreurs).toEqual([]);
 });
@@ -105,13 +106,14 @@ test('une cumulative sans réglage : enregistrer sans toucher aux jetons n\'écr
     await expect(page.locator('#mat-jetons-actif')).not.toBeChecked();
     await expect(badge).toHaveText('CUM');
 
-    // Un champ voisin change (la description) : la fiche s'enregistre, sans bloc de jetons.
+    // Un champ voisin change (l'affichage de la note) : la fiche s'enregistre, sans bloc de jetons.
     await page.evaluate(async () => {
-        document.getElementById('mat-pratique-description').value = 'Une description changée';
+        document.getElementById('mat-affichage-note-lettre').checked = true;
         await sauvegarderConfigPratiqueMat();
     });
     let rangee = await pratiqueRangee(page, 'PR_BANC_SANS_REGLAGE');
-    expect(rangee.description).toBe('Une description changée');   // l'enregistrement a bien eu lieu
+    expect(rangee.affichageNote).toBe(await page.evaluate(() => document.getElementById('mat-affichage-note-lettre').value));   // l'enregistrement a bien eu lieu
+    expect(rangee.affichageNote).not.toBe('complet');
     expect('jetons' in rangee).toBe(false);
     expect(rangee.configuration.jetons).toBeUndefined();
     await expect(badge).toHaveText('CUM');

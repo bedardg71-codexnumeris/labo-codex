@@ -194,7 +194,23 @@ La décision de monter ou non la version revient à Grégoire : elle touche ce q
 | B4 l'instantané n'est plus pris à l'ouverture | 2 |
 | B5 l'ancien réglage du trimestre ne vaut plus | 3 |
 
-**Navigateur (Chromium ; rien sous WebKit).** En cours au moment de ce commit : voir le commit suivant.
+**Navigateur (Chromium ; rien sous WebKit).** Les onze bancs qui touchent aux jetons, joués un à un après B :
+
+| Banc | Après B | Suite |
+|---|---|---|
+| `jetons-par-defaut-29-oct` | 2 rouges (il figeait « case cochée » et « reprise proposée sans réglage ») | réécrit avec la date et le motif, un essai neuf ajouté ; 3 verts, deux passages |
+| `1007-propose-codex-2a2` (P12, la reprise) | 1 rouge | la démo déclare ses jetons dans la mise en place ; vert |
+| `construction-de-la-note-correctifs-28-oct` | 2 rouges | la pratique témoin déclare ses jetons ; 4 verts |
+| `copie-non-recevable-note-28-oct` | 2 rouges | pratique codée sans entrée : l'ancien réglage du trimestre est posé ; 3 verts |
+| `reunir-en-une-copie-1231` (la reprise en trois photos) | 1 rouge | la démo déclare ses jetons ; vert (cet essai rejoué seul) |
+| `reparer-image-perdue-1233` | 1 rouge | **rouge aussi sur la base d'avant B** (`e303f47`) : sans rapport avec le lot, propre à Chromium. Non touché. |
+| `audit-parcours-sommatif-2026-09-24`, `bibliotheque-deux-colonnes-1158`, `copie-de-reference-1229`, `lot-e1-conception-creer-ou-modifier`, `tableau-de-notation-1` | verts | rien à faire |
+
+L'essai neuf du banc du 29 oct. joue, dans le vrai navigateur, la suite demandée : une cumulative sans réglage s'ouvre décochée, badge CUM ; un champ voisin change et s'enregistre, aucun bloc de jetons n'est écrit, le badge reste CUM ; la case cochée, le bloc s'écrit et le badge passe HYB avec son survol.
+
+Une retouche de banc à signaler : cet ancien banc jugeait la note « réglés à la création » par sa visibilité à l'écran. La carte des jetons est un accordéon que la section replie après coup : le verdict dépendait du moment. Il la juge maintenant à l'état que la fiche lui pose.
+
+**Non joués** : les autres bancs de navigateur (la suite entière ne tient pas sous Chromium), et tout WebKit. Un banc qui accorderait un jeton dans la démo sans passer par les onze fichiers repérés rougira au verdict du Mac : il lui faudra la même déclaration (`tests/integration/harness/declarer-jetons.js`).
 
 ## 1. Les mesures demandées avant d'écrire la règle
 

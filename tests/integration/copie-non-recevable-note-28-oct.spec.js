@@ -30,6 +30,9 @@ const MONTER = `({ T }) => {
     window.db.setSync('trimestres', [{ id: T, nom: 'Trimestre témoin', annee: 2026, session: 'A', actif: true }]);
     window.db.setSync('cours', [{ id: coursId, codeCours: 'FIC102', titre: 'Cours fictif' }]);
     window.db.setSync(T + '_groupesCours', [{ id: 'GC1028', trimestreId: T, coursId, groupeNum: '01', pratiqueId: 'sommative', actif: true }]);
+    // ↻ 28 nov. 2026 (sans déclaration, pas de jetons) : la pratique codée, sans entrée de bibliothèque, n'offre plus de jetons ;
+    // les essais qui accordent une reprise s'appuient sur l'ancien réglage explicite du trimestre, une déclaration qui vaut toujours.
+    if (!window.db.getSync(T + '_modalitesEvaluation', null)) window.db.setSync(T + '_modalitesEvaluation', { configurationJetons: { jetonsActif: true, nombreParEleve: 2, dureeDelaiJours: 2, gestionOriginale: 'archiver', repriseCibleeActif: true } });   // security-ok: fixture littérale du banc
     window.db.setSync(T + '_groupeEtudiants', [{ da: '1028001', nom: 'Fictif', prenom: 'Élève', groupe: '01', coursId, groupeCoursId: 'GC1028' }]);   // security-ok: fixture littérale du banc
     window.db.setSync(T + '_productions', [   // security-ok: fixture littérale du banc
         { id: 'P1', titre: 'Dissertation fictive', type: 'travail', ponderation: 40, grilleId: 'G1028', echelleId: 'E1028', groupeCoursId: 'GC1028' },
