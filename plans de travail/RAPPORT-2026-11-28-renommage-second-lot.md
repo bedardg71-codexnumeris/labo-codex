@@ -5,7 +5,7 @@
 au nom courant, à la lecture seulement ; les mesures a, b et c ; les bancs mis à jour. Vitest complet vert (985 fichiers,
 12 702 tests, lancé depuis `tests/`).
 **Reste** : le feu vert de Grégoire, puis la fusion vers `main`, le bump et le changelog (rien de cela n'est fait ici,
-par mandat). Le verdict Playwright WebKit n'est pas pris : WebKit n'existe pas dans le nuage (§ 6).
+par mandat). Le verdict WebKit du Mac est pris, **vert** sur `6cff76e6` (§ 10) ; niveau proposé : `patch`.
 **Aucun calcul de note ne change.** Aucune donnée n'est écrite chez personne.
 **Jetons `?v=`** : les 15 fichiers `js/` modifiés reçoivent dans `index.html` le jeton neuf que propose le garde anti-cache
 (`scripts/verifier-anticache-stage.mjs`, qui refuse le commit sans lui). Ni `version.json` ni le numéro ne bougent :
@@ -232,3 +232,50 @@ d'avant. Si Cowork veut l'artefact jumeau, c'est à lui de le publier.
 diffère du modèle par autre chose que l'ancienne paire, elle était déjà « modifiée » avant ce lot et la garde ne la
 reconnaîtra pas plus qu'avant : la rangée 1 le montrerait. La mesure a n'est pas jouée au navigateur (§ 4). Les deux
 lots Playwright restants ne sont pas joués.
+
+## 10. Verdict WebKit du Mac
+
+**Vert.** Pris le 28 nov. 2026, de 6 h 10 à 8 h 40, sur `6cff76e6`, dans un arbre à part (`../labo-codex-renommage-1128`).
+`origin/main` était toujours `574bb60b` au départ et à la fin : rien à réunir. Aucune fusion, aucun bump, aucun changelog,
+aucun push sur `main`.
+
+| Mesure | Résultat |
+|---|---|
+| Vitest complet (depuis `tests/`) | 985 fichiers, 12 702 essais verts, 53 s |
+| Playwright WebKit, un worker | 1 953 essais joués : 1 912 verts, 23 verts au second essai, 18 rouges, 65 sautés |
+| Les 18 rouges | **18 connus** de `scripts/playwright-baseline.json`, **aucun neuf** (`nouveaux` : 0, `nonJouees` : 0) |
+| Jeton du Mac (`scripts/.verdict-playwright.json`) | **vert (code 0) sur `6cff76e6`** |
+
+Par rapport au verdict de la 1.260.0 (`RAPPORT-2026-11-27-verdict-assemblage.md`, 1 952 essais sur `618acdeb`) : un essai
+de plus, le cas neuf de `modele-fourni-non-supprimable` ; les mêmes 18 rouges connus ; les trois rouges neufs d'hier,
+recalés depuis, sont verts.
+
+**Les quatre specs du lot, sous WebKit** : 30 verts, 2 sautés, aucun vert au second essai. Même compte que sous Chromium (§ 6).
+
+| Spec | Verts | Sautés |
+|---|---|---|
+| `bibliotheque-deux-colonnes-1156` | 18 | 1 (banc de captures, sans sa variable) |
+| `modele-fourni-non-supprimable` (cas neuf compris) | 7 | 0 |
+| `modele-par-standards` | 4 | 1 (banc de captures, sans sa variable) |
+| `pratiques-762-appliquer-au-cours-actif` | 1 | 0 |
+
+**Comment la passe a été prise.**
+
+- **Outil** : celui qui reprend (`~/Library/Caches/labo-codex-verdict/`, `LABO_RACINE` sur l'arbre à part), 20 morceaux
+  par demies, un passage par appel, en avant-plan, et non `npm test` d'un bloc que demandait le mandat : la passe
+  Playwright dure 2 h 24 et un appel d'outil est coupé à 10 min. Mêmes essais, même configuration (`workers: 1`), mêmes
+  fonctions de jugement, même base, même jeton. Vitest, lui, a été joué par `npm run test:unit`.
+- **Sur secteur**, sous `caffeinate`. Le Mac était sur batterie à l'ouverture (68 %) : Vitest a été joué sur batterie,
+  Grégoire a branché le Mac avant Playwright (vérifié par `pmset`).
+- **Le demi-morceau 13a a été coupé par le chien de garde** à 8 min, comme le 27 nov., sans rapport. Rejoué en deux
+  quarts (6 specs, puis 5), même commande ; les deux rapports sont dans la fusion (41 rapports pour 40 demies).
+- **Mémoire libre** : de 79 % à 72 %, un creux à 65 % après la coupe de 13a (seuil d'arrêt : 60 %). Aucune garde refusée.
+  Aucune autre session ni autre passage de tests vu sur le Mac.
+- `tests/node_modules` de cet arbre est un lien vers celui de l'arbre principal, comme dans les autres arbres.
+
+**Les six écrans du § 9 ne sont pas regardés** : je ne peux pas piloter Safari sans le demander à Grégoire. Ils restent
+à regarder après la mise en ligne.
+
+**Niveau de version proposé : `patch`.** Le lot ne livre aucune capacité neuve : il finit de poser les mots des familles
+livrées en 1.260.0 (35 textes d'écran, une garde, un affichage), aucun calcul ne change, aucune donnée n'est écrite.
+Il se consolide dans l'entrée 1.260 des Nouvelles. Si Grégoire veut une entrée de Nouvelles à part, c'est `minor`.
