@@ -101,8 +101,9 @@ describe('C · les pratiques fournies (source seulement)', () => {
     it('les gabarits prédéfinis, les noms des pratiques codées', () => {
         expect(lire('js/pratiques/pratiques-predefines.js')).toMatch(/nom: 'Cumulative traditionnelle'/);
         expect(lire('js/pratiques/pratiques-predefines.js')).toMatch(/nom: 'Cumulative avec remplacement'/);
-        // « Hybride (démo) » attend la release : js/pack-demo-10.js se sert sous le jeton du BUILD, et un commit qui le touche
-        // doit partir dans le même push qu'une release (sentinelle #825, hook pre-push). Ce lot n'en fait pas (mandat).
+        // ↻ release 1.260.0 (27 nov. 2026) : la pratique de la démo s'appelle « Hybride (démo) ». Source seulement : la version
+        // du pack reste 21.3, une démo déjà installée garde son ancien nom jusqu'à « Remettre la démo à neuf ».
+        expect(lire('js/pack-demo-10.js')).toMatch(/"id": "demo-std-litt",\s*"nom": "Hybride \(démo\)"/);
         expect(lire('js/pratiques/pratique-sommative.js')).toContain('return "Cumulative traditionnelle";');
         expect(lire('js/pratiques/pratique-pan-standards.js')).toContain('return "Hybride";');
     });
@@ -121,10 +122,9 @@ function occurrencesHorsCommentaires(f, motif) {
     return lire(f).split('\n').filter(l => !/^\s*(\/\/|\*|\/\*|<!--)/.test(l) && motif.test(l));
 }
 describe('D · « Par sélection de productions » ne s\'affiche plus', () => {
-    it('aucun fichier chargé par index.html ne l\'écrit hors commentaires (les Nouvelles passées et la démo mises à part)', () => {
+    it('aucun fichier chargé par index.html ne l\'écrit hors commentaires (les Nouvelles passées mises à part)', () => {
         const fichiers = [...new Set(lire('index.html').match(/js\/[\w./-]+\.js/g))].concat(['index.html'])
-            .filter(f => f !== 'js/changelog-data.js')    // l'historique des versions dit ce qui était vrai
-            .filter(f => f !== 'js/pack-demo-10.js');     // la démo attend la release (jeton du build, sentinelle #825)
+            .filter(f => f !== 'js/changelog-data.js');   // l'historique des versions dit ce qui était vrai
         const vus = {};
         for (const f of fichiers) {
             let lignes;

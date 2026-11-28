@@ -128,9 +128,6 @@ describe('C · aux endroits corrigés, le nom affiché pour SEL ne contient ni �
         expect(noms).toHaveLength(n);
         for (const nom of noms) {
             expect(nom, fichier).not.toMatch(INTERDIT);
-            // ↻ 27 nov. 2026 : la démo garde « Par sélection de productions (démo) » jusqu'à la release qui la renommera
-            // « Hybride (démo) » (pack servi sous le jeton du build : sentinelle #825). Son nom reste sans « PAN » ni « standards ».
-            if (fichier === 'js/pack-demo-10.js') continue;
             expect(nom.replace(/[«»]/g, '').trim().toLowerCase(), fichier).toContain(NOM.toLowerCase().replace(/ \(démo\)$/, ''));
         }
     });

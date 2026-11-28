@@ -21,6 +21,21 @@
 
     var CHANGELOG = [
         {
+            // 1.260 (27 nov. 2026 : l'assemblage du 27 nov. — trois familles de pratiques, le seuil de défi, les séances par
+            // groupe-cours, l'import et l'export, le Suivi) — titre et cinq lignes de Grégoire (consigne de la release, 27 nov.),
+            // mot pour mot ; seule la typographie du fichier est appliquée.
+            version: '1.260',
+            couleur: 'vert',
+            titre: 'Trois familles de pratiques, et des seuils qui viennent de ton échelle',
+            items: [
+                'Les pratiques se rangent maintenant en trois familles&nbsp;: cumulative (CUM), hybride (HYB) et PAN (STD, SPE, DEN). «&nbsp;Sommative&nbsp;» s’appelle «&nbsp;Cumulative&nbsp;» et «&nbsp;Par sélection de productions&nbsp;» s’appelle «&nbsp;Hybride&nbsp;». Seuls les noms changent&nbsp;: tes pratiques, tes réglages et tes notes restent les mêmes. Une pratique que tu as déjà créée garde son nom.',
+                'Le seuil de défi d’un critère part maintenant du seuil de maîtrise de ton échelle, au lieu de 70&nbsp;%. Si ta maîtrise est à 75&nbsp;%, plus de critères seront signalés comme des défis dans le profil et le dépistage&nbsp;; aucune note ne change. Tu peux régler ce seuil dans Labo › Observation, et un seuil que tu avais réglé à une autre valeur que 70&nbsp;% est gardé. L’échelle de départ porte désormais ses deux seuils&nbsp;: réussite à 65&nbsp;%, maîtrise à 75&nbsp;%.',
+                'Dans Cadre › Trimestre, chaque groupe-cours affiche maintenant son nombre de séances, d’après son horaire, ses journées sans cours et ses reprises&nbsp;; la ligne du trimestre ne compte plus que les semaines. À l’accueil, la carte «&nbsp;À propos&nbsp;» s’ouvre repliée une fois ton trimestre créé&nbsp;: tu l’ouvres quand tu veux.',
+                'À l’import, une case «&nbsp;Balance des blancs&nbsp;» te laisse retirer ce traitement pour tout le lot, et la production choisie ne se reporte plus d’un lot au suivant. Quand tu exportes une seule rétroaction, l’onglet qui s’ouvre te dit ce qui se prépare et comment revenir. À l’export pour Léa, une copie mise à la corbeille est comptée à part.',
+                'Dans le Suivi&nbsp;: la phrase sous la bande de performance parle des seuils de ton échelle plutôt que de niveaux nommés&nbsp;; une intervention sans titre porte sa date&nbsp;; son statut «&nbsp;Complétée&nbsp;» se dit «&nbsp;Terminée&nbsp;»&nbsp;; deux critères dont le nom ne diffère que par les majuscules, les accents ou les espaces sont lus comme un seul. Une grille partagée emporte son échelle, et une grille collée en plusieurs tableaux est lue en entier. Les parcours «&nbsp;Évaluer une première production&nbsp;» et «&nbsp;Recevoir les productions&nbsp;» ne restent plus bloqués sur une étape déjà faite.'
+            ]
+        },
+        {
             // 1.259 (26 nov. 2026 : les tampons d'observation, le jeu « Opérations », la copie exportée en image) — titre et
             // cinq lignes de Grégoire, acceptés un à un (25 nov., 8 h 18 et 19 h 44 ; 26 nov., 6 h 48 à 6 h 49), mot pour
             // mot ; seule la typographie du fichier est appliquée. Ligne 3 : l'ancien titre est écrit tel qu'il était à
