@@ -26,6 +26,10 @@ const CLE_COURS = 'cours';
  * @property {string} numeroCompetence - Numéro de la compétence
  * @property {string} competence - Description de la compétence
  * @property {string} elementsCompetence - Éléments de compétence
+ * @property {{contexte: string[], elements: Array<{texte: string, criteres: string[]}>}} [devisCompetence] - Le devis
+ *   ministériel rangé (lot du 28 nov. 2026, js/materiel-devis.js) : le contexte de réalisation, et les critères de
+ *   performance sous chaque élément. `elementsCompetence` reste la source des éléments pour ses lecteurs (un par
+ *   ligne) ; écrit en même temps, il lui correspond. Absent tant qu'aucun devis n'a été accepté.
  * @property {number|null} heuresContact - Heures d'enseignement attendues du cours (RREC). Source de vérité de la conformité.
  * @property {string} ponderation - Pondération « théorie-labo-perso » (ex. "2-2-3"). Métadonnée de saisie ; propose heuresContact et le repère d'unités.
  * @property {string} [nature] - 'cours' (défaut ; absent = cours) ou 'service' (cadrage « Rencontres », 12 sept. 2026).
@@ -229,7 +233,7 @@ async function mettreAJourCours(coursId, modifications, options) {
     }
 
     // Mettre à jour les champs (sauf id et dateCreation)
-    const champsModifiables = ['codeCours', 'nomCours', 'discipline', 'numeroCompetence', 'competence', 'elementsCompetence', 'heuresContact', 'ponderation', 'nature'];
+    const champsModifiables = ['codeCours', 'nomCours', 'discipline', 'numeroCompetence', 'competence', 'elementsCompetence', 'devisCompetence', 'heuresContact', 'ponderation', 'nature'];
 
     champsModifiables.forEach(champ => {
         if (modifications[champ] !== undefined) {

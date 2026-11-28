@@ -30455,6 +30455,69 @@ body.mode-clair {
 }
 .materiel-btn-lien:focus-visible { outline: 3px solid var(--accent-primaire); outline-offset: 2px; }
 
+/* Lot « Le devis ministériel » (28 nov. 2026, js/materiel-devis.js) : l'entrée de l'accueil, puis la feuille du devis,
+   rangée comme le tableau du ministère (le numéro et l'énoncé en tête, chaque élément avec ses critères dessous).
+   Couleurs : variables seulement, clair comme sombre. Cibles tactiles ≥ 44 px (iPad). */
+.materiel-devis-entree h3 { margin: 0; font-size: 1.1rem; }
+.materiel-devis-entree .btn { min-height: 44px; align-self: flex-start; }
+.materiel-devis-entree p { margin: 0; line-height: 1.55; color: var(--texte-secondaire); max-width: 780px; }
+.materiel-devis { display: flex; flex-direction: column; gap: 20px; }
+.devis-tete { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; }
+.devis-tete h2 { margin: 0; }
+.devis-tete h2:focus, .materiel-devis h3:focus { outline: none; }
+.materiel-devis .btn { min-height: 44px; }
+.devis-intro { margin: 0; max-width: 780px; font-size: 1.05rem; line-height: 1.55; color: var(--texte-secondaire); }
+.devis-consigne, .devis-deja { margin: 0; line-height: 1.5; color: var(--texte-secondaire); }
+.devis-select-cours { max-width: 520px; min-height: 44px; }
+.devis-zone { min-height: 180px; }
+.devis-cours-choisi { margin: 0; color: var(--texte-principal); }
+.devis-feuille {
+    display: flex; flex-direction: column; gap: 20px;
+    background: var(--surface-carte); border: 1px solid var(--bordure-claire);
+    border-radius: var(--radius-grand); padding: 24px;
+}
+.devis-entete { display: grid; grid-template-columns: minmax(140px, 220px) 1fr; gap: 16px; }
+.devis-entete .groupe-form { margin: 0; }
+.devis-section { display: flex; flex-direction: column; gap: 12px; align-items: flex-start; border-top: 1px solid var(--bordure-claire); padding-top: 16px; }
+.devis-section h3, .devis-criteres h4 { margin: 0; }
+.devis-section h3 { font-size: 1.1rem; }
+.devis-criteres h4 { font-size: 0.9rem; font-weight: 600; color: var(--texte-secondaire); }
+.devis-liste, .devis-elements { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; align-self: stretch; }
+.devis-elements { gap: 16px; }
+.devis-ligne { display: grid; grid-template-columns: 1fr minmax(130px, 170px); gap: 8px; align-items: start; }
+.devis-champ { width: 100%; min-height: 44px; resize: vertical; line-height: 1.4; field-sizing: content; }
+.devis-menu { min-height: 44px; }
+.devis-element { border: 1px solid var(--bordure-claire); border-radius: var(--radius-moyen, 10px); padding: 14px; display: flex; flex-direction: column; gap: 12px; background: var(--surface-element); }
+.devis-element-tete { display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: start; }
+.devis-element-numero { min-width: 32px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.1rem; color: var(--texte-principal); }
+.devis-champ-element { font-weight: 600; }
+.devis-element-gestes { display: flex; flex-wrap: wrap; gap: 6px; justify-content: flex-end; }
+.devis-criteres { display: flex; flex-direction: column; gap: 8px; align-items: flex-start; padding-left: 42px; }
+.devis-vide { margin: 0; color: var(--texte-muted); font-style: italic; }
+.devis-cote { border-top: 1px solid var(--bordure-claire); padding-top: 12px; }
+.devis-cote summary { cursor: pointer; min-height: 44px; display: flex; align-items: center; font-weight: 600; color: var(--texte-principal); }
+.devis-cote summary:focus-visible { outline: 3px solid var(--focus-ring-color); outline-offset: 2px; }
+.devis-cote > .devis-consigne { margin-bottom: 12px; }
+.devis-annonce { margin: 0; min-height: 1.4em; color: var(--texte-secondaire); }
+.devis-pied { position: sticky; bottom: 0; padding: 12px 0; background: var(--surface-page); }
+.devis-comparaison { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start; }
+.devis-colonne { background: var(--surface-carte); border: 1px solid var(--bordure-claire); border-radius: var(--radius-grand); padding: 20px; min-width: 0; }
+.devis-colonne-neuve { border-color: var(--accent-primaire); }
+.devis-colonne h3 { margin: 0 0 12px; font-size: 1.05rem; }
+.devis-apercu { margin: 0; display: flex; flex-direction: column; gap: 4px; }
+.devis-apercu dt { font-weight: 600; font-size: 0.9rem; color: var(--texte-secondaire); margin-top: 10px; }
+.devis-apercu dd { margin: 0; line-height: 1.5; color: var(--texte-principal); overflow-wrap: anywhere; }
+.devis-apercu ol, .devis-apercu ul { margin: 4px 0 0; padding-left: 22px; }
+.devis-apercu ol > li { margin-bottom: 8px; font-weight: 600; }
+.devis-apercu ol > li ul { font-weight: 400; }
+@media (max-width: 820px) {
+    .devis-entete, .devis-comparaison { grid-template-columns: 1fr; }
+    .devis-ligne { grid-template-columns: 1fr; }
+    .devis-element-tete { grid-template-columns: auto 1fr; }
+    .devis-element-gestes { grid-column: 1 / -1; justify-content: flex-start; }
+    .devis-criteres { padding-left: 0; }
+}
+
 /* « Apporter mon matériel », lot 3b1 (17 oct.) : ce que l'assistant a écrit dans un critère, en lecture
    (grilles.js, rendreAttenduCritere). Ouvert, pas d'accordéon : Grégoire, 11 sept. */
 #listeCriteres .grille-attendu { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--bordure-claire); display: flex; flex-direction: column; gap: 8px; }
