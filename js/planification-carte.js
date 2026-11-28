@@ -16,6 +16,10 @@
 const etat = {
     noeuds: new Map(),
     liens: new Map(),
+    // Mémos (28 nov. 2026) : la TROISIÈME collection de la carte. Ils l'accompagnent sans en
+    // faire partie — ni blocs, ni liens, jamais lus hors du canevas. Tout site qui recopie la
+    // carte doit les emporter (ou les écarter À DESSEIN) : voir js/planification-memos.js.
+    memos: new Map(),
     compteur: 0,
     compteurLiens: 0,
     selection: null,
@@ -6070,7 +6074,9 @@ function clonerEtatPersistant() {
         }),
         liens: Array.from(etat.liens.values()).map(function(l) {
             return { id: l.id, source: l.source, cible: l.cible, type: l.type };
-        })
+        }),
+        // Mémos : créer, écrire, déplacer, agrandir et supprimer s'annulent comme le reste.
+        memos: window.planificationMemos.cloner(etat.memos)
     };
 }
 
@@ -6579,8 +6585,11 @@ function restaurerSnapshot(snapshot) {
         if (nV.enfants) nV.enfants = nV.enfants.filter(function(eid) { return etat.noeuds.has(eid); });
     }
     _reconstruireCloneIndex();
+    // Mémos : AVANT `sauvegarder()` plus bas, qui écrit la collection telle qu'elle est.
+    window.planificationMemos.chargerDans(etat.memos, snapshot.memos);
 
     reconstruireDOM();
+    window.planificationMemos.rendre();
     etat.selection = null;
     etat.multiSelection.clear();
     fermerPanneau();
@@ -6617,6 +6626,9 @@ function sauvegarder() {
         noeuds: Array.from(etat.noeuds.values()),
         liens: Array.from(etat.liens.values())
     };
+    // Mémos : la clé `memos` n'est posée que s'il y en a — une carte sans mémo s'enregistre
+    // comme avant ce lot, à l'identique.
+    window.planificationMemos.poserMemos(donnees, etat.memos);
     window.planificationDonnees.sauvegarderCarte(index.active, donnees, { machine: _ecritureMachine });
 
     mettreAJourTousLesBadges();
@@ -6629,6 +6641,8 @@ function viderCanvas() {
     if (coucheLiens) coucheLiens.innerHTML = '';
     etat.noeuds.clear();
     etat.liens.clear();
+    etat.memos.clear();
+    window.planificationMemos.rendre();
     _cloneIndex.clear();
     etat.compteur = 0;
     etat.compteurLiens = 0;
@@ -6646,6 +6660,13 @@ function chargerCarte(carteId) {
     viderCanvas();
     var donnees = window.planificationDonnees.chargerCarte(carteId);
     if (!donnees) { centrerVueSurContenu(); rendreChaineCarte(); return; }
+
+    // Mémos : chargés EN PREMIER. Plus bas, le chargement peut réenregistrer la carte
+    // (`if (liensModifies) sauvegarder()`, les migrations) : une collection encore vide à ce
+    // moment-là effacerait les mémos enregistrés. Une carte d'avant ce lot n'a pas la clé :
+    // la collection reste vide et rien n'est réécrit.
+    window.planificationMemos.chargerDans(etat.memos, donnees.memos);
+    window.planificationMemos.rendre();
 
     etat.compteur = donnees.compteur || 0;
     etat.compteurLiens = donnees.compteurLiens || 0;
@@ -8330,6 +8351,42 @@ function deposerDansCorbeille(e, id) {
     return true;
 }
 
+/* === MÉMOS DU CANEVAS (28 nov. 2026) ===
+   Le canevas prête au module des mémos (js/planification-memos.js) ce qu'il possède :
+   la collection `etat.memos`, l'annulation, l'enregistrement, la corbeille. Le module ne
+   touche ni aux blocs ni aux liens, et rien ici ne lit un mémo. */
+function brancherMemos() {
+    window.planificationMemos.brancher({
+        memos: etat.memos,
+        couche: document.getElementById('planif-couche-memos'),
+        zoom: function() { return etat.zoom; },
+        avantModification: enregistrerPourUndo,
+        enregistrer: sauvegarder,
+        placeNeuve: placePourMemoNeuf,
+        // Même règle que pour un bloc (#1070) : seul un geste qui a bougé jusqu'à la corbeille
+        // et l'a vue virer au rouge supprime.
+        surCorbeille: function(e) {
+            var dessus = gesteCorbeille.survolee && pointSurCorbeille(e.clientX, e.clientY);
+            majEtatCorbeille(false);
+            return dessus;
+        },
+        annoncer: afficherToastLien
+    });
+}
+
+/** Au centre de ce qu'on voit du canevas ; décalé tant qu'un autre mémo occupe déjà ce coin. */
+function placePourMemoNeuf(l, h) {
+    var vue = partieVisibleDuCanevas();
+    var place = { x: Math.round(vue.x + (vue.l - l) / 2), y: Math.round(vue.y + (vue.h - h) / 2) };
+    var occupee = function() {
+        return Array.from(etat.memos.values()).some(function(m) {
+            return Math.abs(m.x - place.x) < 12 && Math.abs(m.y - place.y) < 12;
+        });
+    };
+    while (occupee()) { place.x += 28; place.y += 28; }
+    return place;
+}
+
 /** Armée pendant un drag, « ouverte » quand le doigt la survole. */
 function majEtatCorbeille(survolee) {
     var el = elementCorbeille();
@@ -8848,6 +8905,8 @@ function exporterCarte() {
     var index = window.planificationDonnees.getIndex();
     if (!index) return;
     var carte = index.cartes.find(function(c) { return c.id === index.active; });
+    // ⚠ SANS LES MÉMOS, à dessein (28 nov. 2026) : ce fichier est fait pour être remis à
+    // quelqu'un, et les mémos ne sortent dans aucun export partagé. Ne pas « réparer ».
     var donnees = {
         nom: carte ? carte.nom : 'Sans titre',
         dateExport: new Date().toISOString(),
@@ -8889,6 +8948,8 @@ function dupliquerCarte(carteId) {
         noeuds: source.noeuds || [],
         liens: source.liens || []
     }));
+    // Mémos : la copie est la carte de l'enseignant, ils la suivent.
+    window.planificationMemos.poserMemos(contenu, source.memos);
     window.planificationDonnees.sauvegarderCarte(id, contenu);
     index.active = id;
     window.planificationDonnees.sauvegarderIndex(index);
@@ -8929,6 +8990,8 @@ function initialiser() {
         return;
     }
 
+    brancherMemos();
+    brancherPaletteNoeuds();
     appliquerZoom();
 
     // Zoom molette
@@ -9067,6 +9130,7 @@ function initialiser() {
                     if (e2.pointerId !== pointerId) return;
                     palette.style.left = (startLeft + e2.clientX - startX) + 'px';
                     palette.style.top = (startTop + e2.clientY - startY) + 'px';
+                    bornerHauteurPaletteNoeuds();   // déplacée, sa hauteur disponible change
                 }
                 function onUp(e2) {
                     if (e2.pointerId !== pointerId) return;
@@ -10135,6 +10199,103 @@ function appliquerAffichagePalettes() {
                             : 'Afficher la palette « ' + def.nom + ' »';
         btn.setAttribute('aria-label', btn.title);
     });
+    bornerHauteurPaletteNoeuds();   // masquée, elle n'avait pas de boîte à mesurer
+}
+
+/* === PALETTE « NŒUDS » : VERSION COMPACTE ET HAUTEUR BORNÉE (amendement du 28 nov. 2026) ===
+
+   Constat de Grégoire sur l'iPad couché : la palette est plus haute que l'écran. Le défaut
+   précède les mémos (« Enseignement explicite » était déjà coupée), mais « Mémo », rangé au
+   bas, le rendait bloquant.
+
+   ▣ DEUX RÉPONSES, INDÉPENDANTES.
+   1. La version COMPACTE, sur le modèle des palettes d'« Annoter et évaluer »
+      (travaux-outils.js, `VERSIONS_PALETTES`) : un bouton dans l'en-tête, dont le title dit
+      ce qu'il fera ; une préférence par navigateur ; l'étendue par défaut ; une classe sur
+      la palette. Ici la classe suffit : les nœuds d'une famille se rangent sur deux
+      colonnes (styles.css), le contenu n'est pas régénéré.
+   2. La GARANTIE, quelle que soit la version : la palette ne dépasse jamais la hauteur
+      disponible. Sa hauteur est bornée à ce qu'on VOIT du canevas sous elle ; au-delà, la
+      liste des nœuds défile à l'intérieur, et « Mémo », au pied, hors de la zone qui
+      défile, reste toujours atteignable. */
+var PREF_PALETTE_NOEUDS_COMPACTE = 'planifPaletteNoeudsCompacte';
+var PALETTE_NOEUDS_HAUTEUR_MIN = 200;   // px : l'en-tête, deux ou trois nœuds et « Mémo »
+var PALETTE_NOEUDS_MARGE_BAS = 12;      // px : la même marge qu'en haut et à gauche
+
+function paletteNoeudsCompacte() {
+    try {
+        return typeof obtenirPreference === 'function' && obtenirPreference(PREF_PALETTE_NOEUDS_COMPACTE) === true;
+    } catch (e) {
+        return false;
+    }
+}
+
+/** La palette porte la version choisie, et son bouton dit l'autre. Rien n'est écrit. */
+function appliquerVersionPaletteNoeuds() {
+    var palette = document.getElementById('planif-palette');
+    if (!palette) return;
+    var compacte = paletteNoeudsCompacte();
+    palette.classList.toggle('planif-palette-compacte', compacte);
+    var bouton = document.getElementById('planif-palette-version');
+    if (bouton) {
+        // Les mots des palettes d'annotation, repris tels quels.
+        bouton.title = compacte ? 'Passer à la version étendue' : 'Passer à la version compacte';
+        bouton.setAttribute('aria-label', bouton.title);
+    }
+    bornerHauteurPaletteNoeuds();
+}
+
+/** Le geste du bouton : l'autre version, retenue en préférence (par navigateur, donc par appareil). */
+function basculerVersionPaletteNoeuds() {
+    try {
+        if (typeof definirPreference === 'function') definirPreference(PREF_PALETTE_NOEUDS_COMPACTE, !paletteNoeudsCompacte());
+    } catch (e) {
+        console.warn('[Planification] Version de la palette non enregistrée :', e);
+    }
+    appliquerVersionPaletteNoeuds();
+}
+
+/**
+ * La hauteur que la palette peut prendre : du haut de la palette au bas de ce qu'on VOIT
+ * du canevas (le bas de la zone, ou celui de la fenêtre si la page n'est pas descendue
+ * jusqu'au bout), moins une marge. Pure, pour le banc.
+ */
+function hauteurDisponiblePalette(hautPalette, basZone, basFenetre) {
+    var bas = Math.min(basZone, basFenetre);
+    return Math.max(PALETTE_NOEUDS_HAUTEUR_MIN, Math.floor(bas - hautPalette - PALETTE_NOEUDS_MARGE_BAS));
+}
+
+function bornerHauteurPaletteNoeuds() {
+    var palette = document.getElementById('planif-palette');
+    var zone = document.getElementById('planif-zone-wrapper');
+    if (!palette || !zone || typeof palette.getBoundingClientRect !== 'function') return;
+    var p = palette.getBoundingClientRect();
+    if (!p.width && !p.height) return;   // masquée : rien à mesurer, on y reviendra à l'affichage
+    palette.style.maxHeight = hauteurDisponiblePalette(p.top, zone.getBoundingClientRect().bottom, window.innerHeight) + 'px';
+}
+
+/** Branchée une fois, à l'initialisation : la borne suit la fenêtre, la zone et le défilement de la page. */
+function brancherPaletteNoeuds() {
+    var bouton = document.getElementById('planif-palette-version');
+    // Dans la barre de la palette, un appui démarre son déplacement (et capture le pointeur) :
+    // le bouton garde le sien, sans quoi il ne recevrait jamais son clic.
+    if (bouton) bouton.addEventListener('pointerdown', function(e) { e.stopPropagation(); });
+    var borner = throttleRAF(bornerHauteurPaletteNoeuds);
+    window.addEventListener('resize', borner, { passive: true });
+    window.addEventListener('scroll', borner, { passive: true });
+    // La zone change de taille (plein écran, rotation) ; et ce qui est AU-DESSUS d'elle aussi (un
+    // bandeau qui paraît ou part la décale sans la redimensionner) : c'est la hauteur du corps qui le dit.
+    var zone = document.getElementById('planif-zone-wrapper');
+    if (zone && typeof ResizeObserver === 'function') {
+        var observateur = new ResizeObserver(function() { borner(); });
+        observateur.observe(zone);
+        observateur.observe(document.body);
+    }
+    // Une animation au-dessus du canevas (l'en-tête qui se resserre quand la page défile) déplace la
+    // palette SANS changer aucune taille : seule sa fin le dit. Mesuré le 28 nov. : 13 px, plus que la marge.
+    document.addEventListener('transitionend', borner, true);
+    document.addEventListener('animationend', borner, true);
+    appliquerVersionPaletteNoeuds();
 }
 
 function basculerDetailLecon(leconId) {
@@ -11688,6 +11849,10 @@ function _construireCopieLoupe() {
 
     var copie = espace.cloneNode(true);
     copie.removeAttribute('id');
+    // Mémos : la longue-vue lit la CARTE. (Et un `<textarea>` cloné perd le texte saisi :
+    // la copie montrerait des mémos vides.)
+    var coucheMemosCopie = copie.querySelector('#planif-couche-memos');
+    if (coucheMemosCopie) coucheMemosCopie.remove();
     var couche = copie.querySelector('#planif-couche-noeuds');
     if (couche) {
         var avecId = couche.querySelectorAll('[id]');
@@ -12601,6 +12766,18 @@ window.planificationCarte = {
     deplacerSequenceVersSemaine: deplacerSequenceVersSemaine,
     annuler: annuler,
     retablir: retablir,
+    // Bancs des mémos (28 nov. 2026) : l'instantané et le fichier remis, lus sans passer par l'écran.
+    enregistrerPourUndo: enregistrerPourUndo,
+    clonerEtatPersistant: clonerEtatPersistant,
+    restaurerSnapshot: restaurerSnapshot,
+    sauvegarder: sauvegarder,
+    exporterCarte: exporterCarte,
+    // Mémos : la palette en pose un, la barre d'outils les masque ou les montre (data-action).
+    creerMemo: function() { return window.planificationMemos.creer(); },
+    basculerMemos: function() { window.planificationMemos.basculerVisibilite(); },
+    // Palette « Nœuds » (amendement du 28 nov.) : la version compacte, et la borne de hauteur (pure, pour le banc).
+    basculerVersionPaletteNoeuds: basculerVersionPaletteNoeuds,
+    hauteurDisponiblePalette: hauteurDisponiblePalette,
     zoomerAuNiveau: zoomerAuNiveau,
     // Pour la Bibliothèque (lot 3) : elle porte désormais la gestion des cartes.
     dupliquerCarte: dupliquerCarte,

@@ -105,7 +105,7 @@ test('la barre : de gauche à droite ; trois icônes seules, nommées ; plus d�
     expect(barre.map((b) => b.id)).toEqual([
         'planif-btn-bibliotheque', 'planif-liste-cartes', 'planif-btn-actions',
         'planif-btn-annuler', 'planif-btn-retablir', 'planif-btn-rechercher',
-        'planif-btn-palette-noeuds', 'planif-btn-palette-planificateur', 'planif-btn-vue',
+        'planif-btn-palette-noeuds', 'planif-btn-palette-planificateur', 'planif-btn-memos', 'planif-btn-vue',   // 28 nov. : l'interrupteur des mémos
         'planif-palette-inspecteur-btn', 'planif-palette-aide-btn'
     ]);
     // Aucun bouton visible de la barre n'est sans nom : un mot, ou son aria-label.
@@ -433,7 +433,7 @@ for (const [nom, viewport] of [['paysage', { width: 1180, height: 820 }], ['port
                 };
             });
             expect(mesure.grossier).toBe(true);
-            expect(mesure.nb).toBe(11);   // lot 3 (7 nov.) : la loupe de la recherche s'ajoute
+            expect(mesure.nb).toBe(12);   // lot 3 (7 nov.) : la loupe de la recherche s'ajoute · 28 nov. : l'interrupteur des mémos
             expect(mesure.petites).toEqual([]);
             expect(mesure.hauteurs).toEqual([44]);
             expect(erreurs).toEqual([]);

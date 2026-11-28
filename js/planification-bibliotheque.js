@@ -271,7 +271,8 @@ function fermerModalBibliothequeAlignements() {
  * Partage un alignement du trimestre actif → Bibliothèque
  */
 async function partagerAlignement(carteId) {
-    var exportData = window.planificationDonnees.exporterCartePourBibliotheque(carteId);
+    // Mémos (28 nov. 2026) : « Garder dans ma bibliothèque » — la carte y garde ses mémos.
+    var exportData = window.planificationDonnees.exporterCartePourBibliotheque(carteId, { avecMemos: true });
     if (!exportData) {
         notifications.erreur('Impossible d\'exporter cette carte.');
         return;
@@ -346,6 +347,7 @@ async function ajouterAlignementDepuisBibliotheque(biblioId) {
  * Exporte un alignement en fichier JSON avec métadonnées CC
  */
 async function exporterAlignementJSON(carteId) {
+    // Mémos (28 nov. 2026) : SANS eux — ce fichier est fait pour un collègue. Ne pas passer `avecMemos`.
     var exportData = window.planificationDonnees.exporterCartePourBibliotheque(carteId);
     if (!exportData) {
         notifications.erreur('Impossible d\'exporter cette carte.');
@@ -483,7 +485,9 @@ function importerAlignementFichier(event) {
                     auteur: data.metadata_cc.auteur_original || '',
                     dansBibliotheque: true,
                     metadata_cc: data.metadata_cc,
-                    donnees: data.donnees
+                    // Mémos (28 nov. 2026) : un fichier reçu n'apporte pas de mémos (les exports
+                    // n'en portent pas ; un fichier retouché à la main n'en dépose pas non plus).
+                    donnees: window.planificationMemos.sansMemos(data.donnees)
                 };
                 await ajouterAlignementALaBibliotheque(item);
 

@@ -358,7 +358,9 @@ function importerDepuisBibliotheque(alignementBiblio) {
     // un coursId qui n'existe pas dans ce codex.
     index.cartes.push(creerEntreeIndex(nouvelId, alignementBiblio.nom || 'Alignement importé'));
 
-    // Deep-clone les données de la carte
+    // Deep-clone les données de la carte — TOUT le contenu, mémos compris (28 nov. 2026) :
+    // c'est le chemin de la reprise d'un trimestre et de « Utiliser dans ce trimestre ». Un
+    // fichier reçu d'un collègue est débarrassé de ses mémos AVANT d'arriver ici (bibliothèque).
     var contenuClone = JSON.parse(JSON.stringify(alignementBiblio.donnees));
 
     // Sauvegarder
@@ -373,10 +375,18 @@ function importerDepuisBibliotheque(alignementBiblio) {
 
 /**
  * Exporte une carte du trimestre actif pour la bibliothèque.
+ *
+ * ⚠ MÉMOS (28 nov. 2026) — SANS eux par défaut : cette copie sert aussi le fichier remis à
+ * un collègue (`exporterAlignementJSON`), et les mémos ne sortent dans aucun export partagé.
+ * Seul « Garder dans ma bibliothèque » passe `{ avecMemos: true }` : c'est la bibliothèque de
+ * l'enseignant, sa carte y garde ses mémos. Le défaut est le côté sûr : un appelant qui
+ * oublie l'option ne fait rien fuir.
+ *
  * @param {string} carteId - ID de la carte à exporter (ex: 'carte_1')
- * @returns {Object|null} { nom, dateCreation, donnees: { compteur, compteurLiens, noeuds, liens } }
+ * @param {{avecMemos?: boolean}} [options]
+ * @returns {Object|null} { nom, dateCreation, donnees: { compteur, compteurLiens, noeuds, liens[, memos] } }
  */
-function exporterCartePourBibliotheque(carteId) {
+function exporterCartePourBibliotheque(carteId, options) {
     var donnees = getDonnees();
     if (!donnees || !donnees.cartes || !donnees.cartes[carteId]) return null;
 
@@ -391,17 +401,23 @@ function exporterCartePourBibliotheque(carteId) {
         }
     }
 
-    var contenu = donnees.cartes[carteId];
     return {
         nom: infosCarte ? infosCarte.nom : 'Sans titre',
         dateCreation: infosCarte ? infosCarte.dateCreation : new Date().toISOString(),
-        donnees: JSON.parse(JSON.stringify({
-            compteur: contenu.compteur || 0,
-            compteurLiens: contenu.compteurLiens || 0,
-            noeuds: contenu.noeuds || [],
-            liens: contenu.liens || []
-        }))
+        donnees: copieDuContenu(donnees.cartes[carteId], !!(options && options.avecMemos))
     };
+}
+
+/** Copie profonde du contenu d'une carte : blocs et liens toujours, mémos seulement sur demande. */
+function copieDuContenu(contenu, avecMemos) {
+    var copie = JSON.parse(JSON.stringify({
+        compteur: contenu.compteur || 0,
+        compteurLiens: contenu.compteurLiens || 0,
+        noeuds: contenu.noeuds || [],
+        liens: contenu.liens || []
+    }));
+    if (avecMemos) window.planificationMemos.poserMemos(copie, contenu.memos);
+    return copie;
 }
 
 /* ===============================

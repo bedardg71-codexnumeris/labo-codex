@@ -319,6 +319,15 @@ export function chargerScript(cheminRelatifProjet, globaux = {}, fauxWindowExist
         new Function('window', readFileSync(path.join(racineProjet, 'js/entites/production-diagnostique.js'), 'utf8'))(fauxWindow);
     }
 
+    // Mémos du canevas (28 nov. 2026) — `planificationMemos` (js/planification-memos.js) porte la troisième
+    // collection de la carte ; le canevas, la couche de données et la bibliothèque la lisent par `window.…`
+    // (instantané, enregistrement, duplication, sorties sans mémos). Comme `ProductionDiagnostique` : le VRAI
+    // module, chargé dans la fenêtre du harnais — index.html le charge avant ces trois lecteurs.
+    if (!fauxWindow.planificationMemos && /js\/planification-(carte|donnees|bibliotheque)\.js$/.test(cheminRelatifProjet)) {
+        new Function('window', 'document', readFileSync(path.join(racineProjet, 'js/planification-memos.js'), 'utf8'))(
+            fauxWindow, globaux.document || fauxDocument);
+    }
+
     globaux = completerMenuSelectionParDefaut(globaux, fauxWindow, globaux.document || fauxDocument);   // #1147
 
     // Lot 2 des standards sans portfolio (29 oct. 2026) — `obtenirIdsPoolStdDuCorpus` (pratique-registre.js), le pool de la
