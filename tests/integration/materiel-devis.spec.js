@@ -207,3 +207,138 @@ test('devis · un collage piégé n’entre pas dans la page, ni dans la liste d
     expect(requetes).toEqual([]);
     expect((await reserve(page))[0].enonce).toContain('<img');   // gardé comme du texte, tel que collé
 });
+
+// ---------------------------------------------------------------------------------------------------------------------
+// SECOND AMENDEMENT (28 nov. 2026, 10 h 03, réponses de Grégoire)
+// ---------------------------------------------------------------------------------------------------------------------
+
+const reserveDemo = (page) => page.evaluate(async () => (await db.get('demo_devisMinisteriels')) || null);
+
+test('amendement 2 · la démonstration : un devis rangé dans la démo n’entre pas dans la réserve réelle, et n’y paraît pas après la sortie', async ({ page }) => {
+    test.setTimeout(120000);
+    page.on('dialog', (d) => d.accept());
+    await ouvrir(page);
+    // Avant la visite : un devis réel, rangé hors de la démo.
+    await numeriser(page, '01FB');
+    await page.locator('[data-action="materielDevis.accepter"]').click();
+    await expect(page.locator('#materiel-devis .materiel-confirmation')).toBeVisible();
+    const reelleAvant = JSON.stringify(await reserve(page));
+    expect(JSON.parse(reelleAvant).map((d) => d.code)).toEqual(['01FB']);
+
+    // La visite : dans la démo, la liste ne montre pas le devis réel ; on y range 4EF0.
+    await page.evaluate(() => activerModeDemo());
+    await expect.poll(() => page.evaluate(() => estEnModeDemo())).toBe(true);
+    await page.evaluate(() => window.afficherSection('conception'));
+    await page.evaluate(() => window.materielDevis.fermer());
+    await expect(page.locator('#materiel-accueil')).toBeVisible();
+    await expect(page.locator('.devis-ranges li')).toHaveCount(0);
+    await numeriser(page, '4EF0');
+    await page.locator('[data-action="materielDevis.accepter"]').click();
+    await expect(page.locator('#materiel-devis .materiel-confirmation')).toBeVisible();
+    expect((await reserveDemo(page)).map((d) => d.code)).toEqual(['4EF0']);
+    expect(JSON.stringify(await reserve(page)), 'la réserve réelle pendant la démo').toBe(reelleAvant);
+    await page.locator('#materiel-devis [data-action="materielDevis.fermer"]').click();
+    await expect(page.locator('.devis-ranges li')).toHaveCount(1);
+    await expect(page.locator('.devis-ranges li')).toContainText('4EF0');
+
+    // La sortie : la réserve réelle est identique à ce qu'elle était avant la visite ; l'accueil ne montre que le devis réel.
+    await page.evaluate(() => desactiverModeDemo());
+    await expect.poll(() => page.evaluate(() => estEnModeDemo())).toBe(false);
+    expect(JSON.stringify(await reserve(page)), 'la réserve réelle après la démo').toBe(reelleAvant);
+    await page.evaluate(() => window.afficherSection('conception'));
+    await page.evaluate(() => window.materielDevis.fermer());
+    await expect(page.locator('.devis-ranges li')).toHaveCount(1);
+    await expect(page.locator('.devis-ranges li')).toContainText('01FB');
+});
+
+test('amendement 2 · depuis un étiquetage en brouillon : le bouton mène aux devis, le brouillon reste intact et se retrouve au retour', async ({ page }) => {
+    page.on('dialog', (d) => d.accept());
+    await ouvrir(page);
+    await numeriser(page, '4EF0');
+    await page.locator('[data-action="materielDevis.accepter"]').click();
+    await page.locator('#materiel-devis [data-action="materielDevis.fermer"]').click();
+
+    // Une grille collée : l'étiquetage s'ouvre, son brouillon s'écrit, l'accueil est caché.
+    await page.evaluate(() => window.materielDissection.ouvrir(window.materielDissectionLecture.exempleDoc()));
+    await expect(page.locator('#materiel-dissection')).toBeVisible();
+    await expect(page.locator('#materiel-accueil')).toBeHidden();
+    await expect.poll(() => page.evaluate(() => window.materielDissection.aUnBrouillon())).toBe(true);
+    const brouillon = () => page.evaluate(() => JSON.stringify(db.getSync(cle('brouillonDissection'), null)));
+    const avant = await brouillon();
+    expect(avant).not.toBe('null');
+
+    // Le bouton de l'en-tête : l'écran des devis, avec les devis rangés (l'accueil reste caché).
+    await page.locator('#materiel-dissection [data-action="materielDevis.ouvrirDepuisEtiquetage"]').click();
+    await expect(page.locator('#materiel-devis')).toBeVisible();
+    await expect(page.locator('#materiel-dissection')).toBeHidden();
+    await expect(page.locator('#materiel-devis .devis-ranges li')).toHaveCount(1);
+    await expect(page.locator('#materiel-devis .devis-tete [data-action="materielDevis.fermer"]')).toHaveText('Revenir à mon étiquetage');
+    expect(await brouillon()).toBe(avant);
+
+    // Rouvrir un devis depuis là, puis revenir : l'étiquetage se retrouve tel quel.
+    await page.locator('#materiel-devis [data-action="materielDevis.rouvrir"]').click();
+    await expect(page.locator('#devis-numero')).toHaveValue('4EF0');
+    await page.locator('#materiel-devis .devis-tete [data-action="materielDevis.fermer"]').click();
+    await expect(page.locator('#materiel-dissection')).toBeVisible();
+    await expect(page.locator('#materiel-devis')).toBeHidden();
+    await expect(page.locator('#dissection-contenu .dissection-feuille tr')).toHaveCount(8);
+    expect(await brouillon()).toBe(avant);
+});
+
+test('amendement 2 · l’import par cases : un devis neuf entre ; un code déjà rangé au contenu différent ne remplace rien sans sa case, l’ancien et le nouveau montrés', async ({ page }) => {
+    const dialogues = [];
+    page.on('dialog', async (d) => { dialogues.push(d.message()); if (d.type() === 'confirm') await d.dismiss(); else await d.accept(); });   // « Recharger la page ? » : non
+    await ouvrir(page);
+    const coursAvant = await lesCours(page);
+    for (const code of ['4EF0', '000Z']) {
+        await numeriser(page, code);
+        await page.locator('[data-action="materielDevis.accepter"]').click();
+        await expect(page.locator('#materiel-devis .materiel-confirmation')).toBeVisible();
+        await page.locator('#materiel-devis [data-action="materielDevis.fermer"]').click();
+    }
+    const mienne = await reserve(page);
+
+    // Le fichier du collègue : 4EF0 identique, 000Z au contenu différent, 01FB neuf. Il ne porte que des devis.
+    const fichier = await page.evaluate((r) => {
+        const L = window.devisLecture;
+        const neuf = L.pourReserve(L.lire(r.texte01FB));
+        const autre = Object.assign({}, r.mienne[1], { id: 'DEVIS_DU_COLLEGUE', enonce: 'Énoncé du collègue.' });
+        return JSON.stringify({ devisMinisteriels: [Object.assign({}, r.mienne[0], { id: 'AUTRE' }), autre, Object.assign(neuf, { id: 'DEVIS_NEUF_DU_COLLEGUE' })] });
+    }, { mienne, texte01FB: devis('01FB') });
+    // Le vrai chemin : Réglages › « Importer », puis le fichier choisi dans la fenêtre.
+    const ouvrirLeFichier = async () => {
+        await page.evaluate(() => ouvrirModalImport());
+        await page.locator('#fichierImport').setInputFiles({ name: 'devis-du-collegue.json', mimeType: 'application/json', buffer: Buffer.from(fichier, 'utf8') });
+    };
+
+    await ouvrirLeFichier();
+    await expect(page.locator('.devis-import-ligne')).toHaveCount(3);
+    await expect(page.locator('.devis-import-ligne').nth(0)).toContainText('identique');
+    await expect(page.locator('.devis-import-ligne').nth(0).locator('input')).toHaveCount(0);
+    // Le code déjà rangé, différent : case NON cochée, et les deux devis côte à côte.
+    const different = page.locator('.devis-import-ligne').nth(1);
+    await expect(different.locator('.import-item-devis')).not.toBeChecked();
+    await different.locator('summary').click();
+    await expect(different.locator('.devis-colonne').first()).toContainText('Communiquer dans une langue moderne de façon restreinte.');
+    await expect(different.locator('.devis-colonne-neuve')).toContainText('Énoncé du collègue.');
+    await expect(page.locator('.devis-import-ligne').nth(2).locator('.import-item-devis')).toBeChecked();
+    expect(JSON.stringify(await reserve(page)), 'ouvrir la fenêtre n’écrit rien').toBe(JSON.stringify(mienne));
+
+    // Importer tel que proposé : seul le devis neuf entre ; 000Z garde son contenu d'ici.
+    await page.locator('[data-action="executerImportSelectif"]').click();
+    await expect.poll(async () => (await reserve(page)).map((d) => d.code)).toEqual(['4EF0', '000Z', '01FB']);
+    let r = await reserve(page);
+    expect(r[1]).toEqual(mienne[1]);
+    expect(r[0]).toEqual(mienne[0]);
+    expect(dialogues.join(' ')).toContain('1 devis ministériel(s)');
+
+    // Rouvrir le fichier et cocher la case de 000Z : c'est l'accord ; il est remplacé à sa place, sous l'id d'ici.
+    await ouvrirLeFichier();
+    await expect(page.locator('.devis-import-ligne').nth(2)).toContainText('identique');
+    await page.locator('.devis-import-ligne').nth(1).locator('.import-item-devis').check();
+    await page.locator('[data-action="executerImportSelectif"]').click();
+    await expect.poll(async () => (await reserve(page))[1].enonce).toBe('Énoncé du collègue.');
+    r = await reserve(page);
+    expect(r.map((d) => [d.id, d.code])).toEqual([[mienne[0].id, '4EF0'], [mienne[1].id, '000Z'], [r[2].id, '01FB']]);
+    expect(await lesCours(page)).toBe(coursAvant);
+});

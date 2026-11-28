@@ -264,6 +264,30 @@ describe('R — la réserve de devis', () => {
         expect(r).toEqual([{ id: 'D1', code: '4EF0', enonce: '', contexte: [], elements: [{ texte: 'A', criteres: ['ok'] }], activites: { discipline: '', ponderation: '', unites: '2', heures: '', precisions: '' } }]);
     });
 
+    it('un fichier reçu, confronté à la réserve : neuf, identique ou différent ; rien n’est écrit, un doublon du fichier n’est pas proposé', () => {
+        const mienne = D.ranger(D.ranger([], pour('4EF0'), opts(1)), pour('000Z'), opts(2));
+        const gele = JSON.stringify(mienne);
+        const autre = Object.assign(pour('000Z'), { enonce: 'Un autre énoncé.', id: 'DEVIS_DU_COLLEGUE' });
+        const fichier = [Object.assign(pour('4EF0'), { id: 'X', dateCreation: 'autre date' }), autre, pour('01FB'), pour('01FB'), Object.assign(pour('01FL'), { code: '' })];
+        const c = D.confronter(mienne, fichier);
+        expect(c.map((x) => [x.devis.code, x.etat])).toEqual([['4EF0', 'identique'], ['000Z', 'different'], ['01FB', 'neuf']]);
+        expect(c[1].ancien.enonce).toBe('Communiquer dans une langue moderne de façon restreinte.');
+        expect(c[2].ancien).toBeNull();
+        expect(JSON.stringify(mienne)).toBe(gele);
+        expect(D.memeContenu(pour('4EF0'), Object.assign(pour('4EF0'), { id: 'autre', dateModification: 'x' }))).toBe(true);
+        expect(D.confronter(mienne, 'pas un tableau')).toEqual([]);
+        // Ranger le devis différent le remplace à sa place, sous l'id d'ici, pas celui du fichier.
+        const r = D.ranger(mienne, c[1].devis, opts(3));
+        expect(r.map((d) => [d.id, d.code, d.enonce])).toEqual([['DEVIS_1', '4EF0', 'Analyser des textes littéraires.'], ['DEVIS_2', '000Z', 'Un autre énoncé.']]);
+    });
+
+    it('la démonstration a sa réserve, sous le préfixe de la démo ; l’écran ne nomme jamais une clé en dur', () => {
+        expect(D.CLE_RESERVE_DEMO).toBe('demo_devisMinisteriels');
+        const ecran = readFileSync(path.join(racine, 'js', 'materiel-devis.js'), 'utf8');
+        expect(tranche(ecran, 'function cleReserve() {', '}')).toMatch(/enDemo\(\) \? L\(\)\.CLE_RESERVE_DEMO : L\(\)\.CLE_RESERVE/);
+        expect(ecran.replace(/\/\*[\s\S]*?\*\//g, '')).not.toMatch(/['"](demo_)?devisMinisteriels['"]/);
+    });
+
     it('la réserve est une clé GLOBALE, hors trimestre ; aucun fichier du lot ne touche la fiche d’un cours', () => {
         expect(D.CLE_RESERVE).toBe('devisMinisteriels');
         const trimestres = readFileSync(path.join(racine, 'js', 'trimestres.js'), 'utf8');
@@ -283,7 +307,8 @@ describe('S — l’écran ne pose rien de collé dans la page sans l’échappe
     it('aucun handler inline, aucun console.log, une seule écriture', () => {
         expect(source).not.toMatch(/\son(click|change|input|paste)\s*=/);
         expect(source).not.toMatch(/console\.log/);
-        expect(source.match(/modifierEtAnnoncer\(/g)).toHaveLength(1);
+        expect(source.match(/modifierEtAnnoncer\(/g)).toHaveLength(2);   // « Ranger ce devis », et l'import par cases
+        expect(source.match(/modifierEtAnnoncer\(cleReserve\(\)/g)).toHaveLength(2);   // jamais une clé en dur : la démo a sa réserve
         expect(source).not.toMatch(/db\.(set|setSync|modifier|remove|removeSync)\(/);
     });
 

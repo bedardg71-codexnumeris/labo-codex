@@ -497,9 +497,41 @@
         };
     };
 
+    /** Deux devis disent-ils la même chose ? (Le contenu seul : ni l'id, ni les dates.) */
+    D.memeContenu = function (a, b) {
+        var contenu = function (d) {
+            var s = devisSur(d) || devisSur({});
+            return JSON.stringify(D.pourReserve({ numero: s.code, enonce: s.enonce, contexte: s.contexte, elements: s.elements, activites: s.activites }));
+        };
+        return contenu(a) === contenu(b);
+    };
+
+    /**
+     * Les devis d'un fichier reçu, confrontés à la réserve, sans rien écrire. Pour chacun : `neuf` (ce code n'est pas
+     * rangé), `identique` (rangé, même contenu : rien à faire) ou `different` (rangé, autre contenu : `ancien` le
+     * porte, et rien ne se remplace sans accord). Un devis sans code, ou un second devis du même code dans le fichier,
+     * n'est pas proposé.
+     */
+    D.confronter = function (reserve, fichier) {
+        var liste = D.reserveSure(reserve), vus = {};
+        return D.reserveSure(fichier).filter(function (d) {
+            if (!d.code || vus[d.code]) return false;
+            vus[d.code] = true;
+            return true;
+        }).map(function (d) {
+            var ancien = liste.find(function (x) { return x.code === d.code; }) || null;
+            return { devis: d, ancien: ancien, etat: !ancien ? 'neuf' : D.memeContenu(ancien, d) ? 'identique' : 'different' };
+        });
+    };
+
     D.CHAMPS_ACTIVITES = CHAMPS_ACTIVITES;
     /** La clé de la réserve : globale, hors trimestre (inscrite à CLES_GLOBALES, js/trimestres.js). */
     D.CLE_RESERVE = 'devisMinisteriels';
+    /**
+     * La réserve de la démonstration (second amendement, 28 nov., 10 h 03) : un devis rangé dans la démo vit avec elle,
+     * sous le préfixe `demo_` comme tout ce qu'on y crée, et ne touche jamais la réserve réelle.
+     */
+    D.CLE_RESERVE_DEMO = 'demo_devisMinisteriels';
 
     window.devisLecture = D;
 })();

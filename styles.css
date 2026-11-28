@@ -30478,7 +30478,25 @@ body.mode-clair {
 .devis-ranges li { display: flex; gap: 12px; align-items: center; justify-content: space-between; padding: 8px 0; border-top: 1px solid var(--bordure-claire); }
 .devis-ranges .btn { min-height: 44px; flex: none; }
 .devis-range-texte { line-height: 1.45; color: var(--texte-principal); overflow-wrap: anywhere; }
+.devis-ranges-pied { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; padding-top: 10px; border-top: 1px solid var(--bordure-claire); }
+.devis-ranges-pied .btn { min-height: 44px; }
 .devis-range-compte { color: var(--texte-muted); font-size: 0.9rem; white-space: nowrap; }
+/* Sur l'écran des devis : la même liste, sous la zone de collage (l'accueil est caché depuis un étiquetage en brouillon). */
+.devis-ranges-ecran:empty { display: none; }
+.devis-ranges-ecran h4 { margin: 0 0 8px; font-size: 0.95rem; color: var(--texte-secondaire); }
+/* Dans la fenêtre de l'import par cases : les devis du fichier, et la comparaison quand un code est déjà rangé. */
+.devis-import { margin-bottom: 20px; }
+.devis-import h3 { font-size: 0.9rem; margin: 0 0 10px; color: var(--texte-principal); }
+.devis-import h3 span { font-size: 0.8rem; font-weight: 400; color: var(--texte-secondaire); margin-left: 8px; }
+.devis-import-liste { list-style: none; margin: 0 0 8px; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.devis-import-ligne { border: 1px solid var(--bordure-claire); border-radius: var(--radius-moyen); padding: 10px; background: var(--surface-conteneur); }
+.devis-import-tete { display: flex; gap: 10px; align-items: center; min-height: 44px; cursor: pointer; line-height: 1.45; }
+/* La case d'un devis : la classe que l'import par cases relève (`.import-item-devis:checked`, js/import-export.js). */
+.import-item-devis { flex: none; width: 20px; height: 20px; accent-color: var(--accent-primaire); }
+.devis-import-etat { color: var(--texte-muted); font-size: 0.85rem; font-style: italic; }
+.devis-import-alerte { margin: 6px 0; color: var(--alerte-texte-attention); line-height: 1.45; }
+.devis-import-comparer summary { cursor: pointer; min-height: 44px; display: flex; align-items: center; font-weight: 600; }
+.devis-import-comparer h4 { margin: 0 0 8px; font-size: 0.95rem; }
 .devis-activites { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; align-self: stretch; }
 .devis-activites .groupe-form { margin: 0; }
 .devis-activite-large { grid-column: 1 / -1; }

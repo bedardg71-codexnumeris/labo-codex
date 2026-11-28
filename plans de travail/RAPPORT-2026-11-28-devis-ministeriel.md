@@ -1,10 +1,62 @@
 # Rapport – numériser un devis ministériel dans « Apporter mon matériel »
 
-> Dernier relais : 28 novembre 2026, 9 h 15 (Toronto), session du nuage. Il remplace le relais de 8 h 45.
-> Branche : `claude/devis-ministeriel-8vylul` (les mandats disent `lot/devis-ministeriel` ; la session du nuage impose son propre nom de branche). Base : `main` à `574bb60`, la 1.260.0.
-> PR #67, en brouillon. Sans bump ni changelog. Rien n'est fusionné.
-> Fait : le lot du relais de 8 h 02, puis sa refonte selon le correctif de 8 h 08 (« numériser ne touche aucun cours et c'est la création du cours qui vient puiser dans le devis numérisé »).
-> Reste : la relecture des mots par Grégoire ; le verdict WebKit (aucun WebKit dans le conteneur) ; l'essai avec un vrai geste de copie (Aperçu, Safari, iPad) ; quatre questions plus bas.
+> Dernier relais : 28 novembre 2026, 10 h 20 (Toronto), session du nuage. Il remplace les relais de 8 h 45 et de 9 h 15.
+> Branche : `claude/devis-ministeriel-8vylul`. Base : `main` à `574bb60`, la 1.260.0. PR #67, en brouillon.
+> **Décision de Grégoire (10 h 03) : le devis ne part pas en ligne seul.** Il partira avec le lot « Cadre » (la création d'un cours puise dans les devis rangés). Cette branche reste sur sa branche, sans bump ni changelog. Le lot « Cadre » n'est PAS commencé : sa consigne viendra à part.
+> Fait : le lot du relais de 8 h 02, sa refonte selon le correctif de 8 h 08, puis le second amendement de 10 h 03 (section ci-dessous).
+> Reste : la relecture des mots 40 à 50 ; le verdict WebKit (aucun WebKit dans le conteneur) ; l'essai avec un vrai geste de copie (Aperçu, Safari, iPad).
+
+## Second amendement (28 nov., 10 h 03)
+
+### 1. La démonstration a sa propre réserve
+
+**Le moyen.** Dans la démonstration, l'écran lit et écrit `demo_devisMinisteriels` au lieu de `devisMinisteriels` (une seule fonction, `cleReserve`, dans `js/materiel-devis.js`). C'est le préfixe de tout ce que la démo range.
+
+- **À l'entrée** : rien n'est copié ni écrit. La liste « Tes devis rangés » montre la réserve de la démo, vide à la première visite ; les devis réels n'y paraissent pas. Une phrase le dit sous le titre de la liste.
+- **Pendant** : ranger, rouvrir, recoller, importer et exporter des devis portent tous sur la réserve de la démo.
+- **À la sortie** : rien n'est effacé ni recopié. La liste remontre la réserve réelle. Le devis rangé dans la démo reste dans la démo : il se retrouve à la visite suivante, comme les cours qu'on y crée, et il part quand la démo est remise à neuf (ce geste efface toutes les clés `demo_*`, lu dans `js/demo-namespace.js`, `reinstallerDemoDuPack`).
+- Les clés `demo_*` ne partent pas dans le codex (lu dans `js/codex.js`, non exécuté).
+
+**La preuve** (essai au navigateur, « amendement 2 · la démonstration ») : un devis réel est rangé ; on entre dans la démo, on y range 4EF0, on sort. La réserve réelle est comparée octet pour octet avant la visite, pendant et après : identique. L'essai rougit si `cleReserve` rend toujours la clé réelle (cassé puis rétabli).
+
+Supposition nommée : « disparaît avec elle » est lu comme « n'existe que dans la démo et part quand la démo est remise à neuf », pas comme « effacé à chaque sortie ». C'est la règle des autres créations de la démo. Si tu veux un effacement à chaque sortie, c'est une ligne dans la sortie de la démo.
+
+### 2. Le bouton vers les devis depuis l'étiquetage
+
+Un bouton « Mes devis ministériels » dans l'en-tête de l'étiquetage d'une grille. Il ferme l'étiquetage sans toucher son brouillon et ouvre l'écran des devis. Deux choses suivent :
+
+- l'écran des devis montre maintenant lui aussi la liste des devis rangés, sous la zone de collage : l'accueil reste caché tant qu'une grille est en brouillon, et sans cela on n'aurait pas pu rouvrir un devis ;
+- le bouton de sortie dit « Revenir à mon étiquetage » quand un brouillon existe, et il y ramène : la grille se rouvre telle qu'elle était.
+
+Preuve (essai « amendement 2 · depuis un étiquetage en brouillon ») : le brouillon lu en base est identique avant le bouton, sur l'écran des devis et après le retour ; la grille revient avec ses huit rangées. Le banc de l'étiquetage sur iPad (`dissection-ipad-2026-11-12.spec.js`, 7 essais) reste vert avec le bouton de plus, sous Chromium.
+
+### 3. Les devis dans l'import par cases
+
+**Ce qui est branché.** `js/import-export.js` reçoit trois accroches, sans branche neuve dans ses fonctions (la garde de complexité l'exigeait) : les devis du fichier comptent parmi les ressources ; la fenêtre affiche une section « Devis ministériels » ; « Importer la sélection » range les devis cochés. La section et le rangement vivent dans `js/materiel-devis.js` (`devisImport`).
+
+**Ce que fait l'import, devis par devis :**
+
+| Le devis du fichier | Ce que la fenêtre montre | Ce qui se passe |
+|---|---|---|
+| son code n'est pas rangé | « nouveau », case cochée | il entre dans la réserve |
+| même code, même contenu | « déjà rangé chez toi, identique : rien à importer », pas de case | rien |
+| **même code, contenu différent** | un avertissement, un volet « Comparer les deux devis » (l'ancien et le nouveau côte à côte), case **non cochée** | rien, sauf si la case est cochée : alors il remplace le devis d'ici, à sa place et sous l'`id` d'ici |
+
+Cocher la case est l'accord. Un devis sans code, ou un second devis du même code dans le même fichier, n'est pas proposé. La réserve est relue au moment d'écrire. Aucun cours n'est touché.
+
+Preuve (essai « amendement 2 · l'import par cases », par la vraie fenêtre « Importer ») : un fichier porte 4EF0 identique, 000Z différent et 01FB neuf. Importé tel que proposé, seul 01FB entre et 000Z garde son contenu. Rouvert, la case de 000Z cochée, 000Z est remplacé. L'essai rougit si la case d'un devis différent est cochée d'office (cassé puis rétabli).
+
+**Ajout de ma part : « Exporter mes devis ».** Rien ne produisait un fichier qui ne porte que les devis ; sans lui, le collègue aurait dû donner son codex. Le bouton est sous la liste des devis rangés et produit `devis-ministeriels-AAAA-MM-JJ.json`. La fenêtre « Importer » le reconnaît. Je n'ai pas exécuté le téléchargement lui-même, seulement l'import d'un fichier de cette forme. À retirer si tu n'en veux pas.
+
+Limite : la fenêtre d'import est une vieille fenêtre, ses messages de fin passent par des boîtes du navigateur ; je ne les ai pas refaites.
+
+### 4. Les mots
+
+Les textes 14, 17, 19 et 28 sont posés mot pour mot. Les textes neufs sont au fichier TEXTES, numéros 40 à 50. « Composer le devis à la main » est gardé.
+
+### Ce qui a changé dans ce rapport
+
+Les sections plus bas datent de 9 h 15. Deux de leurs affirmations sont périmées par cet amendement : l'import par cases EST maintenant branché, et la démonstration n'écrit plus dans les vraies données. Les quatre questions sont répondues.
 
 ## Ce que le correctif de 8 h 08 a fait retirer
 
@@ -28,6 +80,7 @@ L'accueil d'« Apporter mon matériel » a une seconde entrée, « Tes devis min
 | `js/materiel-devis.js` (neuf) | l'écran. Une seule écriture, `modifierEtAnnoncer('devisMinisteriels', …)`, derrière le bouton « Ranger ce devis » |
 | `js/trimestres.js` | `devisMinisteriels` inscrite à `CLES_GLOBALES` |
 | `js/codex.js` | le nom lisible de la réserve dans la fenêtre de fusion |
+| `js/import-export.js` | trois accroches pour les devis dans l'import par cases (second amendement) |
 | `js/materiel.js` | une garde : la dissection en brouillon ne se rouvre pas par-dessus le devis |
 | `index.html`, `styles.css` | l'entrée de l'accueil, la liste des devis rangés, la feuille |
 | `docs/DATA-OWNERSHIP.md` | la ligne de `devisMinisteriels` |
@@ -62,8 +115,8 @@ Un devis par code. Les cinq champs d'`activites` sont des textes, tels que le de
 | Codex, fusion de deux appareils | la réserve est une liste à `id`, la fusion la traite devis par devis ; **branché** : son nom lisible (`LIBELLES_DES_CLES`) | lu, non exécuté |
 | Migrations | **aucune** : pas de version de schéma à incrémenter, pas de semis, pas d'écriture au démarrage | lu, `js/migrations.js` |
 | Réserve (archive d'un groupe-cours) | **non branché, par choix** : comme `registreLongitudinal`. L'archive d'un groupe n'emporte pas les devis | lu, `reserve.js` l. 58 |
-| Import par cases | **non branché** : ce chemin a ses familles codées en dur, et `cours` lui-même n'y passe pas | lu, `import-export.js` l. 3314 |
-| Mode démonstration | une clé globale s'écrit dans les VRAIES données, même en démonstration. Un devis numérisé pendant la démo reste après la sortie | lu, `trimestres.js` l. 412 |
+| Import par cases | **branché au second amendement** (voir plus haut) | essai au navigateur |
+| Mode démonstration | **réserve propre à la démo au second amendement** (voir plus haut) | essai au navigateur |
 
 Ce relevé vient d'une lecture déléguée à un agent ; j'ai revérifié moi-même les lignes de `codex.js` et de `trimestres.js`, pas les autres.
 
@@ -132,7 +185,7 @@ Pour le lot suivant (les champs liés au devis proposés en listes déroulantes,
 
 ## Trouvailles, et leur issue
 
-1. **L'accueil est caché quand une dissection est en brouillon** (comportement d'avant le lot). L'entrée des devis et la liste des devis rangés ne sont alors atteignables que par « Coller une autre grille », qui efface le brouillon. Issue : **inscrire et continuer** ; question 2 plus bas.
+1. **L'accueil est caché quand une dissection est en brouillon** (comportement d'avant le lot). L'entrée des devis et la liste des devis rangés ne sont alors atteignables que par « Coller une autre grille », qui efface le brouillon. Issue à 9 h 15 : inscrire et continuer. **Réglé au second amendement** par le bouton de l'en-tête de l'étiquetage (réponse de Grégoire).
 2. **`carte-aide-materiel-2026-11-13.spec.js`, essai I1, rouge sous Chromium**, rouge aussi sur `main` sans le lot. Réglé pour WebKit, non jugé ici. Issue : **commenter et oublier**.
 
 ## Ce que je n'ai pas pu vérifier
@@ -162,20 +215,22 @@ Captures dans `plans de travail/captures-2026-11-28-devis-ministeriel/` (celles 
 
 ## Ce qui remonte à Grégoire
 
-1. **Les mots** : `TEXTES-2026-11-28-devis-ministeriel.md`, 39 textes numérotés.
-2. **L'entrée des devis quand une dissection est en cours** : un bouton vers les devis dans l'en-tête de l'étiquetage, ou seulement depuis l'accueil ?
-3. **En démonstration**, un devis numérisé reste dans tes vraies données après la sortie. Est-ce ce que tu veux ?
-4. **L'archive d'un groupe-cours et l'import par cases** n'emportent pas les devis ; seule la sauvegarde complète (le codex) le fait. Est-ce suffisant ?
+Les quatre questions de 9 h 15 sont répondues (second amendement). Il reste :
+
+1. **Les mots 40 à 50** du fichier TEXTES.
+2. **« Exporter mes devis »**, mon ajout : gardé ou retiré ?
+3. **La démonstration** : le devis reste dans la démo jusqu'à sa remise à neuf. Est-ce bien « disparaît avec elle », ou veux-tu qu'il s'efface à chaque sortie ?
 
 ## Gestes d'essai pour Grégoire
 
-Aucun de ces gestes n'écrit avant ton accord, et aucun ne touche un cours.
+Aucun de ces gestes n'écrit avant ton accord, et aucun ne touche un cours. Ils se font sur l'aperçu : rien de ceci n'est en ligne.
 
 1. **Copie ton propre devis depuis ton PDF et colle-le.** Dans Aperçu sur le Mac : ouvre le PDF, sélectionne tout le devis de la compétence, copie. Dans Labo Codex : Conception › Mon matériel › « Numériser un devis », colle, « Lire mon devis ». Dis ce que tu vois : le bon nombre d'éléments ? les critères sous le bon élément ? un pied de page collé à un critère ? la pondération et les unités dans leurs champs ?
 2. **Refais-le depuis Safari**, puis **depuis l'iPad**, avec le même PDF. L'ordre du texte copié peut changer d'un outil à l'autre : c'est ce que je n'ai pas pu mesurer.
 3. **Corrige une ligne mal rangée** par son menu « Déplacer », puis « Annuler le dernier geste ».
-4. **Range le devis**, reviens à l'accueil : il doit paraître sous « Tes devis rangés ». **Rouvre-le.**
-5. **Recolle le même devis** : l'écran doit te montrer l'ancien et le nouveau côte à côte avant de remplacer.
-6. **Numérise un second devis**, d'un autre cours : les deux doivent rester dans la liste.
+4. **Range le devis**, reviens à l'accueil : il doit paraître sous « Tes devis rangés ». **Rouvre-le**, puis **recolle le même devis** : l'ancien et le nouveau doivent paraître côte à côte avant de remplacer.
+5. **Depuis un étiquetage.** Colle une grille (ou « Étiqueter l'exemple moi-même »), pose une étiquette, puis touche « Mes devis ministériels » dans l'en-tête. Rouvre un devis, puis « Revenir à mon étiquetage » : ta grille doit revenir avec ton étiquette.
+6. **La démonstration.** Note tes devis rangés. Entre dans la démonstration, va dans Conception › Mon matériel : la liste doit être vide. Range un devis, sors de la démonstration : tu dois retrouver tes devis d'avant, et pas celui de la démo.
+7. **Le passage à un collègue.** « Exporter mes devis » sous la liste. Puis Réglages › « Importer », choisis ce fichier : tes devis doivent paraître « identique ». Corrige l'énoncé d'un de tes devis, rouvre le même fichier : ce devis doit paraître avec l'avertissement et le volet « Comparer les deux devis », sa case non cochée.
 
 Si un collage sort mal, garde le texte collé tel quel et envoie-le : il devient un jeu d'essai.

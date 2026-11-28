@@ -1,9 +1,10 @@
 # Textes à relire – numériser un devis ministériel dans « Apporter mon matériel »
 
-> Écrit par Claude Code le 28 novembre 2026, refait à 9 h 00 (Toronto) après le correctif de 8 h 08 (« numériser ne touche aucun cours »).
+> Écrit par Claude Code le 28 novembre 2026, refait à 9 h 00 (Toronto) après le correctif de 8 h 08 (« numériser ne touche aucun cours »), mis à jour à 10 h 20 après le second amendement de 10 h 03.
+> **État** : les textes 1 à 39 sont acceptés par Grégoire tels quels, sauf 14, 17, 19 et 28, retouchés par lui (posés ci-dessous, mot pour mot). Les textes 40 à 50 sont neufs, à relire. Règle à tenir : l'application parle d'elle à la troisième personne, et un texte ne laisse pas entendre que l'erreur vient de l'enseignant·e.
 > Ce sont des MOTS DE TRAVAIL : ils sont sur la branche `claude/devis-ministeriel-8vylul`, pas en ligne. Corrige-les d'un bloc ; chaque texte porte un numéro pour que tu puisses répondre « 7 : … ».
 > Vocabulaire du devis gardé tel quel : « compétence », « éléments de la compétence », « critères de performance », « contexte de réalisation », « activités d'apprentissage ».
-> Où ils vivent dans le code : l'entrée de l'accueil dans `index.html` (textes 1 à 3) ; le texte 39 dans `js/codex.js` ; tous les autres dans la table `T`, en tête de `js/materiel-devis.js`.
+> Où ils vivent dans le code : l'entrée de l'accueil dans `index.html` (textes 1 à 3) ; le texte 39 dans `js/codex.js` ; le texte 40 dans `index.html` ; tous les autres dans la table `T`, en tête de `js/materiel-devis.js`.
 
 ## A. L'accueil d'« Apporter mon matériel »
 
@@ -26,15 +27,15 @@
 ## C. Les messages
 
 13. **Zone vide** : « Il n’y a rien à lire. Copie ton devis dans le PDF du ministère, puis colle-le dans la zone. »
-14. **Rien de reconnaissable dans le collage** : « Je n’ai rien reconnu d’un devis dans ce que tu as collé : ni « Code : », ni « Énoncé de la compétence », ni élément numéroté. Vérifie que tu as copié le devis en entier, ou compose-le à la main. »
+14. **Rien de reconnaissable dans le collage** : « L’application n’a rien reconnu d’un devis dans ce que tu as collé : ni « Code : », ni « Énoncé de la compétence », ni élément numéroté. Vérifie que tu as copié le devis en entier, ou compose-le à la main. »
 15. **Pas de numéro au moment de ranger** : « Donne le numéro de la compétence avant de ranger ce devis : c’est par lui qu’il se retrouve. »
 16. **Un devis rouvert reçoit le numéro d'un autre devis rangé** : « Un autre devis rangé porte déjà ce numéro. Corrige le numéro, ou rouvre l’autre devis depuis l’accueil. »
-17. **Quitter une lecture non rangée** (question du navigateur, sur « Revenir à l’accueil » et « Coller un autre devis ») : « Ce que tu as lu et corrigé n’est pas rangé : ce sera perdu. Continuer ? »
+17. **Quitter une lecture non rangée** (question du navigateur, sur « Revenir à l’accueil » et « Coller un autre devis ») : « Ta lecture corrigée n’est pas rangée : elle sera perdue. Continuer ? »
 18. **L'écriture a échoué** : « Le devis n’a pas pu être rangé. Rien n’a changé ; essaie de nouveau. »
 
 ## D. La lecture et sa correction
 
-19. **Titre** : « Voici ce que j’ai lu » (et « Ton devis rangé » quand on rouvre un devis)
+19. **Titre** : « Voici ce que l’application a lu » (et « Ton devis rangé » quand on rouvre un devis)
 20. **Consigne** : « Compare avec ton devis. Retouche un texte en écrivant dedans. Pour une ligne mal rangée, choisis où elle va dans son menu « Déplacer ». Rien n’est enregistré tant que tu n’as pas rangé le devis. »
 21. **Ligne de compte** : « Lu : 6 éléments, 17 critères de performance »
 22. **Intitulés de la feuille** : « Numéro de la compétence », « Énoncé de la compétence », « Contexte de réalisation », « Éléments de la compétence », « Critères de performance », « Activités d’apprentissage »
@@ -43,7 +44,7 @@
 25. **Boutons d'ajout** : « Ajouter une ligne au contexte » · « Ajouter un critère » · « Ajouter un élément »
 26. **Boutons d'un élément** : « ↑ » (lu « Monter l’élément 3 ») · « ↓ » (lu « Descendre l’élément 3 ») · « Retirer cet élément »
 27. **Le menu d'une ligne** : « Déplacer… », avec deux groupes, « Cette ligne seulement » et « Cette ligne et les suivantes », et ces destinations : « Vers le contexte de réalisation » · « Sous l’élément 2 : Saisir le sens d’un message lu. » · « Retirer (mettre de côté) » · « En faire un élément » (pour une ligne mise de côté)
-28. **Le tiroir du bas** : « Lignes mises de côté (15) », et sa phrase : « Ce qui ne fait pas partie de la compétence (pied de page, activités d’apprentissage) ou que tu as retiré. Rien de ceci ne sera rangé. Une ligne mise de côté par erreur se replace par son menu « Déplacer ». »
+28. **Le tiroir du bas** : « Lignes mises de côté (15) », et sa phrase : « Ce qui ne fait pas partie de la compétence (pied de page, en-tête) ou que tu as retiré. Rien de ceci ne sera rangé. Une ligne mise de côté à tort se replace par son menu « Déplacer ». »
 29. **Ce que l'écran annonce après un geste** (ligne discrète, lue par un lecteur d'écran) : « 7 lignes déplacées vers le contexte de réalisation. » · « 3 lignes déplacées vers l’élément 1. » · « 1 ligne déplacée vers les lignes mises de côté. » · « Ligne devenue l’élément 5. » · « Élément 2 retiré : son texte et ses critères sont mis de côté. » · « Élément monté. » · « Élément descendu. » · « Dernier geste annulé. »
 30. **Boutons du pied** : « Ranger ce devis » · « Annuler le dernier geste » · « Coller un autre devis »
 
@@ -65,6 +66,16 @@
 
 39. **Dans la fenêtre de fusion d'un codex** (quand deux appareils ont des devis différents), la réserve se nomme : « tes devis ministériels », réglée dans « Conception › Apporter mon matériel », et une de ses entrées s'appelle « devis ».
 
-## Une question sur les mots
+## H. Second amendement (28 nov., 10 h 03) : mots de travail neufs
 
-Le texte 28 dit que les activités d'apprentissage vont de côté. Ce n'est plus tout à fait vrai : la discipline, la pondération, les unités, les heures et les précisions sont maintenant lues dans leurs champs quand leur libellé porte sa valeur. Je propose : « Ce qui ne fait pas partie de la compétence (pied de page, en-tête) ou que tu as retiré. […] ». À toi de dire.
+40. **Bouton dans l'en-tête de l'étiquetage d'une grille** : « Mes devis ministériels »
+41. **Bouton de sortie des écrans du devis, quand une grille est en brouillon dans l'étiquetage** : « Revenir à mon étiquetage » (à la place de « Revenir à l’accueil » ; les mêmes mots que le bouton déjà validé de la confirmation d'une grille)
+42. **Sous « Tes devis rangés », dans la démonstration** : « Tu es dans la démonstration : les devis que tu ranges ici restent dans la démonstration. »
+43. **Bouton sous la liste des devis rangés** : « Exporter mes devis », et sa phrase : « Un fichier à passer à un·e collègue, qui l’ouvre par « Importer » : il ne porte que tes devis. » (ajout de Claude Code : sans lui, rien ne produit un fichier qui ne porte que les devis)
+44. **Dans la fenêtre de l'import par cases, le titre de la section** : « Devis ministériels », suivi de « Les devis numérisés que porte ce fichier »
+45. **Une rangée de cette section** : « **01FB** Traduire un matériau musical. 2 éléments, 8 critères de performance », suivie de son état : « nouveau » ou « déjà rangé chez toi, identique : rien à importer »
+46. **Quand le code est déjà rangé avec un autre contenu** : « Un devis de ce numéro est déjà rangé chez toi, et son contenu diffère. Compare les deux ; il ne sera remplacé que si tu coches cette case. »
+47. **Le volet de comparaison** : « Comparer les deux devis », avec les colonnes « Ton devis rangé » et « Le devis du fichier »
+48. **Sous la section** : « Un devis importé se range parmi tes devis. Aucun cours n’est touché. »
+49. **Dans le message de fin de l'import** (la ligne s'ajoute aux autres) : « 1 devis ministériel(s) » (la forme « (s) » est celle des autres lignes de ce message, que je n'ai pas touchées)
+50. **Le nom du fichier exporté** : `devis-ministeriels-2026-11-28.json`

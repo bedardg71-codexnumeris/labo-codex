@@ -28,13 +28,14 @@
         titre: 'Numériser un devis ministériel',
         intro: 'Colle ici le devis d’une compétence : tu verras ce qui a été lu, tu corrigeras au besoin, puis tu le rangeras parmi tes devis. Il ne touche aucun cours : c’est à la création d’un cours que tu viendras y puiser. Rien ne s’enregistre avant ton accord.',
         retourAccueil: 'Revenir à l’accueil',
+        retourEtiquetage: 'Revenir à mon étiquetage',
         etiquetteCollage: 'Colle ton devis ici',
         consigneCollage: 'Dans le PDF du ministère, sélectionne tout le devis de la compétence, toutes ses pages comprises, copie-le d’un seul geste, puis colle-le (⌘ V).',
         lire: 'Lire mon devis',
         erreurVide: 'Il n’y a rien à lire. Copie ton devis dans le PDF du ministère, puis colle-le dans la zone.',
-        erreurRien: 'Je n’ai rien reconnu d’un devis dans ce que tu as collé : ni « Code : », ni « Énoncé de la compétence », ni élément numéroté. Vérifie que tu as copié le devis en entier, ou compose-le à la main.',
+        erreurRien: 'L’application n’a rien reconnu d’un devis dans ce que tu as collé : ni « Code : », ni « Énoncé de la compétence », ni élément numéroté. Vérifie que tu as copié le devis en entier, ou compose-le à la main.',
         composerMain: 'Composer le devis à la main',
-        titreLecture: 'Voici ce que j’ai lu',
+        titreLecture: 'Voici ce que l’application a lu',
         titreRouvert: 'Ton devis rangé',
         consigneLecture: 'Compare avec ton devis. Retouche un texte en écrivant dedans. Pour une ligne mal rangée, choisis où elle va dans son menu « Déplacer ». Rien n’est enregistré tant que tu n’as pas rangé le devis.',
         ceQuiEstLu: 'Lu :',
@@ -65,11 +66,11 @@
         versCote: 'Retirer (mettre de côté)',
         enElement: 'En faire un élément',
         deCote: 'Lignes mises de côté',
-        deCoteAide: 'Ce qui ne fait pas partie de la compétence (pied de page, activités d’apprentissage) ou que tu as retiré. Rien de ceci ne sera rangé. Une ligne mise de côté par erreur se replace par son menu « Déplacer ».',
+        deCoteAide: 'Ce qui ne fait pas partie de la compétence (pied de page, en-tête) ou que tu as retiré. Rien de ceci ne sera rangé. Une ligne mise de côté à tort se replace par son menu « Déplacer ».',
         annuler: 'Annuler le dernier geste',
         accepter: 'Ranger ce devis',
         collerAutre: 'Coller un autre devis',
-        confirmerQuitter: 'Ce que tu as lu et corrigé n’est pas rangé : ce sera perdu. Continuer ?',
+        confirmerQuitter: 'Ta lecture corrigée n’est pas rangée : elle sera perdue. Continuer ?',
         erreurSansCode: 'Donne le numéro de la compétence avant de ranger ce devis : c’est par lui qu’il se retrouve.',
         erreurConflit: 'Un autre devis rangé porte déjà ce numéro. Corrige le numéro, ou rouvre l’autre devis depuis l’accueil.',
         titreComparer: 'Un devis de ce numéro est déjà rangé',
@@ -83,7 +84,19 @@
         erreurEcriture: 'Le devis n’a pas pu être rangé. Rien n’a changé ; essaie de nouveau.',
         autreDevis: 'Numériser un autre devis',
         rangesTitre: 'Tes devis rangés',
-        rouvrir: 'Rouvrir'
+        rouvrir: 'Rouvrir',
+        exporter: 'Exporter mes devis',
+        exporterAide: 'Un fichier à passer à un·e collègue, qui l’ouvre par « Importer » : il ne porte que tes devis.',
+        rangesDemo: 'Tu es dans la démonstration : les devis que tu ranges ici restent dans la démonstration.',
+        importTitre: 'Devis ministériels',
+        importSousTitre: 'Les devis numérisés que porte ce fichier',
+        importNeuf: 'nouveau',
+        importIdentique: 'déjà rangé chez toi, identique : rien à importer',
+        importDifferent: 'Un devis de ce numéro est déjà rangé chez toi, et son contenu diffère. Compare les deux ; il ne sera remplacé que si tu coches cette case.',
+        importComparer: 'Comparer les deux devis',
+        importColonneAncien: 'Ton devis rangé',
+        importColonneNouveau: 'Le devis du fichier',
+        importNote: 'Un devis importé se range parmi tes devis. Aucun cours n’est touché.'
     };
 
     var etat = etatNeuf();
@@ -105,7 +118,7 @@
 
     function tete(titre, id) {
         return '<div class="devis-tete"><h2 id="' + id + '" tabindex="-1">' + e(titre) + '</h2>' +
-            '<button type="button" class="btn btn-secondaire" data-action="materielDevis.fermer"' + confirmer() + '>' + e(T.retourAccueil) + '</button></div>';
+            '<button type="button" class="btn btn-secondaire" data-action="materielDevis.fermer"' + confirmer() + '>' + e(motDuRetour()) + '</button></div>';
     }
 
     /** Quitter une lecture qui n'est pas rangée : la question se pose d'abord (`data-confirm`, dispatcher de main.js). */
@@ -117,6 +130,17 @@
         return '<p id="devis-erreur" class="alerte alerte-erreur' + (etat.erreur ? '' : ' u-hide') + '" role="alert">' + e(etat.erreur) + '</p>';
     }
 
+    /** Le retour mène à l'étiquetage quand une grille y est en brouillon (elle se rouvre telle quelle), sinon à l'accueil. */
+    function motDuRetour() {
+        var d = window.materielDissection;
+        return d && typeof d.aUnBrouillon === 'function' && d.aUnBrouillon() ? T.retourEtiquetage : T.retourAccueil;
+    }
+
+    function enDemo() { return typeof window.estEnModeDemo === 'function' && window.estEnModeDemo(); }
+
+    /** La réserve où lire et ranger : celle de la démonstration quand on y est, sinon la vraie. Jamais les deux. */
+    function cleReserve() { return enDemo() ? L().CLE_RESERVE_DEMO : L().CLE_RESERVE; }
+
     function collerHtml() {
         return tete(T.titre, 'devis-titre') + '<p class="devis-intro">' + e(T.intro) + '</p>' +
             '<div class="materiel-collage">' +
@@ -127,18 +151,22 @@
             '<div class="materiel-actions">' +
             '<button type="button" class="btn btn-principal" data-action="materielDevis.lire">' + e(T.lire) + '</button>' +
             '<button type="button" class="btn btn-secondaire" data-action="materielDevis.composer">' + e(T.composerMain) + '</button>' +
-            '</div></div>';
+            '</div></div>' +
+            // Les devis rangés se montrent ici aussi : depuis un étiquetage en brouillon, l'accueil reste caché.
+            '<div class="materiel-collage materiel-devis-entree devis-ranges-ecran">' + rangesHtml() + '</div>';
     }
 
     /** Sur l'accueil : les devis déjà rangés, chacun avec son bouton « Rouvrir ». Rien quand la réserve est vide. */
     function rangesHtml() {
         if (!reserve.length) return '';
-        return '<h4>' + e(T.rangesTitre) + '</h4><ul class="devis-ranges">' + reserve.map(function (d) {
+        return '<h4>' + e(T.rangesTitre) + '</h4>' + (enDemo() ? '<p class="devis-consigne">' + e(T.rangesDemo) + '</p>' : '') + '<ul class="devis-ranges">' + reserve.map(function (d) {
             var n = L().compter(d);
             return '<li><span class="devis-range-texte"><strong>' + e(d.code) + '</strong> ' + e(d.enonce) +
                 ' <span class="devis-range-compte">' + e(pluriel(n.elements, 'élément', 'éléments') + ', ' + pluriel(n.criteres, 'critère de performance', 'critères de performance')) + '</span></span>' +
                 '<button type="button" class="btn btn-secondaire btn-compact" data-action="materielDevis.rouvrir" data-param-id="' + e(d.id) + '" aria-label="' + e(T.rouvrir + ' le devis ' + d.code) + '">' + e(T.rouvrir) + '</button></li>';
-        }).join('') + '</ul>';
+        }).join('') + '</ul>' +
+            '<div class="devis-ranges-pied"><button type="button" class="btn btn-secondaire btn-compact" data-action="materielDevis.exporter">' + e(T.exporter) + '</button>' +
+            '<span class="devis-consigne">' + e(T.exporterAide) + '</span></div>';
     }
 
     /** Le menu « Déplacer » d'une ligne : où elle peut aller, seule ou avec celles qui la suivent. */
@@ -276,7 +304,7 @@
             apercuHtml(r.modele) +
             '<div class="materiel-actions devis-pied">' +
             '<button type="button" class="btn btn-secondaire" data-action="materielDevis.ouvrir">' + e(T.autreDevis) + '</button>' +
-            '<button type="button" class="btn btn-secondaire" data-action="materielDevis.fermer">' + e(T.retourAccueil) + '</button></div></section>';
+            '<button type="button" class="btn btn-secondaire" data-action="materielDevis.fermer">' + e(motDuRetour()) + '</button></div></section>';
     }
 
     // ------------------------------------------------------------------
@@ -319,7 +347,7 @@
     /** Lit la réserve de devis (clé globale) et rend la liste de l'accueil. */
     async function chargerReserve() {
         var lue = null;
-        try { lue = await db.get(L().CLE_RESERVE); }
+        try { lue = await db.get(cleReserve()); }
         catch (err) { console.warn('[Devis] Réserve de devis illisible :', err); }
         reserve = L().reserveSure(lue);
         var zone = el('materiel-devis-ranges');
@@ -407,7 +435,7 @@
         var devis = L().pourReserve(etat.modele), opts = { idOuvert: etat.idOuvert, idNeuf: idNeuf(), maintenant: new Date().toISOString() };
         var ecrit = null;
         try {
-            ecrit = await window.modifierEtAnnoncer(L().CLE_RESERVE, function (lue) {
+            ecrit = await window.modifierEtAnnoncer(cleReserve(), function (lue) {
                 var neuve = L().ranger(lue, devis, opts);
                 return neuve === null ? undefined : neuve;
             }, [], { geste: 'Ranger le devis' });
@@ -433,6 +461,14 @@
             etat = etatNeuf();
             etat.ecran = 'coller';
             rendre('devis-titre');
+        },
+        /**
+         * Depuis l'en-tête de l'étiquetage d'une grille (second amendement, 28 nov.) : l'étiquetage se ferme SANS perdre
+         * son brouillon (`materielDissection.fermer` l'écrit d'abord), et se rouvre tel quel au retour (`fermer`, plus bas).
+         */
+        ouvrirDepuisEtiquetage: async function () {
+            if (window.materielDissection && window.materielDissection.estOuverte()) window.materielDissection.fermer();
+            await materielDevis.ouvrir();
         },
         /** Retour à l'accueil d'« Apporter mon matériel » ; une lecture non acceptée n'a rien écrit. */
         fermer: function () {
@@ -512,6 +548,18 @@
             etat.erreur = '';
             rendre('devis-titre');
         },
+        /**
+         * Un fichier qui ne porte que les devis rangés (`{ devisMinisteriels: [...] }`), pour les passer à un·e collègue
+         * sans donner tout son codex ; il s'ouvre par l'import par cases (`devisImport`). Rien n'est écrit ici.
+         */
+        exporter: async function () {
+            await chargerReserve();
+            if (!reserve.length || !window.FichierSortant) return;
+            var contenu = {};
+            contenu[L().CLE_RESERVE] = reserve;
+            window.FichierSortant.telecharger(new Blob([JSON.stringify(contenu, null, 2)], { type: 'application/json' }),
+                'devis-ministeriels-' + new Date().toISOString().slice(0, 10) + '.json');
+        },
         estOuvert: function () { return etat.ecran !== 'ferme'; },
         /** L'accueil vient de s'afficher : la liste des devis rangés suit la réserve. */
         rafraichirAccueil: chargerReserve,
@@ -528,5 +576,66 @@
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initialiser);
     else initialiser();
 
+    // ------------------------------------------------------------------
+    // L'import par cases (js/import-export.js) : les devis d'un fichier reçu
+    // ------------------------------------------------------------------
+
+    /** Les devis du fichier (`devisMinisteriels`, parfois en texte JSON), confrontés à la réserve lue à l'instant. */
+    function confrontes(config) {
+        var v = config ? config[L().CLE_RESERVE] : null;
+        if (typeof v === 'string') { try { v = JSON.parse(v); } catch (err) { v = null; } }
+        return L().confronter(db.getSync(cleReserve(), []), v);
+    }
+
+    function ligneImportHtml(c, i) {
+        var n = L().compter(c.devis), case_ = '', etat = '';
+        var texte = '<strong>' + e(c.devis.code) + '</strong> ' + e(c.devis.enonce) + ' <span class="devis-range-compte">' +
+            e(pluriel(n.elements, 'élément', 'éléments') + ', ' + pluriel(n.criteres, 'critère de performance', 'critères de performance')) + '</span>';
+        if (c.etat === 'identique') etat = '<span class="devis-import-etat">' + e(T.importIdentique) + '</span>';
+        else case_ = '<input type="checkbox" class="import-item-devis" data-item-id="' + i + '"' + (c.etat === 'neuf' ? ' checked' : '') + ' aria-label="' + e('Importer le devis ' + c.devis.code) + '">';
+        if (c.etat === 'neuf') etat = '<span class="devis-import-etat">' + e(T.importNeuf) + '</span>';
+        var comparaison = c.etat !== 'different' ? '' : '<p class="devis-import-alerte">' + e(T.importDifferent) + '</p>' +
+            '<details class="devis-import-comparer"><summary>' + e(T.importComparer) + '</summary><div class="devis-comparaison">' +
+            '<section class="devis-colonne"><h4>' + e(T.importColonneAncien) + '</h4>' + apercuHtml(enApercu(c.ancien)) + '</section>' +
+            '<section class="devis-colonne devis-colonne-neuve"><h4>' + e(T.importColonneNouveau) + '</h4>' + apercuHtml(enApercu(c.devis)) + '</section>' +
+            '</div></details>';
+        return '<li class="devis-import-ligne"><label class="devis-import-tete">' + case_ + '<span>' + texte + ' ' + etat + '</span></label>' + comparaison + '</li>';
+    }
+
+    var devisImport = {
+        /** Combien de devis ce fichier propose (pour que la fenêtre d'import ne se dise pas vide). */
+        compter: function (config) { return L() ? confrontes(config).length : 0; },
+        /** La section de la fenêtre d'import ; rien quand le fichier ne porte aucun devis. Tout texte échappé. */
+        sectionHtml: function (config) {
+            var liste = L() ? confrontes(config) : [];
+            if (!liste.length) return '';
+            return '<div class="devis-import"><h3>' + e(T.importTitre) + ' <span>' + e(T.importSousTitre) + '</span></h3>' +
+                '<ul class="devis-import-liste">' + liste.map(ligneImportHtml).join('') + '</ul>' +
+                '<p class="devis-consigne">' + e(T.importNote) + '</p></div>';
+        },
+        /**
+         * Range les devis cochés. Une case cochée sur un devis `different` EST l'accord de remplacement : la fenêtre a
+         * montré l'ancien et le nouveau. Un devis `identique` n'a pas de case. La réserve est relue au moment d'écrire.
+         * @param {Object} config - le fichier
+         * @param {Array<string>} coches - les `data-item-id` des cases cochées
+         * @returns {Promise<number>} le nombre de devis rangés
+         */
+        importer: async function (config, coches) {
+            var choisis = confrontes(config).filter(function (c, i) { return c.etat !== 'identique' && (coches || []).map(String).indexOf(String(i)) !== -1; });
+            if (!choisis.length) return 0;
+            var maintenant = new Date().toISOString();
+            var ecrit = await window.modifierEtAnnoncer(cleReserve(), function (lue) {
+                var liste = lue;
+                choisis.forEach(function (c) {
+                    var neuve = L().ranger(liste, c.devis, { idNeuf: idNeuf(), maintenant: maintenant });
+                    if (neuve) liste = neuve;
+                });
+                return liste === lue ? undefined : liste;
+            }, [], { geste: 'Importer des devis', discret: true });
+            return ecrit ? choisis.length : 0;
+        }
+    };
+
+    window.devisImport = devisImport;
     window.materielDevis = materielDevis;
 })();
