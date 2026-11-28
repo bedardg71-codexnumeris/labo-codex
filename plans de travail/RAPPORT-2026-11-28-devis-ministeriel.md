@@ -143,7 +143,22 @@ Pour le lot suivant (les champs liés au devis proposés en listes déroulantes,
 
 ## Le parcours joué à l'écran, sur l'aperçu Netlify
 
-Voir la section « Captures » en fin de fichier.
+Aperçu : https://deploy-preview-67--codexnumeris-051225.netlify.app (commit `cf4c86f`). Joué par moi sous Chromium (pas Safari), avec un cours fictif créé pour servir de témoin, puis 4EF0 et 000Z collés depuis les jeux d'essai, puis 4EF0 recollé.
+
+Mesuré pendant ce jeu, en lisant la base à chaque étape : avant « Ranger », la réserve ne change pas ; après, elle porte `4EF0`, puis `4EF0` et `000Z` ; recoller 4EF0 passe par la comparaison et laisse deux devis ; la collection `cours` est identique du début à la fin.
+
+Captures dans `plans de travail/captures-2026-11-28-devis-ministeriel/` (celles de la première version, avec le choix du cours, sont retirées) :
+
+| Geste | 4EF0 | 000Z |
+|---|---|---|
+| L'accueil, deux entrées | `1-accueil-deux-entrees.jpg` | |
+| Le devis collé | `4EF0-2-colle.jpg` | `000Z-2-colle.jpg` |
+| La lecture | `4EF0-3-lecture.jpg` | `000Z-3-lecture.jpg` (sort mélangé) |
+| La correction | `4EF0-4-corrige.jpg` | `000Z-4a-geste-1-vers-le-contexte.jpg`, `000Z-4b-geste-2-vers-l-element-1.jpg` |
+| Le devis rangé | `4EF0-5-range.jpg` | `000Z-5-range.jpg` |
+| L'accueil avec les devis rangés | `6-accueil-devis-ranges.jpg` | |
+| Recoller un code déjà rangé | `recolle-4EF0-5a-comparaison.jpg`, `recolle-4EF0-5-range.jpg` | |
+| Rouvrir, iPad debout (820 × 1180, aucun débord mesuré) | | `7-ipad-debout-000Z-rouvert.jpg` |
 
 ## Ce qui remonte à Grégoire
 
