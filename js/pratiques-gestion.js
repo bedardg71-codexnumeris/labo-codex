@@ -381,6 +381,9 @@ async function preparerDonneesBibliothequePratiques() {
             afficherId: idsNommes.has(pratique.id),
             apercu: apercuPratiqueBibliotheque(pratique, catalogues),
             menu: [
+                // Renommer depuis la bibliothèque (28 nov. 2026) : en tête, sauf pour une pratique de la démo (en
+                // lecture seule dans la fiche aussi).
+                ...(estDeDemoPourRenommer(pratique) ? [] : [ligneMenuRenommer(pratique.id, 'trimestre')]),
                 { label: 'Dupliquer', action: 'dupliquerPratiqueBibliotheque', param: pratique.id, title: 'Créer une copie' },
                 { label: 'Exporter pour partager', action: 'partageExport.exporterPourPartager', param: 'pratique', param2: pratique.id, title: 'Générer un fichier .lcz signé à transmettre (#329)' },
                 // Legacy JSON — retrait prévu à la convergence des formats (P8 #329)
@@ -403,7 +406,15 @@ async function preparerDonneesBibliothequePratiques() {
     const rangeesBibliotheque = pratiquesDisponibles.map(pratique => {
         const dejaPresent = pratiquesDansBibliotheque.some(p => BibliothequeUI.lieeAExemplaire(p, pratique));
         const repCourant = repParPratique[pratique.id] || null;
+        // Lot modele-fourni-non-supprimable — un modèle fourni, intact, n'offre pas « Supprimer » : le geste n'aurait aucun
+        // effet visible (le modèle reprend sa place à la lecture). Sa ligne dit d'où il vient, à la place de son auteur.
+        // Renommer depuis la bibliothèque (28 nov. 2026) : il n'offre pas « Renommer » non plus (décision de Grégoire).
+        const fourniIntact = estFourniIntact(pratique);
         const menu = [];
+        if (!fourniIntact && !estDeDemoPourRenommer(pratique)) {
+            menu.push(ligneMenuRenommer(pratique.id, 'bibliotheque'));
+            if (repsPratiques.some(r => r.id !== repCourant) || repCourant) menu.push({ separateur: true });
+        }
         repsPratiques.forEach(r => {
             if (r.id !== repCourant) {
                 menu.push({ label: 'Classer dans : ' + r.nom, action: 'BibliothequeUI.repertoires.classer', param: 'pratiques', param2: pratique.id, param3: r.id, title: 'Ranger dans ce dossier' });
@@ -412,9 +423,6 @@ async function preparerDonneesBibliothequePratiques() {
         if (repCourant) {
             menu.push({ label: 'Retirer du dossier', action: 'BibliothequeUI.repertoires.retirer', param: 'pratiques', param2: pratique.id, title: 'Sortir du dossier (repasse en non classées)' });
         }
-        // Lot modele-fourni-non-supprimable — un modèle fourni, intact, n'offre pas « Supprimer » : le geste n'aurait aucun
-        // effet visible (le modèle reprend sa place à la lecture). Sa ligne dit d'où il vient, à la place de son auteur.
-        const fourniIntact = estFourniIntact(pratique);
         if (!fourniIntact) {
             if (menu.length) menu.push({ separateur: true });
             menu.push({ label: 'Supprimer de ma bibliothèque', action: 'supprimerPratiqueDeBibliothequePartagee', param: pratique.id, classe: 'btn-supprimer', title: 'Supprimer de la bibliothèque' });
@@ -1152,6 +1160,153 @@ async function dupliquerPratiqueBibliotheque(pratiqueId) {
 }
 
 /* ===============================
+   RENOMMER DEPUIS LA BIBLIOTHÈQUE (28 nov. 2026)
+   =============================== */
+
+/**
+ * Les textes d'écran du geste « Renommer » (posés par Cowork le 28 nov. 2026 ; Grégoire peut les corriger avant la
+ * mise en ligne). Les deux derniers (échecs d'écriture) sont de la session : le mandat demandait de le dire à l'écran
+ * sans en donner les mots.
+ */
+const TEXTES_RENOMMER_PRATIQUE = Object.freeze({
+    menu: 'Renommer',
+    menuTitle: 'Changer le nom de cette pratique',
+    titre: 'Renommer la pratique',
+    champ: 'Nouveau nom',
+    noteExemplaire: 'Son exemplaire de ta bibliothèque portera le même nom.',
+    noteTrimestre: 'Elle est aussi dans ce trimestre : elle y portera le même nom.',
+    noteFournie: 'Le modèle fourni avec l\'application garde son nom.',
+    noteDejaPorte: 'Une autre pratique porte déjà ce nom. Tu peux le garder quand même.',
+    refusVide: 'Donne un nom à la pratique.',
+    annuler: 'Annuler',
+    confirmer: 'Renommer',
+    fait: 'Pratique renommée.',
+    faitLesDeux: 'Pratique renommée, dans ce trimestre et dans ta bibliothèque.',
+    noteBas: 'Tes autres trimestres gardent le nom qu\'elle y porte.',
+    echec: 'La pratique n\'a pas pu être renommée.',
+    echecJumelle: Object.freeze({
+        exemplaire: 'Pratique renommée dans ce trimestre seulement. Son exemplaire de ta bibliothèque n\'a pas pu être renommé.',
+        trimestre: 'Pratique renommée dans ta bibliothèque seulement. Dans ce trimestre, elle n\'a pas pu être renommée.'
+    })
+});
+
+/**
+ * Une pratique de la démo (`BibliothequeUI.estPratiqueDeDemo` : dans la démo seulement) est en lecture seule dans la
+ * fiche ; elle ne se renomme pas ici non plus. Hors de la démo, toute pratique se renomme, celle d'un·e collègue comprise.
+ */
+function estDeDemoPourRenommer(pratique) {
+    return typeof BibliothequeUI.estPratiqueDeDemo === 'function' && BibliothequeUI.estPratiqueDeDemo(pratique);
+}
+
+/** La ligne « Renommer » du menu ⋮ d'une rangée ; `cote` : 'trimestre' ou 'bibliotheque'. */
+function ligneMenuRenommer(pratiqueId, cote) {
+    return { label: TEXTES_RENOMMER_PRATIQUE.menu, action: 'renommerPratiqueDepuisBibliotheque', param: pratiqueId, param2: cote, title: TEXTES_RENOMMER_PRATIQUE.menuTitle };
+}
+
+/**
+ * LE SEUL ÉCRIVAIN DU NOM d'une pratique du trimestre : la fiche (`mettreAJourNomPratiqueMat`) et le geste
+ * « Renommer » de la bibliothèque passent par ici. Un trimestre clos refuse (le témoin le dit).
+ * @returns {Promise<boolean>} true si le nom a été écrit
+ */
+async function ecrireNomPratiqueDuTrimestre(pratiqueId, nouveauNom) {
+    let ecrit = false;
+    const resultat = await modifierEtAnnoncer(cle('pratiquesConfigurables'), (lues) => {
+        const configurations = lues || [];
+        const index = configurations.findIndex(p => p.id === pratiqueId);
+        if (index === -1) return undefined;
+
+        configurations[index].nom = nouveauNom;
+        ecrit = true;
+        return configurations;
+    }, [], { geste: 'Modifier la pratique' });
+    return ecrit && resultat !== undefined;
+}
+
+/** L'une des deux écritures du geste ; un échec rend `false` (le témoin ou la console l'ont déjà dit). */
+async function ecrireNomSelonCote(cote, pratiqueId, nom) {
+    try {
+        return cote === 'trimestre'
+            ? await ecrireNomPratiqueDuTrimestre(pratiqueId, nom)
+            : await renommerExemplairePratique(pratiqueId, nom);
+    } catch (e) {
+        console.error('[pratiques-gestion] Renommer : écriture échouée', e);
+        return false;
+    }
+}
+
+/**
+ * « Renommer » au menu ⋮ des deux colonnes de la bibliothèque des pratiques (demande de Grégoire, 28 nov. 2026).
+ * Ce que le geste vise et écrit est décidé par deux fonctions pures (`cibleRenommagePratique`, `jugerNomPratique`,
+ * pratiques-bibliotheque.js). Aucune écriture hors du trimestre ouvert et de la bibliothèque.
+ * @param {string} pratiqueId
+ * @param {string} cote - 'trimestre' ou 'bibliotheque' : la colonne d'où part le geste
+ */
+async function renommerPratiqueDepuisBibliotheque(pratiqueId, cote) {
+    const T = TEXTES_RENOMMER_PRATIQUE;
+    const trimestre = db.getSync(cle('pratiquesConfigurables'), null) || [];
+    const bibliotheque = await obtenirToutesLesPratiquesBibliotheque() || [];
+    const cible = cibleRenommagePratique({
+        cote, id: pratiqueId, trimestre, bibliotheque,
+        liee: BibliothequeUI.lieeAExemplaire, estDeDemo: estDeDemoPourRenommer
+    });
+    if (cible.refus) return;   // la fenêtre n'offre pas ce geste dans ces cas
+
+    const autres = trimestre.concat(bibliotheque);
+    const saisie = await demanderNouveauNomPratique(cible, autres);
+    if (saisie === null) return;
+    const plan = jugerNomPratique(saisie, cible, autres);
+    if (plan.refus || !plan.ecrireRangee) return;   // nom inchangé : rien n'est écrit
+
+    const coteJumelle = cible.cote === 'trimestre' ? 'bibliotheque' : 'trimestre';
+    const rangeeEcrite = await ecrireNomSelonCote(cible.cote, cible.rangee.id, plan.nom);
+    if (!rangeeEcrite) {
+        notifications.erreur(T.echec);
+        return;
+    }
+    const jumelleEcrite = plan.ecrireJumelle ? await ecrireNomSelonCote(coteJumelle, cible.jumelle.id, plan.nom) : false;
+
+    reporterNomDansLaFiche(cible.cote === 'trimestre' ? cible.rangee.id : (jumelleEcrite ? cible.jumelle.id : null), plan.nom);
+    fermerModalBibliothequePratiques();
+    await afficherListePratiquesMateriel();
+    await afficherBibliothequePratiques();
+
+    if (plan.ecrireJumelle && !jumelleEcrite) notifications.erreur(T.echecJumelle[cible.typeJumelle]);
+    else notifications.succes(jumelleEcrite ? T.faitLesDeux : T.fait);
+}
+
+/** La fenêtre de saisie du geste (patron `uiDialogues.demanderSaisie`) ; rend la saisie, ou null si annulé. */
+function demanderNouveauNomPratique(cible, autres) {
+    const T = TEXTES_RENOMMER_PRATIQUE;
+    const noteDeLaJumelle = { exemplaire: T.noteExemplaire, trimestre: T.noteTrimestre, fournie: T.noteFournie }[cible.typeJumelle];
+    return uiDialogues.demanderSaisie({
+        titre: T.titre,
+        message: T.champ,
+        valeurInitiale: cible.rangee.nom || '',
+        texteAnnuler: T.annuler,
+        texteConfirmer: T.confirmer,
+        notes: noteDeLaJumelle ? [noteDeLaJumelle] : [],
+        noteSelonSaisie: (valeur) => {
+            const p = jugerNomPratique(valeur, cible, autres);
+            return (p.dejaPorte && !p.inchange) ? T.noteDejaPorte : '';
+        },
+        valider: (valeur) => (jugerNomPratique(valeur, cible, autres).refus === 'vide' ? T.refusVide : ''),
+        noteBas: T.noteBas
+    });
+}
+
+/**
+ * La fiche : son titre et son champ, si la pratique renommée dans ce trimestre y est ouverte (un champ resté à
+ * l'ancien nom le réécrirait au prochain passage).
+ */
+function reporterNomDansLaFiche(idDuTrimestre, nom) {
+    if (!idDuTrimestre || idDuTrimestre !== pratiqueEnEditionMateriel) return;
+    const titre = document.getElementById('mat-titre-pratique');
+    if (titre) titre.textContent = nom;
+    const champ = document.getElementById('mat-pratique-nom');
+    if (champ) champ.value = nom;
+}
+
+/* ===============================
    ÉDITION DES PRATIQUES
    =============================== */
 
@@ -1794,16 +1949,8 @@ async function mettreAJourNomPratiqueMat() {
     // #522 — le nom, la description et la discipline sont trois champs voisins
     // du même formulaire : les quitter l'un après l'autre est le geste qui
     // lançait deux enregistrements sur le même instantané.
-    let ecrit = false;
-    await modifierEtAnnoncer(cle('pratiquesConfigurables'), (lues) => {
-        const configurations = lues || [];
-        const index = configurations.findIndex(p => p.id === pratiqueEnEditionMateriel);
-        if (index === -1) return undefined;
-
-        configurations[index].nom = nouveauNom;
-        ecrit = true;
-        return configurations;
-    }, [], { geste: 'Modifier la pratique' });
+    // 28 nov. 2026 : un seul écrivain du nom, partagé avec « Renommer » de la bibliothèque.
+    const ecrit = await ecrireNomPratiqueDuTrimestre(pratiqueEnEditionMateriel, nouveauNom);
 
     if (ecrit) {
         // Mettre à jour le titre et la sidebar
@@ -3487,6 +3634,7 @@ window.mettreAJourDisciplinePratique = mettreAJourDisciplinePratique;
 
 // Fonctions bibliothèque (manquantes avant Phase 5)
 window.dupliquerPratiqueBibliotheque = dupliquerPratiqueBibliotheque;
+window.renommerPratiqueDepuisBibliotheque = renommerPratiqueDepuisBibliotheque;
 // Brique C namespacing pas 5 — import inter-trimestre de pratiques (modèle COPIE).
 window.listerTrimestresAvecPratiques = listerTrimestresAvecPratiques;
 window.afficherPratiquesTrimestreModal = afficherPratiquesTrimestreModal;

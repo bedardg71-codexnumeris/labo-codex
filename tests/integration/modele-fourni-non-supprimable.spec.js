@@ -174,7 +174,8 @@ test('une pratique qui appartient à l’enseignant·e : « Supprimer » et la s
     const r = rangeeBiblio(page, 'Pratique fictive personnelle');
     await expect(r.locator('.biblio2-rangee-meta')).toHaveText('Cumulative · par Auteur fictif');
     await r.locator('.biblio2-kebab').click();
-    await expect(page.locator(SEL + ' .biblio-menu-popover.actif .biblio-menu-item')).toHaveText(['Supprimer de ma bibliothèque']);
+    // ↻ 28 nov. 2026 : « Renommer » en tête (renommer-pratique-bibliotheque.spec.js).
+    await expect(page.locator(SEL + ' .biblio-menu-popover.actif .biblio-menu-item')).toHaveText(['Renommer', 'Supprimer de ma bibliothèque']);
     await page.locator(SEL + ' .biblio-menu-popover.actif').getByRole('menuitem', { name: 'Supprimer de ma bibliothèque' }).click();
     await attendreRepos(page);
 

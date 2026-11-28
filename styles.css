@@ -30283,6 +30283,21 @@ body.mode-clair {
     font-size: 0.85rem;
 }
 
+/* 28 nov. 2026 — la fenêtre de saisie (`uiDialogues.demanderSaisie`) : le refus sous le champ, et les notes
+   qui disent ce que le geste emporte (Renommer une pratique depuis la bibliothèque). */
+.ui-dialogue-refus {
+    margin: 6px 0 0;
+    color: var(--rouge-erreur);
+    font-size: 0.9rem;
+}
+.ui-dialogue-note {
+    margin: 8px 0 0;
+    color: var(--gris-moyen);
+    font-size: 0.85rem;
+}
+.ui-dialogue-note--bas { margin-top: 14px; }
+.ui-dialogue-refus[hidden], .ui-dialogue-note[hidden] { display: none; }
+
 /* #790 — la case « ce palier lève un signalement », dans l'éditeur de paliers de
    projection. Discrète : elle est un réglage du palier, pas son sujet. Le label
    enveloppe la case et son texte, donc la cible tactile de 44 px porte sur toute

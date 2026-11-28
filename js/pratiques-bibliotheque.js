@@ -521,6 +521,106 @@ async function mettreAJourConfigurationPratique(configuration) {
 }
 
 /**
+ * Renommer une pratique depuis la bibliothèque (28 nov. 2026) — CE QUE LE GESTE VISE. Fonction pure.
+ * La rangée d'une colonne, et sa JUMELLE de l'autre colonne quand la relation unique les lie (`liee`,
+ * `BibliothequeUI.lieeAExemplaire` : par l'id d'abord, sinon par `idOriginal`). Décisions de Grégoire (28 nov.) :
+ * seul son geste renomme ; la jumelle suit ; un modèle fourni avec l'application ne se renomme pas.
+ *   · `refus` : 'introuvable', 'fourni' (rangée de la bibliothèque qui est un modèle fourni intact) ou 'demo' (pratique
+ *     de la démo, en lecture seule dans la fiche aussi) ; sinon null.
+ *   · `typeJumelle` : 'aucune' ; 'exemplaire' ou 'trimestre' (elle sera renommée) ; 'fournie' ou 'demo' (elle garde
+ *     son nom, et RIEN ne s'écrit pour elle — pas même dans la copie rangée d'un modèle fourni).
+ * @param {Object} d - `{ cote: 'trimestre'|'bibliotheque', id, trimestre, bibliotheque, liee, estDeDemo }` ;
+ *   `bibliotheque` est la liste telle que la fenêtre la lit (modèles fournis compris).
+ */
+function cibleRenommagePratique(d) {
+    const trimestre = Array.isArray(d.trimestre) ? d.trimestre : [];
+    const bibliotheque = Array.isArray(d.bibliotheque) ? d.bibliotheque : [];
+    const estDeDemo = typeof d.estDeDemo === 'function' ? d.estDeDemo : () => false;
+    const duTrimestre = d.cote === 'trimestre';
+    const rangee = (duTrimestre ? trimestre : bibliotheque).find(p => p && p.id === d.id) || null;
+    const cible = { cote: duTrimestre ? 'trimestre' : 'bibliotheque', rangee, jumelle: null, typeJumelle: 'aucune', refus: null };
+    cible.refus = refusDeRenommer(cible, estDeDemo);
+    if (cible.refus) return cible;
+
+    cible.jumelle = jumelleDeLaRangee(rangee, duTrimestre ? bibliotheque : trimestre, duTrimestre, d.liee);
+    cible.typeJumelle = typeDeLaJumelle(cible, estDeDemo);
+    return cible;
+}
+
+/** Pourquoi la rangée ne se renomme pas, ou null. */
+function refusDeRenommer(cible, estDeDemo) {
+    if (!cible.rangee) return 'introuvable';
+    if (estDeDemo(cible.rangee)) return 'demo';
+    if (cible.cote === 'bibliotheque' && estModeleFourniIntact(cible.rangee)) return 'fourni';
+    return null;
+}
+
+/** La jumelle de l'autre colonne : celle du même id d'abord, sinon la première que la relation lie. */
+function jumelleDeLaRangee(rangee, autreColonne, duTrimestre, liee) {
+    if (typeof liee !== 'function') return null;
+    const liees = autreColonne.filter(autre => (duTrimestre ? liee(rangee, autre) : liee(autre, rangee)));
+    return liees.find(autre => autre.id === rangee.id) || liees[0] || null;
+}
+
+/** Ce que la jumelle devient : renommée ('exemplaire', 'trimestre') ou laissée ('fournie', 'demo'). */
+function typeDeLaJumelle(cible, estDeDemo) {
+    if (!cible.jumelle) return 'aucune';
+    const duTrimestre = cible.cote === 'trimestre';
+    if (duTrimestre && estModeleFourniIntact(cible.jumelle)) return 'fournie';
+    if (estDeDemo(cible.jumelle)) return 'demo';
+    return duTrimestre ? 'exemplaire' : 'trimestre';
+}
+
+/**
+ * Renommer une pratique depuis la bibliothèque (28 nov. 2026) — CE QUE LE NOM SAISI FAIT ÉCRIRE. Fonction pure.
+ * Les espaces de bord partent. Nom vide : refusé. Nom inchangé (celui de la rangée) : rien ne s'écrit, nulle part.
+ * Sinon la rangée s'écrit, et sa jumelle quand elle est à l'enseignant·e et ne porte pas déjà ce nom.
+ * `dejaPorte` : une AUTRE pratique (ni la rangée ni sa jumelle) porte ce nom ; ce n'est jamais un refus, le nom n'est
+ * pas une identité (js/identite-item.js).
+ * @returns {{ refus: 'vide'|null, nom: string, inchange: boolean, ecrireRangee: boolean, ecrireJumelle: boolean, dejaPorte: boolean }}
+ */
+function jugerNomPratique(nomSaisi, cible, autres) {
+    const nom = String(nomSaisi == null ? '' : nomSaisi).trim();
+    const plan = { refus: null, nom, inchange: false, ecrireRangee: false, ecrireJumelle: false, dejaPorte: false };
+    if (!nom) { plan.refus = 'vide'; return plan; }
+    const rangee = cible && cible.rangee;
+    if (!rangee || cible.refus) return plan;
+    const jumelle = cible.jumelle;
+    const forme = (v) => String(v == null ? '' : v).trim().toLocaleLowerCase('fr');
+    plan.dejaPorte = (Array.isArray(autres) ? autres : []).some(p => p && p !== rangee && p !== jumelle
+        && p.id !== rangee.id && !(jumelle && p.id === jumelle.id) && forme(p.nom) === forme(nom));
+    if (nom === rangee.nom) { plan.inchange = true; return plan; }
+    plan.ecrireRangee = true;
+    plan.ecrireJumelle = !!jumelle && (cible.typeJumelle === 'exemplaire' || cible.typeJumelle === 'trimestre')
+        && jumelle.nom !== nom;
+    return plan;
+}
+
+/**
+ * Renommer une pratique depuis la bibliothèque (28 nov. 2026) — l'écriture du nom d'un EXEMPLAIRE, dans la file.
+ * La garde du modèle fourni est rejouée ICI, sur la copie fraîchement lue : la copie rangée, intacte, d'un modèle
+ * fourni n'est jamais réécrite (la renommer la ferait passer pour modifiée et masquerait le modèle).
+ * @returns {Promise<boolean>} true si le nom a été écrit
+ */
+async function renommerExemplairePratique(configId, nouveauNom) {
+    const nom = String(nouveauNom == null ? '' : nouveauNom).trim();
+    if (!nom) return false;
+    let ecrit = false;
+    const resultat = await db.modifier(CLE_BIBLIOTHEQUE_PRATIQUES, (lues) => {
+        const bibliotheque = lues || [];
+        const index = bibliotheque.findIndex(p => p && p.id === configId);
+        if (index === -1) return undefined;
+        if (estModeleFourniIntact(bibliotheque[index])) return undefined;
+        if (bibliotheque[index].nom === nom) return undefined;
+        bibliotheque[index] = { ...bibliotheque[index], nom, dateModification: new Date().toISOString() };
+        ecrit = true;
+        return bibliotheque;
+    }, []);
+    if (resultat !== undefined && ecrit && window.annoncerEcritureUsager) window.annoncerEcritureUsager(CLE_BIBLIOTHEQUE_PRATIQUES);   // lot F : geste hors témoin (renommerExemplairePratique)
+    return ecrit && resultat !== undefined;
+}
+
+/**
  * Retirer une configuration de la bibliothèque
  * @param {string} configId - ID de la configuration à retirer
  * @returns {Promise<boolean>} true si retirée, false si non trouvée ou prédéfinie
@@ -799,6 +899,9 @@ window.poserEchelleAdoption = poserEchelleAdoption;
 window.obtenirToutesLesPratiquesBibliotheque = obtenirToutesLesPratiquesBibliotheque;
 window.obtenirToutesLesPratiquesBibliothequeSync = obtenirToutesLesPratiquesBibliothequeSync;
 window.estModeleFourniIntact = estModeleFourniIntact;
+window.cibleRenommagePratique = cibleRenommagePratique;
+window.jugerNomPratique = jugerNomPratique;
+window.renommerExemplairePratique = renommerExemplairePratique;
 window.obtenirPratiquesParType = obtenirPratiquesParType;
 window.obtenirPratiquesParDiscipline = obtenirPratiquesParDiscipline;
 window.obtenirDisciplinesDisponiblesPratiques = obtenirDisciplinesDisponiblesPratiques;

@@ -161,6 +161,32 @@
     }
 
     /**
+     * 28 nov. 2026 — sous le champ de `demanderSaisie` : la ligne du refus (vide tant que rien n'est refusé), les notes
+     * constantes, la note relue à chaque frappe, la note du bas. Tout en `textContent`. Rend la ligne du refus.
+     */
+    function _poserRefusEtNotes(section, champ, options) {
+        const refus = _creer('p', { className: 'ui-dialogue-refus', id: 'ui-dialogue-refus', attrs: { role: 'alert' } });
+        refus.hidden = true;
+        if (typeof options.valider === 'function') section.appendChild(refus);
+        (Array.isArray(options.notes) ? options.notes : []).forEach(function (note) {
+            if (note) section.appendChild(_creer('p', { className: 'ui-dialogue-note', texte: note }));
+        });
+        if (typeof options.noteSelonSaisie === 'function') {
+            const noteVive = _creer('p', { className: 'ui-dialogue-note', id: 'ui-dialogue-note-saisie', attrs: { 'aria-live': 'polite' } });
+            const relire = function () {
+                const phrase = String(options.noteSelonSaisie(champ.value != null ? String(champ.value) : '') || '');
+                noteVive.textContent = phrase;
+                noteVive.hidden = !phrase;
+            };
+            section.appendChild(noteVive);
+            champ.addEventListener('input', function () { refus.hidden = true; relire(); });
+            relire();
+        }
+        if (options.noteBas) section.appendChild(_creer('p', { className: 'ui-dialogue-note ui-dialogue-note--bas', texte: options.noteBas }));
+        return refus;
+    }
+
+    /**
      * Modale de saisie (remplace `prompt()`).
      * @param {object} options
      * @param {string} [options.titre]          Titre court.
@@ -172,6 +198,11 @@
      * @param {string} [options.texteAnnuler]   Libellé d'annulation (défaut « Annuler »).
      * @param {string} [options.variante]       'danger' → bouton d'action destructif (rouge).
      * @param {string} [options.classe]         Une classe de plus sur le fond (21 nov. 2026 ; vue simple : `ui-dialogue--tactile`).
+     * @param {function} [options.valider]      28 nov. 2026 : `(valeur) => message de refus, ou ''`. Un refus s'écrit sous
+     *   le champ et la fenêtre RESTE ouverte ; sans cette option, toute saisie est rendue telle quelle (comme avant).
+     * @param {string[]} [options.notes]        28 nov. 2026 : des phrases sous le champ (ce que le geste emporte).
+     * @param {function} [options.noteSelonSaisie] 28 nov. 2026 : `(valeur) => phrase, ou ''`, relue à chaque frappe.
+     * @param {string} [options.noteBas]        28 nov. 2026 : une phrase constante, au bas de la fenêtre.
      * @returns {Promise<string|null>} la chaîne saisie, ou null si annulé.
      */
     function demanderSaisie(options) {
@@ -194,6 +225,8 @@
             champ.value = options.valeurInitiale != null ? String(options.valeurInitiale) : '';
             base.section.appendChild(champ);
 
+            const refus = _poserRefusEtNotes(base.section, champ, options);
+
             const btnAnnuler = _creer('button', { className: 'btn btn-neutre', texte: options.texteAnnuler || 'Annuler' });
             // #1037 (relecture, 11 oct.) : `variante: 'danger'` → bouton destructif, comme confirmerAction.
             const btnOk = _creer('button', { className: 'btn ' + (options.variante === 'danger' ? 'btn-supprimer' : 'btn-principal'), texte: options.texteConfirmer || 'OK' });
@@ -208,13 +241,25 @@
                 resolve(valeur);
             }
             function valeurChamp() { return champ.value != null ? String(champ.value) : ''; }
+            // 28 nov. 2026 — une saisie refusée ne ferme pas : le motif s'écrit, le champ reprend le focus.
+            function soumettre() {
+                const motif = typeof options.valider === 'function' ? String(options.valider(valeurChamp()) || '') : '';
+                if (motif) {
+                    refus.textContent = motif;
+                    refus.hidden = false;
+                    champ.setAttribute('aria-describedby', 'ui-dialogue-refus');
+                    _rendreFocus(champ);
+                    return;
+                }
+                repondre(valeurChamp());
+            }
             function surTouche(e) {
                 if (e.key === 'Escape') { e.preventDefault(); repondre(null); }
-                else if (e.key === 'Enter' && !options.multiligne) { e.preventDefault(); repondre(valeurChamp()); }
+                else if (e.key === 'Enter' && !options.multiligne) { e.preventDefault(); soumettre(); }
             }
 
             btnAnnuler.addEventListener('click', function () { repondre(null); });
-            btnOk.addEventListener('click', function () { repondre(valeurChamp()); });
+            btnOk.addEventListener('click', soumettre);
             base.overlay.addEventListener('click', function (e) { if (e.target === base.overlay) repondre(null); });
             document.addEventListener('keydown', surTouche, true);
 

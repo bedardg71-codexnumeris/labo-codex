@@ -326,3 +326,52 @@ describe('lot E3 · uiDialogues.confirmerAction, option caseACocher', () => {
         await expect(p).resolves.toBe(true);
     });
 });
+
+// 28 nov. 2026 — « Renommer » une pratique depuis la bibliothèque : la fenêtre de saisie refuse sans se fermer, et
+// porte des notes (constantes, ou relues à chaque frappe).
+describe('demanderSaisie · valider, notes, noteSelonSaisie, noteBas (28 nov. 2026)', () => {
+    const parId = (id) => registre.find(e => e.id === id && e.parent);
+    const notes = () => registre.filter(e => e.parent && String(e.className).includes('ui-dialogue-note') && !e.hidden).map(e => e.textContent);
+
+    it('un refus de `valider` s’écrit et la fenêtre RESTE ouverte ; une saisie acceptée la ferme', async () => {
+        let resolue = false;
+        const p = uiDialogues.demanderSaisie({ titre: 'X', valider: (v) => (v.trim() ? '' : 'Donne un nom.') });
+        p.then(() => { resolue = true; });
+        champSaisie().value = '   ';
+        cliquer(bouton('OK'));
+        await Promise.resolve();
+        expect(resolue).toBe(false);
+        expect(parId('ui-dialogue-refus').textContent).toBe('Donne un nom.');
+        expect(parId('ui-dialogue-refus').hidden).toBe(false);
+        touche('Enter');   // Entrée passe par la même garde
+        await Promise.resolve();
+        expect(resolue).toBe(false);
+        champSaisie().value = 'Nom fictif';
+        touche('Enter');
+        await expect(p).resolves.toBe('Nom fictif');
+    });
+
+    it('sans `valider`, aucune ligne de refus n’est posée et toute saisie passe (contrat d’avant)', async () => {
+        const p = uiDialogues.demanderSaisie({ titre: 'X' });
+        expect(parId('ui-dialogue-refus')).toBeUndefined();
+        champSaisie().value = '';
+        cliquer(bouton('OK'));
+        await expect(p).resolves.toBe('');
+    });
+
+    it('les notes constantes et la note du bas s’affichent ; la note vive suit la saisie', async () => {
+        const p = uiDialogues.demanderSaisie({
+            titre: 'X', valeurInitiale: 'a', notes: ['Note une.', ''], noteBas: 'Note du bas.',
+            noteSelonSaisie: (v) => (v === 'pris' ? 'Déjà porté.' : '')
+        });
+        expect(notes()).toEqual(['Note une.', 'Note du bas.']);
+        champSaisie().value = 'pris';
+        champSaisie()._listeners.input.forEach(fn => fn({}));
+        expect(notes()).toEqual(['Note une.', 'Déjà porté.', 'Note du bas.']);
+        champSaisie().value = 'libre';
+        champSaisie()._listeners.input.forEach(fn => fn({}));
+        expect(notes()).toEqual(['Note une.', 'Note du bas.']);
+        cliquer(bouton('Annuler'));
+        await expect(p).resolves.toBeNull();
+    });
+});

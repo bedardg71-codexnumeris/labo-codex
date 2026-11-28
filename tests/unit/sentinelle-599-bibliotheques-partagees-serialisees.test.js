@@ -231,7 +231,8 @@ const PAR_LA_FILE = {
     'js/echelles-bibliotheque.js': 2,
     'js/cartouches-bibliotheque.js': 2,
     'js/productions-bibliotheque.js': 2,
-    'js/pratiques-bibliotheque.js': 3,
+    // ↻ 3 → 4 le 28 nov. 2026 : `renommerExemplairePratique` (« Renommer » depuis la bibliothèque), par la file.
+    'js/pratiques-bibliotheque.js': 4,
     // ⚰ Retiré le 1er septembre 2026 avec `js/spe-specifications.js` (#681) :
     // 1009 lignes, 24 symboles exposés, ZÉRO consommateur vivant. Les 3 sites
     // qu'il portait écrivaient correctement par la file — c'est le fichier qui
@@ -265,7 +266,8 @@ describe('#599 · C — la course ne peut pas se rouvrir en silence', () => {
         // versement des huit échelles disciplinaires.
         // ↻ 19 → 16 le 1er septembre 2026 : `js/spe-specifications.js` retiré (#681)
         // emportait ses 3 sites.
-        expect(total, 'les seize sites de #599').toBe(16);
+        // ↻ 16 → 17 le 28 nov. 2026 : `renommerExemplairePratique`, un site de plus, par la file.
+        expect(total, 'les dix-sept sites de #599').toBe(17);
     });
 
     // ⚠ CE CLIQUET A ÉTÉ REFAIT APRÈS UN BREAK-TEST QUI A REFUSÉ DE ROUGIR.

@@ -53,7 +53,7 @@ const ANNONCES = {
     'js/partage-section.js': 1,
     'js/planification-bibliotheque.js': 1,
     'js/planification-donnees.js': 1,
-    'js/pratiques-bibliotheque.js': 2,
+    'js/pratiques-bibliotheque.js': 3,   // ↻ 2 → 3 le 28 nov. 2026 : `renommerExemplairePratique` (« Renommer » depuis la bibliothèque)
     'js/pratiques-gestion.js': 5,
     'js/pratiques.js': 1,   // #469 (12 oct. 2026) : quatre gestes partis avec l'îlot, aucun n'était atteint
     'js/pratiques/denotation-jugements.js': 1,

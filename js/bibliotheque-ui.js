@@ -849,6 +849,9 @@
         });
         document.addEventListener('keydown', function (e) {
             if (e.key !== 'Escape') return;
+            // 28 nov. 2026 — un Échap déjà consommé (`preventDefault`) par une fenêtre de dialogue ouverte par-dessus
+            // (`uiDialogues`, qui se retire en phase de capture, donc AVANT ce gestionnaire) ne ferme pas la bibliothèque.
+            if (e.defaultPrevented) return;
             // #1154 — Échap ferme d'abord un menu ouvert, puis la fenêtre en deux colonnes.
             if (_menuOuvertCourant) {
                 BibliothequeUI.fermerTousLesMenus();

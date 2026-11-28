@@ -622,7 +622,9 @@ test('pratiques : ⋮, les libellés et leurs actions ; la phrase dans la confir
         await menu.getByRole('menuitem', { name: libelle, exact: true }).click();
     }
     menu = await ouvrirMenu(rangee(page, 'pratiques', 'bibliotheque', 'Pratique fictive du menu'));
-    await expect(menu.locator('.biblio-menu-item')).toHaveText(['Supprimer de ma bibliothèque']);
+    // ↻ 28 nov. 2026 : « Renommer » en tête (renommer-pratique-bibliotheque.spec.js). La rangée du trimestre lue plus haut
+    // est une pratique de la démo, en lecture seule : elle ne l'offre pas.
+    await expect(menu.locator('.biblio-menu-item')).toHaveText(['Renommer', 'Supprimer de ma bibliothèque']);
     await menu.getByRole('menuitem', { name: 'Supprimer de ma bibliothèque' }).click();
     expect(await page.evaluate(() => window.__appels)).toEqual([
         ['dupliquerPratiqueBibliotheque', id],
